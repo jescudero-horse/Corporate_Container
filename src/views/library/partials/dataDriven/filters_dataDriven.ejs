@@ -1,0 +1,130 @@
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Select the filters</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <button class="btn btn-secondary" id="clearFiltersButton" onclick="clearFilters()">Clear Filters</button>
+    <div class="offcanvas-body">
+        <!--FILTROS POR ESCALABILIDAD EXTERNA-->
+        <div class="form-group" id="factoryFilters">
+            <label><b>External Scalability</b></label>
+            <div class="form-check">
+                <input class="form-check-input plant-filter" type="checkbox" value="HLT">
+                <label class="form-check-label">HTL</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input plant-filter" type="checkbox" value="Motores">
+                <label class="form-check-label">Motores</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input plant-filter" type="checkbox" value="Sevilla">
+                <label class="form-check-label">Sevilla</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input plant-filter" type="checkbox" value="Aveiro">
+                <label class="form-check-label">Aveiro</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input plant-filter" type="checkbox" value="Oyak">
+                <label class="form-check-label">Oyak</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input plant-filter" type="checkbox" value="Rumania">
+                <label class="form-check-label">Rumania</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input plant-filter" type="checkbox" value="Curitiba">
+                <label class="form-check-label">Curitiba</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input plant-filter" type="checkbox" value="Los Andes">
+                <label class="form-check-label">Los Andes</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input plant-filter" type="checkbox" value="Argentina">
+                <label class="form-check-label">Argentina</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input plant-filter" type="checkbox" value="All Horse">
+                <label class="form-check-label">All Horse</label>
+            </div>
+        </div>
+
+        <!--FILTROS POR STATUS-->
+        <div class="form-group" id="statusFilter">
+            <label><b>Status</b></label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Backlock">
+                <label class="form-check-label">Backlock</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="In progress">
+                <label class="form-check-label">In progress</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Finish">
+                <label class="form-check-label">Finish</label>
+            </div>
+        </div>
+
+        <!--FILTROS POR PLANTA PILOTO-->
+        <div class="form-group" id="pilotPlantContainer">
+            <label><b>Pilot Plant</b></label>
+            <div class="form-check">
+                <input class="form-check-input pilotPlant" type="checkbox" value="HLT">
+                <label class="form-check-label">HTL</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input pilotPlant" type="checkbox" value="Motores">
+                <label class="form-check-label">Motores</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input pilotPlant" type="checkbox" value="Sevilla">
+                <label class="form-check-label">Sevilla</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input pilotPlant" type="checkbox" value="Aveiro">
+                <label class="form-check-label">Aveiro</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input pilotPlant" type="checkbox" value="Oyak">
+                <label class="form-check-label">Oyak</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input pilotPlant" type="checkbox" value="Rumania">
+                <label class="form-check-label">Rumania</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input pilotPlant" type="checkbox" value="Curitiba">
+                <label class="form-check-label">Curitiba</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input pilotPlant" type="checkbox" value="Los Andes">
+                <label class="form-check-label">Los Andes</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input pilotPlant" type="checkbox" value="Argentina">
+                <label class="form-check-label">Argentina</label>
+            </div>
+        </div>
+    </div>
+</div>

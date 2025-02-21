@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <%- include('../partials/head.ejs') %>
+        <script src="/script/library/dataDriven/dataDriven.js"></script>
+        <script src="/script/library/information.js"></script>
+</head>
+
+<body>
+    <!-- MAIN MODAL -->
+    <%- include('../partials/modal.ejs') %>
+
+        <!--NAVIGATION PANEL-->
+        <%- include('../partials/navigation.ejs') %>
+
+            <!-- LIVE TOAST -->
+            <%- include('../partials/toast.ejs') %>
+
+                <div class="container">
+                    <h1><%-title %></h1>
+
+                    <div class="col-md-4">
+                        <button id="filterButton" class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+                            Filters <i class="bi bi-funnel"></i>
+                        </button>
+                    </div>
+
+                    <!--DATA DRIVEN FILTERS-->
+                    <%- include('../partials/dataDriven/filters_dataDriven.ejs') %>
+
+                        <!--DATATABLE DATA DRIVEN-->
+                        <%- include('../partials/dataDriven/dataTableDataDriven.ejs') %>
+                </div>
+
+                <!--FOOTER-->
+                <%- include('../partials/footer.ejs') %>
+</body>
+
+</html>

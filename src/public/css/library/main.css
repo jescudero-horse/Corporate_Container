@@ -1,0 +1,832 @@
+.btn-flotante {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+#lottie-container {
+    width: 100px;
+    height: 100px;
+    margin: auto;
+    display: block;
+    cursor: pointer
+}
+
+#lottie-container-floating {
+    width: 80px;
+    height: 80px;
+    cursor: pointer;
+}
+
+#horsito_button_modalPrincipal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+}
+
+#lottie-icon-container {
+    width: 30px; 
+    height: 30px;
+}
+
+#lottie-icon-container svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Style for the body */
+body {
+    background: #202020;
+    color: white;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Style for the body */
+body.alert {
+    background: #202020;
+    color: white;
+    animation: none;
+}
+
+/* Confifure the size of the report modal */
+.custom-modal-size {
+    max-width: 90vw;
+    max-height: 100vh;
+}
+
+/* Style for the containter of the select categories */
+.button-container,
+.button-container-option {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+}
+
+/* Style for the desfault hidden attribute */
+.hidden {
+    display: none;
+}
+
+/* Style for the button container */
+#buttonContainer {
+    margin-top: 20px;
+}
+
+/* Style fot the PowerAutomate button */
+.btn-power-automate:hover {
+    background-color: #104ccb;
+    color: white;
+}
+
+/* Style for the PowerApps button */
+.btn-power-apps:hover {
+    background-color: #5a32a3;
+    color: white;
+}
+
+/* Style for the best practise button */
+.btn-best-practise:hover {
+    background-color: #52af53;
+    color: white
+}
+
+/* Style for the video station button */
+.btn-video-station:hover {
+    background-color: #212529;
+    color: white;
+}
+
+/* Style for the applied best practise button */
+.btn-applied-best-practise:hover {
+    background-color: #346e34;
+    color: white;
+}
+
+/* Style for the options buttons */
+.optionBtn {
+    margin: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    animation: slideIn 0.5s ease-out;
+}
+
+/* Animation for the buttons options of the categories */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animations for the page */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Styles for the blueprints image edit */
+.centered-image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    max-width: 500px;
+    height: auto;
+}
+
+.date-range-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.input-group {
+    margin-bottom: 10px;
+}
+
+/* Style for the container of each a */
+.button-container-option a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 40px;
+    margin: 10px;
+    background-color: #202020;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 24px;
+    width: 500px;
+}
+
+/* Style for the logo */
+.navbar-logo {
+    max-width: 100px;
+    margin-right: 10px;
+}
+
+.footer p {
+    color: white !important;
+}
+
+/* Style for the images */
+img {
+    border-radius: 15px;
+}
+
+/* Style for the a when is hover */
+.button-container-option a:hover {
+    background-color: #212529;
+}
+
+/* Style for the icon of the a */
+.button-container-option a .icon {
+    font-size: 50px;
+}
+
+/* Style for the text of the a */
+.button-container-option .text {
+    margin-top: 5px;
+}
+
+/* Disable the icon of the list (cards to select the functions/subfunctions */
+.card ul {
+    list-style-type: none;
+}
+
+/* Style for the cards */
+.card {
+    width: 18rem;
+}
+
+/* Style for the titles container */
+.container h1 {
+    font-size: 3rem;
+    color: white;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 3px solid #2b2c2e;
+    display: inline-block;
+}
+
+/* Style for the function row */
+.function-cell-large {
+    font-size: 20px;
+    font-weight: bold;
+    padding: 10px;
+}
+
+/* Style for the subfunction row */
+.subfunction-cell-large {
+    font-size: 16px;
+    padding: 10px;
+}
+
+/* Style for the background of the dataTable */
+#dataTable {
+    background-color: #f2f2f2;
+}
+
+/* Style for the childNodes of the dataTable */
+#dataTable tbody tr:nth-child(even) {
+    background-color: #dddddd;
+}
+
+/* Style for the borders of the dataTable */
+#dataTable {
+    border-collapse: collapse;
+    border: 1px solid #dddddd;
+}
+
+/* Style for the padding and the borders of the dataTable */
+#dataTable th,
+#dataTable td {
+    border: 1px solid #dddddd;
+    padding: 8px;
+}
+
+/* Style for the colour of the name columns */
+#dataTable th {
+    background-color: #0b5ed7;
+    color: white;
+}
+
+/* Style for the dataTable when the mouse hover a row */
+#dataTable tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Style for the dataTable images */
+#dataTable img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 400px;
+    object-fit: contain;
+}
+
+/* Style so we can move the table to display all see all the columns */
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* Style for the splide carousel */
+.splide__slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Style for the image of the splide carousel */
+.splide__slide img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Estilo para los botones de categorías */
+.custom-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.custom-nav .link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 500px;
+    height: 500px;
+    background-color: rgba(52, 58, 64, 0.8);
+    color: white;
+    border-radius: 1rem;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    font-size: 1.5rem;
+    font-weight: bold;
+    position: relative;
+    overflow: hidden;
+}
+
+.custom-nav .link:hover,
+.custom-nav .link:focus {
+    background-color: rgba(73, 80, 87, 0.8); 
+    transform: translateY(-3px);
+}
+
+.custom-nav .link span {
+    margin-left: 0.75rem;
+}
+
+.custom-nav .link .icon {
+    font-size: 4rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.1;
+}
+
+.custom-nav .link .title {
+    position: relative;
+    z-index: 1;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+/* Animation for fade in */
+.fade-in {
+    animation: fadeIn 0.5s forwards;
+}
+
+/* Animation for fade out */
+.fade-out {
+    animation: fadeOut 0.5s forwards;
+}
+
+/** Style for the card videos */
+.col-md-3 {
+    position: relative;
+    width: 23%;
+    padding-bottom: 15px;
+    margin: 1%;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 500px;
+}
+
+.card-body {
+    flex: 1;
+    padding: 10px;
+    display: flex;
+    height: auto;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+video {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    background-color: black;
+}
+
+.input-group-text {
+    font-size: 14px;
+    text-align: left;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-footer {
+    text-align: right;
+    padding: 10px;
+    font-size: 12px;
+}
+
+/* Style for the Splider buttons */
+.splide__arrow {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    padding: 10px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.splide__arrow i {
+    font-size: 30px;
+}
+
+
+/** Styles for the comment card */
+.card-card {
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    background-color: #ffffff;
+}
+
+.comment-card-body {
+    padding: 1.25rem;
+    background-color: white;
+    border-radius: 5px;
+    color: black;
+}
+
+.comment-card .card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: 0.75rem 1.25rem;
+    text-align: right;
+}
+
+.comment-card .card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: 0.75rem 1.25rem;
+    text-align: right;
+}
+
+.comment-card .input-group-text {
+    display: block;
+    width: 100%;
+    font-weight: 500;
+    color: #495057;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.comment-card textarea.form-control {
+    min-height: 80px;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    background-color: #ffffff;
+    color: #495057;
+}
+
+.comment-card .btn {
+    margin-left: 0.5rem;
+}
+
+/*********************/
+.comment-column {
+    display: flex;
+    justify-content: center;
+}
+
+.card-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.comment-card-body {
+    padding: 20px;
+}
+
+.comment-user {
+    font-weight: bold;
+    color: #007bff;
+}
+
+textarea.form-control {
+    background-color: #e9ecef;
+    border: none;
+    resize: none;
+    height: 100px;
+    margin-top: 10px;
+    color: #495057;
+}
+
+.card-footer {
+    padding: 10px;
+    background-color: #f1f1f1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.card-footer button {
+    margin-left: 10px;
+}
+
+.btn-secondary,
+.btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-danger svg,
+.btn-secondary svg {
+    margin-right: 5px;
+}
+
+/* Tables */
+.table {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #343a40;
+    color: #fff;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f9f9f9;
+}
+
+/* Actions */
+.table td {
+    text-align: center;
+}
+
+.table th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table td button {
+    font-size: 0.75rem;
+    margin-right: 0.25rem;
+}
+
+/* Buttons icons */
+.bi {
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+/* Space betwen columns*/
+.col-md-4 {
+    padding-bottom: 2rem;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+    .col-md-4 {
+        margin-bottom: 2rem;
+    }
+
+    h3 {
+        text-align: center;
+        font-size: 1.25rem;
+    }
+}
+
+/* Style for the comments */
+.comment-row {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.comment-user {
+    font-weight: bold;
+    color: #0b5ed7;
+    margin-right: 10px;
+}
+
+.comment-text {
+    color: #333;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.comment-actions .btn {
+    padding: 5px 10px;
+}
+
+.comment-actions .btn-sm {
+    font-size: 0.875rem;
+}
+
+/* Styles for the forms */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group-label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.section-title {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    margin-left: 1rem;
+}
+
+/* Style for the options container */
+.options-container {
+    margin-left: 1rem;
+}
+
+.form-check {
+    margin-bottom: 0.5rem;
+}
+
+.form-check-label {
+    margin-left: 0.5rem;
+}
+
+/** Styles for the routers */
+/* NORMAL MODE */
+.custom-nav .link[href="/library/appList"] {
+    --bg: #7e2828;
+    background-image: url('/assets/library/aplicaciones.png');
+}
+
+.custom-nav .link[href="/library/dataAnalyseReports"] {
+    --bg: #7289f9;
+    background-image: url('/assets/library/analitica.png');
+}
+
+.custom-nav .link[href=""] {
+    --bg: #407aa3;
+    background-image: url('/assets/library/window.png');
+}
+
+.custom-nav .link[href="/library/3dModels"] {
+    --bg: #ae8d5c;
+    background-image: url('/assets/library/plano.png');
+}
+
+.custom-nav .link[data-custom="practise"] {
+    --bg: #6ae26c;
+    background-image: url('/assets/library/mejor-practica.png');
+}
+
+.custom-nav .link[href="/library/training"] {
+    --bg: #b9b918;
+    background-image: url('/assets/library/pesa.png');
+}
+
+.custom-nav .link[href="/library/dataDriven"] {
+    --bg: #b9b918;
+    background-image: url('/assets/library/dataDriven.png');
+}
+
+/* ADMIN MODE */
+.custom-nav .link[href="/library/appList_Admin"] {
+    --bg: #7e2828;
+    background-image: url('/assets/library/aplicaciones.png');
+}
+
+.custom-nav .link[href="/library/dataAnalyseReportsAdmin"] {
+    --bg: #7289f9;
+    background-image: url('/assets/library/analitica.png');
+}
+
+.custom-nav .link[href="/library/powerApps_Admin"] {
+    --bg: #742775;
+    background-image: url('/assets/library/desarrollador-de-software.png');
+}
+
+.custom-nav .link[href="/library/3dModels_Admin"] {
+    --bg: #ae8d5c;
+    background-image: url('/assets/library/plano.png');
+}
+
+.custom-nav .link[href="/library/bestPractise_Admin"] {
+    --bg: #6ae26c;
+    background-image: url('/assets/library/mejor-practica.png');
+}
+
+.custom-nav .link[href="/library/training_Admin"] {
+    --bg: #b9b918;
+    background-image: url('/assets/library/pesa.png');
+}
+
+.custom-nav .link[href="/library/dataDriven_admin"] {
+    --bg: #b9b918;
+    background-image: url('/assets/library/dataDriven.png');
+}
+
+/* Styles for the new best practice cards */
+.new-card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.new-card {
+    background-color: #fff;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.new-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.new-card-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.new-card-body {
+    padding: 1rem;
+}
+
+.new-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.new-card-text {
+    color: #4a4a4a;
+    margin-bottom: 0.5rem;
+}
+
+.new-card-button {
+    display: inline-block;
+    background-color: white;
+    color: black;
+    border-radius: 0.25rem;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.new-card-button:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+/* Hace que el área resaltada no tenga relleno */
+.driver-highlighted-element {
+    background: transparent !important; /* Elimina el relleno */
+    box-shadow: 0 0 0 15px rgba(56, 132, 255, 0.75) !important; /* Agrega un contorno visible */
+}
+
+/* Asegura que el popover se muestre correctamente */
+.driver-popover {
+    z-index: 1051 !important;
+}
+
+/* Asegura que el contorno resaltado esté por encima del modal */
+.driver-highlighted-element-wrapper {
+    z-index: 1052 !important;
+}

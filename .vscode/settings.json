@@ -1,0 +1,18 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 50,
+            "server": "portal-motores.vll.renault.es",
+            "port": 31009,
+            "driver": "MySQL",
+            "name": "corporate_central_re7",
+            "database": "corporate_central_re7",
+            "username": "corporatecentral",
+            "password": "1GJYbSrM_Oxv@PSF"
+        }
+    ]
+}

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <script src="/script/library/editPowerApp.js"></script>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <div id="liveAlertPlaceHolder"></div>
+
+    <div class="adminPanel">
+        <div class="container mt-5">
+            <h1 class="text-center"><%- title%></h1>
+
+            <!-- TOAST -->
+            <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <img src="/assets/library/HORSE_FAVICON.ico" class="rounded me-2" style="width: 50px; height: 50px;">
+                        <strong class="me-auto">Digital Library</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body" style="background-color: black; color: white;">
+                        You can delete the URL input of the URL list if you clic on the row that you want to delete.
+                    </div>
+                </div>
+            </div>
+
+            <form id="editrPowerAppsForm" action="/library/api/updatePowerApps" method="POST" onsubmit="return validateForm(event)"
+                autocomplete="off">
+                <input type="text" id="id" name="id" hidden>
+                <!--POWERAPPS FORM-->
+                <%- include('partials/powerApps_form.ejs') %>
+
+                    <br>
+
+                    <button type="submit" class="btn btn-primary">Continue</button>
+            </form>
+        </div>
+    </div>
+
+    <!--FOOTER-->
+    <%- include('partials/footer.ejs') %>
+
+        <!--INCLUDE THE MODALS-->
+        <%- include('partials/modal.ejs') %>
+</body>
+
+<script>
+    //Identify the toast
+    const toast = document.getElementById('liveToast')
+
+    //Configure the toast
+    const toastBootstrap = new bootstrap.Toast(toast, {
+        autohide: false
+    });
+
+    //Show the toast
+    toastBootstrap.show();
+
+    //Add an event when all the elements are loaded
+    document.addEventListener('DOMContentLoaded', function () {
+        //Identify the URL list
+        var urlList = document.querySelector('#urlList');
+
+        //Configure the funcionability to delete a URL if user clics on the li element
+        urlList.addEventListener('click', function () {
+
+            //Check if the element clic is a LI element
+            if (event.target.tagName = 'LI') {
+                //Remove this element
+                event.target.remove();
+            }
+        });
+    });
+
+    /**
+     * Function to validate if user introduce a URL into the associated list
+     * */
+    function validateUrl(event) {
+        //Indentify the URL input
+        const inputURL = document.getElementById('inputURL').value;
+
+        //Check if the input URL is void or isn´t a valid URL
+        if (inputURL === "" || !isValidURL(inputURL)) {
+            event.preventDefault();
+
+            //In other case
+        } else {
+            //Identify the URL from the list
+            var ul = document.querySelector('#urlList');
+
+            //Create a li element
+            var li = document.createElement('li');
+
+            /* Assign the class and the value */
+            li.className = 'list-group-item';
+            li.textContent = inputURL;
+
+            //Add the li element into ul
+            ul.appendChild(li);
+
+            //Delete the input of the input URL
+            document.getElementById('inputURL').value = "";
+        }
+    }
+
+    /**
+     * Function to validate if the URL is correct
+     * */
+    function isValidURL(url) {
+        var pattern = new RegExp('^(https?:\\/\\/)?' + //Protocolo
+            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + //Dominio
+            '((\\d{1,3}\\.){3}\\d{1,3}))' + //IP
+            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + //Puerto y ruta
+            '(\\?[;&a-z\\d%_.~+=-]*)?' + //Parametros de consulta
+            '(\\#[-a-z\\d_]*)?$', 'i'); //Fragmento
+
+        return !!pattern.test(url);
+    }
+
+    /**
+     * Function to validate the from to avoid empty elements
+     * */
+    function validateForm(event) {
+        //Identify the place holder for the alerts
+        const alertPlaceHolder = document.getElementById('liveAlertPlaceHolder');
+
+        //Configure the method to configure the alert message
+        const appendAlert = (message, type) => {
+            const wrapper = document.createElement('div')
+            wrapper.innerHTML = [
+                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                `   <div>${message}</div>`,
+                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                '</div>'
+            ].join('')
+
+            alertPlaceHolder.append(wrapper);
+        }
+
+        //Identify all the necesary elements
+        var title = document.getElementById("title").value;
+        var owner = document.getElementById('owner').value;
+        var type = document.getElementById('type').value;
+        var created = document.getElementById('created').value;
+        var url = document.getElementById('url').value;
+        var sharepoint = document.getElementById('sharepoint').value;
+        var urlList = document.querySelector('#urlList');
+        var powerAutomate = document.getElementById('powerAutomate');
+        var listItems = urlList.querySelectorAll('li');
+        const checkboxes = document.querySelectorAll('.list-group-item .form-check-input');
+        const markedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+
+        //Store the factories in an arrat with separate
+        var listItemFactory = Array.from(markedCheckboxes).map(function (li) {
+            return li.textContent.trim();
+        });
+
+        //Store the URLs in an array with separate 
+        var listItemsText = Array.from(listItems).map(function (li) {
+            return li.textContent.trim();
+        });
+
+        //Store the URLs separete ";"
+        var urlJoined = listItemsText.join(';');
+
+        //Store the factories separate ";"
+        var factoriesJoined = markedCheckboxes.map(checkbox => checkbox.value).join(';');
+
+        //Check if the information is in the form
+        if (title === "" || owner === "" || type === "" || url === "" || markedCheckboxes.length === 0) {
+            //Call the method to display the message alert
+            appendAlert('You have to insert the neccesary information to add the Power App source', 'danger');
+
+            //Move the window position view to the top
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+            event.preventDefault();
+
+            //If theres not list associated...
+        } else if (listItems.length === 0) {
+            //Call the method to display the messahe alert
+            appendAlert('You have to insert the associated sites', 'danger');
+
+            //Move the window position view to the top
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+            event.preventDefault();
+
+            //In other case...
+        } else {
+            //Store in the urlJoined input hidden, the final string
+            document.getElementById('urlJoined').value = urlJoined;
+
+            //Store in the factoriesJoined input hidden, the final string
+            document.getElementById('factoriesJoined').value = factoriesJoined;
+
+            //Convert the array into a JSON string
+            const powerAutomateArrayJson = JSON.stringify(powerAutomateArray);
+
+            //Add the information into the hidden input
+            document.getElementById('powerAutomateArray').value = powerAutomateArrayJson;
+        }
+    }
+</script>
+
+</html>

@@ -1,0 +1,25 @@
+<input id="searchBar_bestPractise" class="form-control me-2" type="search" autocomplete="off" placeholder="Search...">
+
+<script>
+    //Configuramos el comportamiento de la barra de tareas
+    $('#searchBar_bestPractise').on('keyup', function () {
+        //Almacenamos el campo de texto introducido en la barra de búsqueda
+        var searchText = this.value.toLowerCase();
+
+        //Iteramos por las tarjetas
+        $('.new-card').each(function () {
+            //Creamos una instancia de la tarjeta
+            var card = $(this);
+
+            //Almacenamos el contenido de la tarjetañ
+            var cardData = card.text().toLowerCase();
+
+            //Configuramos la lógica de mostrar u ocultar las tarjetas
+            if (cardData.indexOf(searchText) === -1) {
+                card.hide();
+            } else {
+                card.show();
+            }
+        });
+    });
+</script>

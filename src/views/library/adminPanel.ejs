@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title%>
+    </title>
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <div id="liveAlertPlaceHolder"></div>
+
+    <div class="adminPanel">
+        <div class="container mt-5">
+            <h1 class="text-center">Log In</h1>
+            <form id="loginForm" action="/library/api/login-ldap" method="POST" onsubmit="return validateForm(event)"
+                autocomplete="off">
+                <div class="mb-3 form-floating">
+                    <input type="text" class="form-control" id="ipn" name="ipn" placeholder="IPN">
+                    <label for="title" class="form-label" style="color: #6c757d;">IPN</label>
+                </div>
+
+                <div class="mb-3 form-floating">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+                    <label for="title" class="form-label" style="color: #6c757d;">Password</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary"><i class="bi bi-box-arrow-in-right"></i> Continue</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Function to validate the log in form
+         * */
+        function validateForm(event) {
+            //Identify the place holder for the alerts
+            const alertPlaceHolder = document.getElementById('liveAlertPlaceHolder');
+
+            //Configure the method to configure the alert message
+            const appendAlert = (message, type) => {
+                const wrapper = document.createElement('div')
+                wrapper.innerHTML = [
+                    `<div class="alert alert-warning alert-dismissible fade show" role="alert">`,
+                    `   <strong>${message}`,
+                    '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                    '</div>'
+                ].join('')
+
+                alertPlaceHolder.append(wrapper);
+            }
+
+            //Identify all the inputs value
+            var ipn = document.getElementById("ipn").value;
+            var password = document.getElementById("password").value;
+
+            if (ipn === "" || password === "") {
+                //Call the method to displaye the message alert
+                appendAlert('You have to insert your credentials', 'warning');
+                event.preventDefault();
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <%- include('../partials/head.ejs') %>
+        <script src="/script/library/dataDriven/dataDriven.js"></script>
+        <script src="/script/library/information.js"></script>
+        <script src="/script/library/getUserID.js"></script>
+</head>
+
+<body>
+    <!-- MAIN MODAL -->
+    <%- include('../partials/modal.ejs') %>
+
+        <!--NAVIGATION PANEL-->
+        <%- include('../partials/navigation_Admin.ejs') %>
+
+            <!--LIVE TOAST-->
+            <%- include('../partials/toast.ejs') %>
+
+                <input type="text" name="ipn" id="ipn" hidden>
+
+                <div class="container">
+                    <h1><%-title %></h1>
+
+                    <div class="col-md-8">
+                        <a class="btn btn-primary" id="button" onclick="anyadirInformacionModal()">
+                            <div class="text">Add information <i class="bi bi-plus-circle"></i></div>
+                        </a>
+
+                        <button id="filterButton" class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+                            Filters <i class="bi bi-funnel"></i>
+                        </button>
+
+                        <!--TABLE OPTIONS-->
+                        <%- include('../partials/tableOptions.ejs') %> <br>
+                    </div>
+
+                    <!--DATA DRIVEN FILTERS-->
+                    <%- include('../partials/dataDriven/filters_dataDriven.ejs') %>
+
+                        <!--DATATABLE DATA DRIVEN-->
+                        <%- include('../partials/dataDriven/dataTableDataDriven.ejs') %>
+                </div>
+
+                <!--FOOTER-->
+                <%- include('../partials/footer.ejs') %>
+</body>

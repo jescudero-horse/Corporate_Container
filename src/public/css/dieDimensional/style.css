@@ -1,0 +1,98 @@
+.navbar-logo {
+    max-width: 100px;
+    margin-right: 10px;
+}
+
+.hero-section {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+        url('/api/placeholder/1920/1080') center/cover no-repeat;
+    height: 100vh;
+    color: white;
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    color: #0d6efd;
+    margin-bottom: 1rem;
+}
+
+.testimonial-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.hero-section {
+    animation: fadeIn 2s ease-in-out;
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;  
+    gap: 15px;
+}
+
+.input-group {
+    flex: 1 1 220px; 
+    max-width: 800px;
+}
+
+.input-group-text {
+    width: 190px;
+    text-align: left
+}
+
+.input-group .form-control {
+    min-width: 150px; 
+    padding-left: 20px;
+}
+
+.text-field-good {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 15px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    background-image: linear-gradient(45deg, #32cd32, #98fb98);
+    background-size: 200% 200%;
+    animation: gradientAnimation 3s ease infinite;
+    color: white;
+    text-align: center;
+}
+
+.text-field-bad {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 15px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    background-image: linear-gradient(45deg, #ff6347, #f08080);
+    background-size: 200% 200%;
+    animation: gradientAnimation 3s ease infinite;
+    color: white;
+    text-align: center;
+}
+
+/* Media Query para pantallas pequeñas */
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+    }
+}
+
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}

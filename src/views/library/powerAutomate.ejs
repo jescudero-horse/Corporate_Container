@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+        <script src="/script/library/powerAutomate.js"></script>
+        <script src="/script/library/information.js"></script>
+</head>
+
+<body>
+    <!--NAVIGATION PANEL-->
+    <%- include('partials/navigation.ejs') %>
+
+        <div class="container">
+            <h1><%-title %></h1>
+
+            <!--MODAL-->
+            <%- include('partials/modal.ejs') %>
+
+                <!--DATATABLE POWER AUTOMATE-->
+                <%- include('partials/dataTablePowerAutomate.ejs') %>
+        </div>
+
+        <!--FOOTER-->
+        <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    //Initialize the dataTable and hide the firs column (ID)
+    $(document).ready(function () {
+        //Store in  variable de dataTable component
+        var table = $('#dataTable').DataTable();
+
+        //Hide the ID column
+        $('#dataTable').DataTable().column(0).visible(false);
+
+        //Hide the userID column
+        $('#dataTable').DataTable().column(7).visible(false);
+    });
+
+    //Configre the array with the information
+    const tourSteps = [
+        {
+            element: "#dt-search-0",
+            popover: {
+                title: 'Search bar',
+                description: 'By using the search bar, you can filter through all the elements of the table... such as the flow name, owner...',
+                position: 'left'
+            }
+        },
+        {
+            element: "#dt-length-0",
+            popover: {
+                title: 'Entries per page',
+                description: "Here you can set the number of entries you want to display in the table.",
+                position: 'right'
+            }
+        }
+    ];
+</script>
+
+</html>

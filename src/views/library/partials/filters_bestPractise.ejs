@@ -1,0 +1,227 @@
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Select the filters</h5>
+        <button id="cerrarPanelFiltros" type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="d-flex justify-content-between mb-3">
+        <button class="btn btn-outline-danger" id="clearFiltersButton" onclick="clearFilters()">
+            <i class="bi bi-x-circle"></i> Clear Filters
+        </button>
+        <button class="btn btn-outline-success" id="applyFilters" onclick="applyFilters()">
+            <i class="bi bi-check-circle"></i> Apply Filters
+        </button>
+    </div>
+    <div class="offcanvas-body">
+        <div>
+            <div class="form-group" id="factoryFilters">
+                <label id="labelFactories"><b>Factories</b></label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="PFA">
+                    <label class="form-check-label">PFA</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Curitiba">
+                    <label class="form-check-label">Curitiba</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Motores">
+                    <label class="form-check-label">Motores</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Mioveni">
+                    <label class="form-check-label">Mioveni</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Bursa">
+                    <label class="form-check-label">Bursa</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Aveiro">
+                    <label class="form-check-label">Aveiro</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Sevilla">
+                    <label class="form-check-label">Sevilla</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="CMC">
+                    <label class="form-check-label">CMC</label>
+                </div>
+            </div>
+
+            <div class="container mt-4" id="dateRangeFilter" hidden>
+                <div class="form-group" id="dateRange">
+                    <div class="date-range-container">
+                        <label><b>Date range</b></label>
+                        <button class="btn btn-danger" onclick="deleteDateRange()" id="clearDates"><i
+                                class="bi bi-trash-fill"></i></button>
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="minDateLabel">Minimum date</span>
+                        <input type="date" id="minimumDate" name="minimumDate" class="form-control"
+                            aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="maxDateLabel">Maximum date</span>
+                        <input type="date" id="maximumDate" name="maximumDate" class="form-control"
+                            aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" id="statusFilter" hidden>
+                <label><b>Status</b></label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="Not applicable">
+                    <label class="form-check-label">Not applicable</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="I'm going to apply it">
+                    <label class="form-check-label">I'm going to apply it</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="I'm applying it">
+                    <label class="form-check-label">I'm applying it</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group" id="categorizationFilter">
+            <label id="categorizationLabel"><b>Categorization</b></label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Good idea">
+                <label class="form-check-label">Good idea</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Best practise">
+                <label class="form-check-label">Best practise</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Tecno Brick">
+                <label class="form-check-label">Tecno Brick</label>
+            </div>
+        </div>
+
+        <div class="form-group" id="tagsDiv">
+            <label id="tags-label"><b>Tags-input</b></label>
+
+            <input type="text" class="form-control" id="tags-input" name="tags-input" placeholder="Insert the tags...">
+        </div>
+
+        <div class="form-group" id="budgetFilter" hidden>
+            <label><b>Budget of the year</b></label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="on">
+                <label class="form-check-label">Yes</label>
+            </div>
+        </div>
+
+        <div class="form-group" id="entitiesFilter">
+            <label id="categories_Label" class="form-group-label">Categories</label>
+            <div class="options-container">
+                <label class="section-title">Transmissions</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="Transmissions - Machining" value="Transmissions - Machining">
+                    <label class="form-check-label" for="machining">Machining</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="Transmissions - Assembly" value="Transmissions - Assembly">
+                    <label class="form-check-label" for="assembly">Assembly</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="Transmissions - Flow" value="Transmissions - Flow">
+                    <label class="form-check-label" for="flow">Flow</label>
+                </div>
+            </div>
+
+            <div class="options-container">
+                <label class="section-title">Engine</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="Engine - Machining" value="Engine - Machining">
+                    <label class="form-check-label" for="machining">Machining</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="Engine - Assembly" value="Engine - Assembly">
+                    <label class="form-check-label" for="assembly">Assembly</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="Engine - Flow" value="Engine - Flow">
+                    <label class="form-check-label" for="flow">Flow</label>
+                </div>
+            </div>
+
+            <div class="options-container">
+                <label class="section-title">Casting</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="HPDC" value="HPDC">
+                    <label class="form-check-label" for="machining">HPDC</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="LPDC" value="LPDC">
+                    <label class="form-check-label" for="assembly">LPDC</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="Casting - Flow" value="Casting - Flow">
+                    <label class="form-check-label" for="flow">Flow</label>
+                </div>
+            </div>
+
+            <div class="options-container">
+                <label class="section-title">Management</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="Management - Quality" value="Management - Quality">
+                    <label class="form-check-label" for="quality">Quality</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="Management - Security"
+                        value="Management - Security">
+                    <label class="form-check-label" for="security">Security</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="Management - Performance"
+                        value="Management - Performance">
+                    <label class="form-check-label" for="performancia">Performance</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="Management - Cost"
+                        value="Management - Cost">
+                    <label class="form-check-label" for="cost">Cost</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="Management - Logistic"
+                        value="Management - Logistic">
+                    <label class="form-check-label" for="logistic">Logistic</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    //Create a DOMContentLoader to initialize Tagify
+    document.addEventListener('DOMContentLoaded', function () {
+        var input = document.querySelector('input[name=tags-input]');
+        new Tagify(input);
+    });
+
+    /**
+     * Function to clean the filters
+     * */
+    function clearFilters() {
+        //Reload the page
+        window.location.reload();
+    }
+</script>

@@ -1,0 +1,234 @@
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Select the filters</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <button class="btn btn-secondary" id="clearFiltersButton" onclick="clearFilters()">Clear Filters</button>
+    <div class="offcanvas-body">
+        <div>
+            <div class="form-group" id="typeReportFilters">
+                <label>Type report</label>
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Security">
+                    <label class="form-check-label">Security</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Performance">
+                    <label class="form-check-label">Performance</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Quality">
+                    <label class="form-check-label">Quality</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Costs">
+                    <label class="form-check-label">Costs</label>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="form-group" id="platformFilters">
+                <label>Platform</label>
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Looker">
+                    <label class="form-check-label">Looker</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="SpotFire">
+                    <label class="form-check-label">SpotFire</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="NodeRed - Real Time">
+                    <label class="form-check-label">NodeRed - Real Time</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="WebIntelligence BI4">
+                    <label class="form-check-label">WebIntelligence BI4</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Others">
+                    <label class="form-check-label">Others</label>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="form-group" id="factoryFilters">
+                <label>Factory</label>
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="HLT">
+                    <label class="form-check-label">HTL</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Motores">
+                    <label class="form-check-label">Motores</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Sevilla">
+                    <label class="form-check-label">Sevilla</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Aveiro">
+                    <label class="form-check-label">Aveiro</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Oyak">
+                    <label class="form-check-label">Oyak</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Rumania">
+                    <label class="form-check-label">Rumania</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Curitiba">
+                    <label class="form-check-label">Curitiba</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Los Andes">
+                    <label class="form-check-label">Los Andes</label>
+                </div>
+
+                <div class="form-check">
+                    <input class="form-check-input type-report-filter" type="checkbox" value="Argentina">
+                    <label class="form-check-label">Argentina</label>
+                </div>
+            </div>
+
+            <br>
+
+        </div>
+
+        <div>
+            <label>Function/Subfunction</label>
+
+            <div class="form-group" id="function_HLT">
+                <input class="form-check-input function-filter" type="checkbox" value="HLT" id="HLT" name="HLT"> HTL
+
+                <div class="form-check" id="subfunction_HLT">
+                    <div class="form-check">
+                        <input class="form-check-input function_HLT" type="checkbox" value="Logistics">
+                        <label class="form-check-label">Logistics</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input function_HLT" type="checkbox" value="Quality">
+                        <label class="form-check-label">Quality</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input function_HLT" type="checkbox" value="Process Engineering">
+                        <label class="form-check-label">Process Engineering</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input function_HLT" type="checkbox" value="Product Engineering">
+                        <label class="form-check-label">Product Engineering</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="form-group" id="function_Motores">
+                <input class="form-check-input function-filter" type="checkbox" value="Motores" id="Motores"
+                    name="Motores"> Motores
+
+                <div class="form-check" id="subfunction_Motores">
+                    <div class="form-check">
+                        <input class="form-check-input function_Motores" type="checkbox" value="Machining">
+                        <label class="form-check-label">Machining</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input function_Motores" type="checkbox" value="Assembly">
+                        <label class="form-check-label">Assembly</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input function_Motores" type="checkbox" value="Injection">
+                        <label class="form-check-label">Injection</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="form-group" id="function_Sevilla">
+                <input class="form-check-input function-filter" type="checkbox" value="Sevilla" id="Sevilla"
+                    name="Sevilla"> Sevilla
+
+                <div class="form-check" id="subfunction_Sevilla">
+                    <div class="form-check">
+                        <input class="form-check-input function_Sevilla" type="checkbox" value="Assembly">
+                        <label class="form-check-label">Assembly</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input function_Sevilla" type="checkbox" value="Machining">
+                        <label class="form-check-label">Machining</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input function_Sevilla" type="checkbox" value="Heat treatments">
+                        <label class="form-check-label">Heat treatments</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="form-group" id="function_Aveiro">
+                <input class="form-check-input function-filter" type="checkbox" value="Aveiro" id="Aveiro"
+                    name="Aveiro"> Aveiro
+
+                <div class="form-check" id="subfunction_Sevilla">
+                    <div class="form-check">
+                        <input class="form-check-input function_Aveiro" type="checkbox" value="Assembly">
+                        <label class="form-check-label">Assembly</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input function_Aveiro" type="checkbox" value="Machining">
+                        <label class="form-check-label">Machining</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input function_Aveiro" type="checkbox" value="Heat treatments">
+                        <label class="form-check-label">Heat treatments</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group" id="function">
+            <input class="form-check-input function-filter" type="checkbox" value="Oyak" id="Oyak" name="Oyak">Oyak
+
+            <input class="form-check-input function-filter" type="checkbox" value="Rumania" id="Rumania"
+                name="Rumania">Rumania
+
+            <input class="form-check-input function-filter" type="checkbox" value="Curitiba" id="Curitiba"
+                name="Curitiba">Curitiba
+
+            <input class="form-check-input function-filter" type="checkbox" value="Los Andes" id="Los Andes"
+                name="Los Andes">Los Andes
+
+            <input class="form-check-input function-filter" type="checkbox" value="Argentina" id="Argentina"
+                name="Argentina">Argentina
+        </div>
+    </div>
+</div>

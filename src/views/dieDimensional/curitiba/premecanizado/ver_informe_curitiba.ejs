@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Report</title>
+    <!--INCLUIMOS LA CABECERA-->
+    <%- include('../../partials/head.ejs') %>
+    <script src="/script/dieDimensional/Curitiba/verInforme.js"></script>
+    <script src="/script/dieDimensional/main.js"></script>
+</head>
+
+<body>
+    <!--INCLUIMOS LA BARRA DE NAVEGACIÓN-->
+    <%- include('../../partials/nav.ejs') %>
+
+    <!--INCLUIMOS LOS MODALES-->
+    <%- include('../../partials/modal.ejs') %>
+
+        <br>
+        <div class="form-row container">
+            <div class="input-group mb-3">
+                <span class="input-group-text">Report creation date</span>
+                <input type="date" id="fecha_creacion_reporte" name="fecha_creacion_reporte" class="form-control"
+                    disabled>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">Measured part</span>
+                <input type="text" id="pieza_medida" name="pieza_medida" class="form-control" disabled>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">Mold type</span>
+                <input type="text" id="tipo_molde" name="tipo_molde" class="form-control" disabled>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">Mold</span>
+                <input type="text" id="molde" name="molde" class="form-control" disabled>
+            </div>
+        </div>
+
+        <div class="form-row container">
+            <div class="input-group mb-3">
+                <span class="input-group-text">Machine</span>
+                <input type="text" id="maquina" name="maquina" class="form-control" disabled>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">Position</span>
+                <input type="number" id="puesto" name="puesto" class="form-control" disabled>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text">Comments on <br>measurement</span>
+                <input type="text" id="comentarios" name="comentarios" class="form-control">
+            </div>
+        </div>
+
+        <div class="container">
+            <hr>
+
+            <!--INCLUIMOS EL DT DEL LISTADO DE NO CONFORMIDADES - PREMECANIZADO-->
+            <%- include('../../partials/dt_premeca_listado_no_conformidades.ejs') %>
+        </div>
+</body>
+
+</html>

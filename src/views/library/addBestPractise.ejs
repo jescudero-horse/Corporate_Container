@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <script src="/script/library/information.js"></script>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <!--INCLUDE THE MODAL-->
+    <%- include('partials/modal.ejs') %>
+        <div id="liveAlertPlaceHolder"></div>
+
+        <div class="adminPanel">
+            <div class="container mt-5">
+                <h1 class="text-center"><%- title%></h1>
+                <form id="addBestPractise" action="/library/api/insert-data-bestPractise" method="POST"
+                    autocomplete="off" onsubmit="return validateForm(event)">
+
+                    <!--INCLIDE THE BEST PRACTISE FORM-->
+                    <%- include('partials/bestPractise_form.ejs') %>
+
+                        <button type="submit" class="btn btn-primary">Continue</button>
+                </form>
+            </div>
+        </div>
+
+        <!--FOOTER-->
+        <%- include('partials/footer.ejs') %>
+
+</body>
+
+<script>
+    let animation;
+    //Initialize the DOM content
+    document.addEventListener('DOMContentLoaded', () => {
+        //Store the input
+        var input = document.querySelector('input[name=tags]');
+
+        //Initialize the input using Tagify
+        new Tagify(input, {
+            maxTags: 5
+        });
+    });
+
+    /**
+     * Function to validate the form to avoid empty elements
+     * */
+    function validateForm(event) {
+        //Identify the place holder for the alerts
+        const alertPlaceHolder = document.getElementById('liveAlertPlaceHolder');
+
+        //Configure the method to configure the alert message
+        const appendAlert = (message, type) => {
+            const wrapper = document.createElement('div')
+            wrapper.innerHTML = [
+                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                `   <div>${message}</div>`,
+                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                '</div>'
+            ].join('')
+
+            alertPlaceHolder.append(wrapper);
+        }
+
+        //Identify all the necesary elements
+        var factory = document.getElementById('factory').value;
+        var metier = document.getElementById('metier').value;
+        var line = document.getElementById('line').value;
+        var technology = document.getElementById('technology').value;
+        var tags = document.getElementById('tags-input').value;
+        const checkboxes = document.querySelectorAll('input[name="category"]');
+        var isChecked = false;
+
+        //Iterate throw the checkbox
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                isChecked = true;
+            }
+        })
+
+        //Check the forms inputs
+        if (factory === '' || metier === '' || line === '' || technology === '' || tags.length === 0 || isChecked === false) {
+            //Call the method to display the message alert
+            appendAlert('You have to insert all the neccesary information to add the best practise', 'danger');
+
+            //Move the window position view to the top
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+            //Stop the propagation
+            event.preventDefault();
+
+            //In other case...
+        } else {
+            $(document).ready(function () {
+                //Configure the header of the modal
+                $('#modal .modal-header').html(`
+                    <h1 class="modal-title fs-5" style="color: black;">Modal title</h1>
+                `);
+
+                //Configure the title of the modal
+                $('#modal .modal-title').text('Add the neccesary files');
+
+                //Configure the body of the modal
+                $('#modal .modal-body').html(`
+                    <div>
+                        <h3 id="beforeImage_title">Share the before images</h3>
+                        <form id="addFiles" action="/library/api/insertBestPractise-file/${1}/${document.getElementById('factory').value}/${document.getElementById('title').value}" method="POST"
+                            enctype="multipart/form-data">
+                
+                            <div class="mb-3">
+                                <input class="form-control" type="file" id="files" name="files" accept=".png, .jpg, .jpeg"
+                                    multiple>
+                            </div>
+                
+                            <button type="submit" class="btn btn-primary">Continue</button>
+                        </form>
+                    </div>
+
+                    <hr>
+
+                    <div>
+                        <h3 id="afterImage">Share the after images</h3>
+                        <form id="addFiles" action="/library/api/insertBestPractise-file/${0}/${document.getElementById('factory').value}/${document.getElementById('title').value}" method="POST"
+                            enctype="multipart/form-data">
+                
+                            <div class="mb-3">
+                                <input class="form-control" type="file" id="files" name="files" accept=".png, .jpg, .jpeg"
+                                    multiple>
+                            </div>
+                
+                            <button type="submit" class="btn btn-primary">Continue</button>
+                        </form>
+                    </div>
+
+                    <hr>
+
+                    <div>
+                        <h3 id="mainImageTitle">Share the main images</h3>
+                        <form id="addFiles" action="/library/api/insertBestPractise-file/${3}/${document.getElementById('factory').value}/${document.getElementById('title').value}" method="POST"
+                            enctype="multipart/form-data">
+                
+                            <div class="mb-3">
+                                <input class="form-control" type="file" id="mainImageFile" name="files" accept=".png, .jpg, .jpeg"
+                                    required>
+                            </div>
+                
+                            <button type="submit" class="btn btn-primary">Continue</button>
+                        </form>
+                    </div>
+
+                    <hr>
+
+                    <div>
+                        <h3 id="otherFile">Share other files</h3>
+                        <form id="addFiles" action="/library/api/insertBestPractise-file/${null}/${document.getElementById('factory').value}/${document.getElementById('title').value}" method="POST"
+                            enctype="multipart/form-data">
+                
+                            <div class="mb-3">
+                                <input class="form-control" type="file" id="files" name="files" accept=".pdf, .mp4, .mp3"
+                                    multiple required>
+                            </div>
+                
+                            <button type="submit" class="btn btn-primary">Continue</button>
+                        </form>
+                    </div>
+                `);
+
+                //Configure the modal
+                $('#modal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+
+                //Configure the footer of the modal
+                $('#modal .modal-footer').html(`
+                    <button id="horsito_button" class="btn btn-outline-primary">
+                        <div id="lottie-icon-container"></div>
+                    </button>
+                    <button class="btn btn-secondary" id="listFiles" action="checkFiles()"><i class="bi bi-search"></i></button>
+                    <button type="button" class="btn btn-secondary" id="closeButton">Close</button>
+                `);
+
+                //Apply the funcionality for the check button
+                $('#listFiles').on('click', function () {
+                    //Use fetch() to make the request to know if the user can exit
+                    fetch('/library/api/retrieveFiles', {
+                        method: "GET"
+                    })
+
+                        //Control the response
+                        .then(response => {
+                            if (!response.ok) {
+                                console.error("Error al conectare con el end point: ", result);
+                            }
+
+                            return response.json();
+                        })
+
+                        //Control the data
+                        .then(data => {
+                            //Declare a variable to store the path of the attachet files
+                            let rowData = [];
+
+                            console.log("DATOS OBTENIDOS: ", data);
+
+                            //Iterate throw the data
+                            data.forEach(item => {
+                                //Create a variable with the category
+                                let category;
+
+                                //Control the item.before_file variable to assign the category name
+                                if (item.before_file === 1) {
+                                    category = "Before image";
+                                } else if (item.before_file === 0) {
+                                    category = "After image";
+                                } else if (item.before_file === null) {
+                                    category = "Other file"
+                                } else if (item.before_file === 3) {
+                                    category = "Main Image";
+                                }
+
+                                //Create a variable to store the file patrh without the "/"
+                                let fileName = item.path.split('/').pop();
+
+                                //Add the file name and the category
+                                rowData.push({
+                                    path: fileName,
+                                    category: category
+                                });
+                            });
+
+                            //Configure the title of the modal
+                            $('#modalInformation .modal-title').text('Last upload');
+
+                            //Configure the body of the modal
+                            $('#modalInformation .modal-body').html(`
+                                <table id="modal-table" class="table table-striped">
+                                    <thread>
+                                        <tr>
+                                            <th>Path</th>
+                                            <th>Category</th>
+                                        </tr>
+                                    </thread>
+                                    <tbody>
+                                        ${rowData.map(row => `
+                                            <tr>
+                                                <td>${row.path}</td>
+                                                <td>${row.category}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            `);
+
+                            console.log("ROW DATA: ", rowData);
+
+                            //Configure the footer of the modal
+                            $('#modalInformation .modal-footer').html(`
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            `);
+
+                            //Show the modal
+                            $('#modalInformation').modal('show');
+                        });
+                });
+
+                //Apply the funcionality of the close button
+                $('#closeButton').on('click', function () {
+                    //Comprobamos que haya compartido la imagen principal
+                    if (document.getElementById('mainImageFile').value === '') {
+                        //Configure the alert
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "You must enter the main image"
+                        });
+                    } else {
+                        //Create a variable to set the timer
+                        let timerInterval;
+
+                        //Configure the alert
+                        Swal.fire({
+                            title: "Thanks for your time",
+                            html: "Reloading page, please wait <b></b> milliseconds...",
+                            timer: 5000,
+                            allowOutsideClick: false,
+                            timerProgressBar: true,
+                            didOpen: () => {
+                                Swal.showLoading();
+                                const timer = Swal.getPopup().querySelector("b");
+                                timerInterval = setInterval(() => {
+                                    timer.textContent = `${Swal.getTimerLeft()}`;
+                                }, 100);
+                            },
+                            willClose: () => {
+                                clearInterval(timerInterval);
+                            }
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.timer) {
+                                //Redirect to the success best practise
+                                window.location.href = '/library/successBestPractise';
+                            }
+                        });
+                    }
+                });
+
+                //Show the modal
+                $('#modal').modal('show');
+            });
+        }
+    }
+
+    //Apply the functionality when the modal is open
+    $('#modal').on('shown.bs.modal', function () {
+        //Create an instance of "Horsito"
+        animation = lottie.loadAnimation({
+            container: document.getElementById('lottie-container'),
+            render: 'svg',
+            loop: false,
+            autoplay: false,
+            path: '/animations/library/Asistente.json'
+        });
+
+        //Creamos una instancia de Horsito
+        const button = document.getElementById('horsito_button');
+
+        //Comrprobamos si el botón existe
+        if (button) {
+            //Aplicamos la funcionalidad para el contenedor de Lottie
+            button.addEventListener('click', function () {
+                console.log("Dentro de Horsito");
+                //Establecemos la velocidad para el animador
+                animation.setSpeed(2);
+
+                //Reproducimos la animación
+                animation.play();
+
+                //Esperamos a que la animación se complete y llamar al método
+                animation.addEventListener('complete', function () {
+                    console.log("Animación terminada");
+                    onAnimationComplete(tourSteps);
+                });
+            });
+        } else {
+            console.warn('Element #horsito_button not found.');
+        }
+    });
+
+    //Create a variable with all the steps
+    const tourSteps = [
+        {
+            element: "#beforeImage_title",
+            popover: {
+                title: 'Share the before image',
+                description: "Within this category, you can add the 'before' images. You can add more than one, and it is not mandatory! Remember to click the 'Continue' button to upload the files.",
+                position: 'bottom'
+            },
+        },
+        {
+            element: "#afterImage",
+            popover: {
+                title: 'Share the after image',
+                description: "Within this category, you can add the 'after' images. You can add more than one, and it is not mandatory! Remember to click the 'Continue' button to upload the files.",
+                position: 'bottom'
+            },
+        },
+        {
+            element: "#mainImageTitle",
+            popover: {
+                title: 'Share the main image',
+                description: "Within this category, you must fill in the best practice with the key image… Remember that it should be an eye-catching image, so it must be very striking!.",
+                position: 'bottom'
+            },
+        },
+        {
+            element: "#otherFile",
+            popover: {
+                title: 'Share the others files',
+                description: "Within this category, you can add other types of files, such as videos, Excel files, presentations... (THEY MUST BE IN .pdf FORMAT)... this is not a required field, and you can upload multiple files. Remember to click the 'Continue' button to upload the files.",
+                position: 'auto'
+            },
+        },
+        {
+            element: "#listFiles",
+            popover: {
+                title: 'Check the files',
+                description: "Clicking this button will allow you to check the files you are about to share. If the attached files (such as videos) do not appear, wait a moment and check again (it may take some time to process if the video is large). If they still do not appear, you can try uploading them again. You will also be able to attach other types of files in the section for updating the best practice.",
+                position: 'auto'
+            },
+        },
+        {
+            element: "#closeButton",
+            popover: {
+                title: 'Close the window to attach the files',
+                description: "Clicking this button will close the file attachment window, and the files will be uploaded along with the best practice. You will need to wait for the files to be processed.",
+                position: 'auto'
+            }
+        }
+    ]
+</script>
+
+</html>

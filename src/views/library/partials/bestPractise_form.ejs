@@ -1,0 +1,154 @@
+<div class="row mb-3">
+    <div class="col">
+        <div class="mb-3 form-floating">
+            <input type="text" class="form-control" id="title" name="title" placeholder="Title">
+            <label for="title" class="form-label" style="color: #6c757d;">Title</label>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="mb-3 form-floating">
+            <input type="email" class="form-control" id="owner" name="owner" placeholder="Owner">
+            <label for="Owner" class="form-label" style="color: #6c757d;">Owner</label>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col">
+        <div class="form-floating">
+            <select class="form-select" id="factory" name="factory" aria-label="Factory">
+                <option value="PFA">PFA</option>
+                <option value="Curitiba">Curitiba</option>
+                <option value="Motores">Motores</option>
+                <option value="Mioveni">Mioveni</option>
+                <option value="Bursa">Bursa</option>
+                <option value="Aveiro">Aveiro</option>
+                <option value="Sevilla">Sevilla</option>
+                <option value="CMC">CMC</option>
+            </select>
+            <label for="factory" class="form-label" style="color: #6c757d;">Factory</label>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="form-floating">
+            <select class="form-select" id="metier" name="metier" aria-label="Club Metier">
+                <option value="ASSY ENG.">ASSY ENG.</option>
+                <option value="ASSY GB.">ASSY GB.</option>
+                <option value="HPDC ALUM.">HPDC ALUM.</option>
+                <option value="LOGISTIC">LOGISTIC</option>
+                <option value="MACH. ENG.">MACH. ENG.</option>
+                <option value="MACH. GB.">MACH. GB.</option>
+            </select>
+            <label for="metier" class="form-label" style="color: #6c757d;">Club Metier</label>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col">
+        <div class="form-floating">
+            <input type="text" class="form-control" id="line" name="line" placeholder="Line">
+            <label for="line" class="form-label" style="color: #6c757d;">Line</label>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="form-floating">
+            <input type="text" class="form-control" id="technology" name="technology" placeholder="Technology">
+            <label for="technology" class="form-label" style="color: #6c757d;">Technology</label>
+        </div>
+    </div>
+</div>
+
+<div class="form-floating">
+    <select class="form-select" id="categorization" name="categorization" aria-label="Categorization">
+        <option value="Good idea">Good idea</option>
+        <option value="Best practise">Best practise</option>
+        <option value="Tecno Brick">Tecno Brick</option>
+    </select>
+    <label for="categorization" class="form-label" style="color: #6c757d;">Categorization</label>
+</div>
+
+<div class="form-group">
+    <label for="tags">Tags:</label>
+    <input type="text" class="form-control" id="tags-input" name="tags" placeholder="Add your tags:">
+</div>
+
+<div class="mb-3">
+    <label class="form-label" id="categoryDiv">Category</label>
+    <div class="d-flex flex-column">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="Transmissions - Machining"
+                id="caja_mecanizado">
+            <label class="form-check-label" for="caja_mecanizado">Transmissions - Machining</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="Transmissions - Assembly"
+                id="caja_montaje">
+            <label class="form-check-label" for="caja_montaje">Transmissions - Assembly</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="caja_flujo"
+                id="Transmissions - Flow">
+            <label class="form-check-label" for="caja_flujo">Transmissions - Flow</label>
+        </div>
+        <hr>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="Engine - Machining"
+                id="motor_mecanizado">
+            <label class="form-check-label" for="motor_mecanizado">Engine - Machining</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="Engine - Assembly"
+                id="motor_montaje">
+            <label class="form-check-label" for="motor_montaje">Engine - Assembly</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="Engine - Flow" id="motor_flujo">
+            <label class="form-check-label" for="motor_flujo">Engine - Flow</label>
+        </div>
+        <hr>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="HPDC" id="hpdc">
+            <label class="form-check-label" for="hpdc">HPDC</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="LPDC" id="lpdc">
+            <label class="form-check-label" for="lpdc">LPDC</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="Casting - Flow" id="casting_flujo">
+            <label class="form-check-label" for="casting_flujo">Casting - Flow</label>
+        </div>
+        <hr>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="Management - Quality"
+                id="calidad_calidad">
+            <label class="form-check-label" for="calidad_calidad">Management - Quality</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="Management - Security"
+                id="calidad_seguridad">
+            <label class="form-check-label" for="calidad_seguridad">Management - Security</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="Management - Performance"
+                id="calidad_performancia">
+            <label class="form-check-label" for="calidad_performancia">Management - Performance</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="Management - Cost"
+                id="calidad_costes">
+            <label class="form-check-label" for="calidad_costes">Management - Cost</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="category" value="Management - Logistic"
+                id="calidad_logistica">
+            <label class="form-check-label" for="calidad_logistica">Management - Logistic</label>
+        </div>
+    </div>
+</div>
+
+<br>

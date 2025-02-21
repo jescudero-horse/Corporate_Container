@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <script src="/script/library/spotFire.js"></script>
+    <script src="/script/library/information.js"></script>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+
+</head>
+
+<body>
+    <!--INCLUTHE THE NAVIGATION PANEL-->
+    <%- include('partials/navigation.ejs') %>
+
+        <div class="container">
+            <h1><%-title %></h1>
+
+            <!--INCLUDE THE MODAL-->
+            <%- include('partials/modal.ejs') %>
+
+                <br>
+
+                <button id="filterButton" class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+                    Filters <i class="bi bi-funnel"></i>
+                </button>
+
+                <br>
+
+                <!--INCLUDE THE FILTERS FOR THE SPOTFIRE-->
+                <%- include('partials/filters_spotFire.ejs') %>
+
+                    <br>
+
+                    <!--INCLUDE THE DATATABLE CONTROLS-->
+                    <%- include('partials/dataTableControl.ejs') %>
+        </div>
+
+        <div class="list" id="list">
+            <div class="table-responsive">
+                <table id="dataTable" class="table table-light table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Factory</th>
+                            <th scope="col">Type report</th>
+                            <th scope="col">Platform</th>
+                            <th scope="col">Location/URL</th>
+                            <th scope="col">URL</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Contact</th>
+                            <th scope="col">Video tutorial</th>
+                            <th scope="col">Data source</th>
+                            <th scope="col">Sent elementals</th>
+                            <th scope="col">Renault</th>
+                            <th scope="col">Function</th>
+                            <th scope="col">Subfunction</th>
+                            <th scope="col">Comments</th>
+                            <th scope="col">UserID</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!--FOOTER-->
+        <%- include('partials/footer.ejs') %>
+
+</body>
+
+<script>
+    //Initialize the dataTable, display the move tabe button and hide the columns
+    $(document).ready(function () {
+        //Apply the funcionabiity to the left button
+        $('#scrollLeftButton').click(function () {
+            $('#list').animate({
+                'marginLeft': "-=250px"
+            })
+        });
+
+        //Apply the funcionability to the rigth button
+        $('#scrollRightButton').click(function () {
+            $('#list').animate({
+                'marginLeft': "+=200px"
+            });
+        });
+
+        //Apply the funcionability to the reset position
+        $('#scrollResetButton').click(function () {
+            $('#list').animate({
+                'marginLeft': "0px"
+            });
+        });
+
+        //Hide the ID and URL columns
+        $('#dataTable').DataTable({
+            columnDefs: [
+                { targets: 0, visible: false },
+                { targets: 6, visible: false },
+                { targets: 8, visible: false },
+                { targets: 9, visible: false },
+                { target: 16, visible: false }
+            ]
+        });
+    });
+
+    //Configre the array with the information
+    const tourSteps = [
+        {
+            element: '#filterButton',
+            popover: {
+                title: 'Filters',
+                description: 'If you press this button, you can display a menu where you can make use of the available filters',
+                position: 'right'
+            }
+        },
+        {
+            element: '#dataTableControls',
+            popover: {
+                title: 'Table controls',
+                description: 'In case you want to move the table, you can click on the buttons to move it... the middle button is used to move the table back to its original position.',
+                position: 'bottom',
+            },
+        },
+        {
+            element: "#dt-search-0",
+            popover: {
+                title: 'Search bar',
+                description: 'By using the search bar, you can filter through all the elements of the table... such as the report title, factory, platform...',
+                position: 'left'
+            }
+        },
+        {
+            element: "#dt-length-0",
+            popover: {
+                title: 'Entries per page',
+                description: "Here you can set the number of entries you want to display in the table.",
+                position: 'right'
+            }
+        }
+    ];
+</script>
+
+</html>

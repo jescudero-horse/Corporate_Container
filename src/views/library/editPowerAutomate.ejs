@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <script src="/script/library/editPowerAutomate.js"></script>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <div id="liveAlertPlaceHolder"></div>
+
+    <div class="adminPanel">
+        <div class="container mt-5">
+            <h1 class="text-center"><%- title%></h1>
+
+            <form id="editPowerAutomate" action="/library/api/updatePowerAutomate" method="POST" onsubmit="return validateForm(event)"
+                autocomplete="off">
+                <input type="text" id="id" name="id" hidden>
+                <!--POWER AUTOMATE FORM-->
+                <%- include('partials/powerAutomate_form.ejs') %>
+
+                    <br>
+
+                    <button type="submit" class="btn btn-primary">Continue</button>
+            </form>
+        </div>
+    </div>
+
+    <!--FOOTER-->
+    <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    /**
+     * Function to validate the from to avoid empty elements
+     * */
+    function validateForm(event) {
+        //Identify the place holder for the alerts
+        const alertPlaceHolder = document.getElementById('liveAlertPlaceHolder');
+
+        //Configure the method to configure the alert message
+        const appendAlert = (message, type) => {
+            const wrapper = document.createElement('div')
+            wrapper.innerHTML = [
+                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                `   <div>${message}</div>`,
+                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                '</div>'
+            ].join('')
+
+            alertPlaceHolder.append(wrapper);
+        }
+
+        //Identify all the necesary elements
+        var flowName = document.getElementById('flowName').value;
+        var owner = document.getElementById('owner').value;
+        var state = document.getElementById('state');
+        var description = document.getElementById('description').value;
+
+        //Check if the information is in the form
+        if (flowName == '' || owner == '' || state == '' || description == '') {
+            //Call the method to display the messahe alert
+            appendAlert('You have to insert the neccesary information to add the PowerAutomate source', 'danger');
+
+            //Move the window position view to the top
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+            //Stop the propagation
+            event.preventDefault();
+        }
+    }
+</script>
+
+</html>

@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+        <script src="/script/library/viewAppliedBestPractise.js"></script>
+        <script src="/script/library/getUserID.js"></script>
+</head>
+
+<body>
+    <!--TOAST-->
+    <%- include('partials/toast.ejs') %>
+
+        <!--INCLUDE THE FILTERS FOR THE BEST PRACTISE-->
+        <%- include('partials/filters_bestPractise.ejs') %>
+
+            <!--INCLUDE THE NAVIGATION PANEL (ADMIN MODE)-->
+            <%- include('partials/navigation_Admin.ejs') %>
+
+                <!--MODAL-->
+                <%- include('partials/modal.ejs') %>
+
+                    <div class="container">
+                        <h1><%-title %></h1>
+
+                        <div class="col-md-4">
+                            <button class=" btn btn-primary" type="button" data-bs-toggle="offcanvas"
+                                data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+                                Filters <i class="bi bi-funnel"></i>
+                            </button>
+
+                            <!--TABLE OPTIONS-->
+                            <%- include('partials/tableOptions.ejs') %>
+                        </div>
+
+                        <!--SEARCH BAR COMPONENT-->
+                        <%- include('partials/searchBar.ejs') %>
+                            <br>
+
+                            <input type="text" id="ipn" hidden>
+
+                            <!--BEST PRACTISE APPLIED-->
+                            <%- include('partials/dataTableBestPractiseApplied.ejs') %>
+                    </div>
+</body>
+
+<script>
+    //Global variable to store the title of the best practise
+    let title_bestPractise;
+
+    //Create an array to store the best practise information
+    let rowData_bestPractise = []
+
+    //Enable the date range filter
+    document.getElementById('dateRangeFilter').removeAttribute('hidden');
+
+    //Enable the status filter
+    document.getElementById('statusFilter').removeAttribute('hidden');
+
+    //Enabled the budget filter
+    document.getElementById('budgetFilter').removeAttribute('hidden');
+
+    //Disable the entities filters
+    document.getElementById('entitiesFilter').setAttribute('hidden', 'true');
+
+    //Hide the categorizacion filter
+    document.getElementById('categorizationFilter').setAttribute('hidden', 'true');
+
+    //Hide the tags filter
+    document.getElementById('tagsDiv').setAttribute('hidden', 'true');
+
+    /**
+     * Function to fill the information in the main modal table
+     * */
+    function handleBestPractiseData(data) {
+        //Configure the title of the modal
+        $('#modal .modal-title').text('Title best practise: ' + data[0].title);
+
+        //Configure the body of the modal
+        $('#modal .modal-body').html(`
+            <table id="modal-table" class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Factory</th>
+                    <th>Metier</th>
+                    <th>Line</th>
+                    <th>Technology</th>
+                    <th>Category</th>
+                    <th>Keyword</th>
+                </thead>
+                </tr>
+                <tbody>
+                <tr>
+                    <th>` + data[0].title + `</th>
+                    <th>` + data[0].factory + `</th>
+                    <th>` + data[0].metier + `</th>
+                    <th>` + data[0].line + `</th>
+                    <th>` + data[0].technology + `</th>
+                    <th>` + data[0].category + `</th>
+                    <th>` + data[0].keyword + `</th>
+                </tr>
+                </tbody>
+            </table>
+        `);
+    }
+
+    /**
+     * Function to fill the information in the confirm delete modal
+     * */
+    function handleBestPractiseData_deleteModal(data, rowData) {
+        console.log("ROW DATA:", rowData);
+        //Add the modal-xl attribute
+        $('#modalConfirmDelete .modal-dialog').addClass('modal-xl');
+
+        //Configure the title of the modal
+        $('#modalConfirmDelete .modal-title').text('Do you want to delete this source?');
+
+        //Configure the body of the modal
+        $('#modalConfirmDelete .modal-body').html(`
+            <div>
+                <h3>BEST PRACTISE </h3>
+
+                <table id="modal-table" class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Factory</th>
+                        <th>Metier</th>
+                        <th>Line</th>
+                        <th>Technology</th>
+                        <th>Category</th>
+                        <th>Keyword</th>
+                    </thead>
+                    </tr>
+                    <tbody>
+                    <tr>
+                        <th>` + data[0].title + `</th>
+                        <th>` + data[0].factory + `</th>
+                        <th>` + data[0].metier + `</th>
+                        <th>` + data[0].line + `</th>
+                        <th>` + data[0].technology + `</th>
+                        <th>` + data[0].category + `</th>
+                        <th>` + data[0].keyword + `</th>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <hr>
+
+            <div>
+                <h3>APPLIED BEST PRACTISE</h3>
+                <div class="input-group mb-3">
+                    <label class="input-group-text" for="factoryLabel">Factory</label>
+                    <select class="form-select" id="factoryInput" name="factoryInput" selected="${rowData[3]}" disabled>
+                        <option value="PFA" ${rowData[3] === 'PFA' ? 'selected' : ''}>PFA</option>
+                        <option value="Curitiba" ${rowData[3] === 'Curitiba' ? 'selected' : ''}>Curitiba</option>
+                        <option value="Motores" ${rowData[3] === 'Motores' ? 'selected' : ''}>Motores</option>
+                        <option value="Mioveni" ${rowData[3] === 'Mioveni' ? 'selected' : ''}>Mioveni</option>
+                        <option value="Bursa" ${rowData[3] === 'Bursa' ? 'selected' : ''}>Bursa</option>
+                        <option value="Aveiro" ${rowData[3] === 'Aveiro' ? 'selected' : ''}>Aveiro</option>
+                        <option value="Sevilla" ${rowData[3] === 'Sevilla' ? 'selected' : ''}>Sevilla</option>
+                        <option value="CMC" ${rowData[3] === 'CMC' ? 'selected' : ''}>CMC</option>
+                    </select>
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="statusLabel">State</span>
+                    <input type="text" id="statusInput" name="statusInput" class="form-control" value="${rowData[4]}" disabled>
+                </div>
+
+                <div id="reasonDiv_appliedBestPractise" class="input-group mb-3">
+                    <span class="input-group-text" id="reasonLabel">Reason</span>
+                    <select class="form-select" id="reasonInput" name="reasonInput" selected="${rowData[5]}" disabled>
+                        <option value="Different technology" ${rowData[5] === 'Different technology' ? 'selected' : ''}>Different technology</option>
+                        <option value="Different process" ${rowData[5] === 'Different process' ? 'selected' : ''}>Different process</option>
+                        <option value="End of life" ${rowData[5] === 'End of life' ? 'selected' : ''}>End of life</option>
+                    </select>
+                </div>
+
+                <div class="form-check form-switch" id="budgetDiv">
+                    <label class="form-check-label" for="budgetForTheYearLabel">Included in the budget of the year</label>
+                    <input class="form-check-input" type="checkbox" id="budgetForTheYear" name="budgetForTheYear" disabled>
+                </div>
+                
+                <div id="estimatedDateDiv" class="input-group mb-3">
+                    <span class="input-group-text" id="estimatedDateILabel">Estimated Date</span>
+                    <input type="date" id="estimatedDateInput" name="estimatedDateInput" class="form-control" value="${rowData[7]}" disabled>
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="ipnLabel">IPN</span>
+                    <input type="text" class="form-control" value="${rowData[8]}" disabled>
+                </div>
+            </div>
+        `);
+
+        //Document ready for control the divs (hide/show)
+        $(document).ready(function () {
+            console.log("Estado: ", rowData[4]);
+            console.log("Reason: ", rowData[5]);
+
+            //Control the reason input
+            if (rowData[5] === '' || rowData[5] == null) {
+                $('#reasonDiv_appliedBestPractise').hide();
+                document.getElementById('reasonDiv').setAttribute('hidden', 'true');
+                console.log("DENTRO DEL IF: reasonDiv se oculta");
+            } else {
+                $('#reasonDiv_appliedBestPractise').show();
+                console.log("DENTRO DEL ELSE: reasonDiv se muestra");
+            }
+
+            //Control the budget switch
+            if (rowData[6] === '' || rowData[6] === null) {
+                document.getElementById('budgetDiv').setAttribute('hidden', 'true');
+            } else {
+                $('#budgetDiv').show();
+                document.getElementById('budgetForTheYear').setAttribute('checked', 'true');
+            }
+
+            //Control the estimated date input
+            if (rowData[7] === null || rowData[7] === '') {
+                $('#estimatedDateDiv').hide();
+            } else {
+                $('#estimatedDateDiv').show();
+            }
+        });
+    }
+
+    //Initialize the document
+    $(document).ready(function () {
+        //Store the instance of the dataTable
+        var table = $('#dataTable').DataTable({
+            //Hide the search input
+            "dom": "lrtip",
+
+            //Hide the columns
+            columnDefs: [
+                { targets: 0, visible: false },
+                { targets: 1, visible: false }
+            ],
+
+            //Configurate the exports buttons
+            buttons: [
+                //Configurate the copy buttons
+                {
+                    extend: 'copy',
+                    text: 'Copy to clipboard <i class="bi bi-clipboard2-data-fill"></i>',
+                    className: 'dropdown-item',
+                    exportOptions: {
+                        modifier: {
+                            selected: true
+                        },
+
+                        columns: [2, 3, 4, 5]
+                    }
+                },
+
+                //Configurate the excel export button
+                {
+                    extend: 'excel',
+                    text: 'Export to Excel file <i class="bi bi-filetype-xlsx"></i>',
+                    className: 'dropdown-item',
+                    exportOptions: {
+                        modifier: {
+                            selected: true,
+                        },
+
+                        columns: [2, 3, 4, 5]
+                    }
+                },
+
+                //Configurate the hide/show columns
+                {
+                    extend: 'colvis',
+                    text: 'Show/Hide columns <i class="bi bi-eye"></i>',
+                    className: 'dropdown-item'
+                },
+
+                //Configure the personal applied list
+                {
+                    text: 'View your personal applied best practise <i class="bi bi-card-checklist"></i>',
+                    className: 'dropdown-item',
+                    action: function (e, dt, node, config) {
+                        //Store the IPN of the user
+                        const ipn = document.getElementById('ipn').value;
+
+                        //Check if the user is logged in
+                        if (ipn === "") {
+                            //Dispaly a message alert
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'You don´t have permissions',
+                                text: 'If you want to see the list of good practices applied, you will have to log in',
+                                showCancelButton: true,
+                                confirmButtonText: 'Log in'
+                            }).then((result) => {
+                                //If the user press the log in button...
+                                if (result.isConfirmed) {
+                                    //Redirect to log in
+                                    window.location.href = '/library/adminPanel';
+                                }
+                            });
+
+                        //In other case...
+                        } else {
+                            //Filter the dataTable using the IPN value and the column
+                            $('#dataTable').DataTable().column(8).search(ipn).draw();
+
+                            //Identify the toast
+                            const toast = document.getElementById('liveToast');
+
+                            //Add the message and the  button to the body of the toast
+                            $('#liveToast .toast-body').html(
+                                `
+                                    <p>If you want to return to the normal list, make a clic on the "Return to normal list"<p>
+                                    <button onclick="returnNormalList(7)" type="button" class="btn btn-primary btn-sm">Return to normal list</button>
+                                `
+                            );
+
+                            //Configure the header of the toast
+                            $('#liveToast .toast-header').html(
+                                `
+                                    <img src="/assets/library/HORSE_FAVICON.ico" class="rounded me-2" style="width: 50px; height: 50px;">
+                                    <strong class="me-auto">Digital Library</strong>
+                                `
+                            );
+
+                            //Configure the toast
+                            const toastBootstrap = new bootstrap.Toast(toast, {
+                                autohide: false
+                            });
+
+                            //Show the toast
+                            toastBootstrap.show();
+                        }
+                    }
+                }
+            ]
+        });
+
+        //Add the buttons to the dropdown
+        $('#dropdown').append(table.buttons().container());
+
+        //Delete the footer of the main modal
+        $('#modal .modal-footer').html('');
+
+        //Apply the funcionality to each row
+        $('#dataTable tbody').on('click', 'tr', function () {
+            //Store the actual information of the row
+            let rowData = table.row(this).data();
+
+            //Store in a variable the main modal
+            const modal = document.getElementById('modal');
+
+            //Apply the funcionality of the modal
+            modal.addEventListener('shown.bs.modal', function () {
+                //Use fecth() to execute the request to obtein the information about the best practise
+                fetch(`/library/api/getBestPractise/${rowData[1]}`, {
+                    method: 'GET'
+                })
+                    //Control the respomse
+                    .then(response => {
+                        if (!response.ok) {
+                            console.error("Error al obtener los datos de la buena práctica con ID ", rowData[1], ". Respuesta: ", response);
+                            return;
+                        }
+
+                        //Return the data
+                        return response.json();
+                    })
+
+                    //Control the data
+                    .then(data => {
+                        //Create an array with the keywords
+                        const tagsArray = data[0].keyword.split(';').filter(tag => tag.trim() !== '');
+
+                        //Iterate throw the data
+                        rowData_bestPractise = data.map(item => ({
+                            idBestPractise: item.id,
+                            title: item.title,
+                            factory: item.factory,
+                            metier: item.metier,
+                            line: item.line,
+                            technology: item.technology,
+                            category: item.category,
+                            keyword:
+                                `
+                                <input type="text" class="form-control tags-input" value="${tagsArray.join(', ')}" readonly>
+                            `
+                        }));
+
+                        //Call the method to fill the table (main modal)
+                        handleBestPractiseData(rowData_bestPractise);
+                    });
+            });
+
+            //Store the ipn of the user
+            const ipn = document.getElementById('ipn').value;
+
+            //Check if the applied best practise is the owner
+            if (ipn === rowData[8]) {
+                //Add the necessary buttons on the footer´s main modal
+                $('#modal .modal-footer').html(`
+                    <button type="button" id="previewButton" class="btn btn-dark"><i class="bi bi-eye-fill"></i> Preview information</button>
+                    <button type="button" class="btn btn-outline-danger" data-bs-target="#modalConfirmDelete" data-bs-toggle="modal" id="deleteButtonMainModal"><i class="bi bi-trash3"></i> Delete</button>
+                    <button type="button" class="btn btn-primary" data-bs-target="#bestPractiseModalForm" id="updateRow"><i class="bi bi-pen"></i> Update</button>
+                `);
+
+                //In other case...
+            } else {
+                //Add the necessary button
+                $('#modal .modal-footer').html(`
+                    <button type="button" id="previewButton" class="btn btn-light"><i class="bi bi-eye-fill"></i> Preview information</button>
+                `);
+            }
+
+            //Create an array to store the final information of the best practise
+            let finalRowData = [];
+
+            //Apply the funcionability to the preview information of the moda
+            $('#previewButton').on('click', function () {
+                //Iterate throw the data
+                rowData_bestPractise.forEach(item => {
+                    finalRowData = [
+                        item.idBestPractise,
+                        item.title,
+                        item.factory,
+                        item.metier,
+                        item.line,
+                        item.technology,
+                        item.category,
+                        item.keyword
+                    ]
+                });
+
+                //Convert the row information into JSON 
+                const rowDataJson = encodeURIComponent(JSON.stringify(finalRowData));
+
+                //Redirect to the page to upload the data source and we send the data source information in the URL
+                window.location.href = `/library/previewBestPractise?data=${rowDataJson}`;
+            });
+
+            //Apply the title form the update applied best practise
+            $('#bestPractiseModalForm .modal-title').text("Update the applied best practise: " + rowData[2]);
+
+            //Apply the form form for the update applied best practise
+            $('#bestPractiseModalForm .modal-body').html(`
+                <form id="applyBestPractiseForm" action="/library/api/updateApplyBestPractise" method="POST" autocomplete="off">
+                    <div class="container">
+                        <input type="text" id="idAppliedBestPractise" name="idAppliedBestPractise" value="${rowData[0]}" hidden>
+
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="factoryLabel">Factory</label>
+                            <select class="form-select" id="factoryInput" name="factoryInput" selected="${rowData[3]}">
+                                <option value="PFA" ${rowData[3] === 'PFA' ? 'selected' : ''}>PFA</option>
+                                <option value="Curitiba" ${rowData[3] === 'Curitiba' ? 'selected' : ''}>Curitiba</option>
+                                <option value="Motores" ${rowData[3] === 'Motores' ? 'selected' : ''}>Motores</option>
+                                <option value="Mioveni" ${rowData[3] === 'Mioveni' ? 'selected' : ''}>Mioveni</option>
+                                <option value="Bursa" ${rowData[3] === 'Bursa' ? 'selected' : ''}>Bursa</option>
+                                <option value="Aveiro" ${rowData[3] === 'Aveiro' ? 'selected' : ''}>Aveiro</option>
+                                <option value="Sevilla" ${rowData[3] === 'Sevilla' ? 'selected' : ''}>Sevilla</option>
+                                <option value="CMC" ${rowData[3] === 'CMC' ? 'selected' : ''}>CMC</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="statusLabel">State</span>
+                            <select class="form-select" id="statusInput" name="statusInput" selected="${rowData[4]}">
+                                <option value="Not applicable" ${rowData[4] === 'Not applicable' ? 'selected' : ''}>Not applicable</option>
+                                <option value="I'm going to apply it" ${rowData[4] === "I'm going to apply it" ? 'selected' : ''}>I'm going to apply it</option>
+                                <option value="I'm applying it" ${rowData[4] === "I'm applying it" ? 'selected' : ''}>I'm applying it</option>
+                            </select>
+                        </div>
+
+                        <div id="reasonDiv" class="input-group mb-3" hide>
+                            <span class="input-group-text" id="reasonLabel">Reason</span>
+                            <select class="form-select" id="reasonInput" name="reasonInput" selected="${rowData[5]}">
+                                <option value="Different technology" ${rowData[5] === 'Different technology' ? 'selected' : ''}>Different technology</option>
+                                <option value="Different process" ${rowData[5] === 'Different process' ? 'selected' : ''}>Different process</option>
+                                <option value="End of life" ${rowData[5] === 'End of life' ? 'selected' : ''}>End of life</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="estimatedDateILabel">Estimated Date</span>
+                            <input type="date" id="estimatedDateInput" name="estimatedDateInput" class="form-control" value="${rowData[6]}">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="confirmButton"><i class="bi bi-pen"></i> Update the applied best practise</button>
+                    </div>
+                </form>
+            `);
+
+            //Add event listener to statusInput to toggle reasonDiv visibility
+            $('#statusInput').on('change', function () {
+                //If the state option is "Not applicable"
+                if (this.value === "Not applicable") {
+                    //Show the reason input
+                    $('#reasonDiv').show();
+
+                    //In other case...
+                } else {
+                    //Hide the reason input
+                    $('#reasonDiv').hide();
+                }
+            });
+
+            //Apply the funcionality for the conmfirm button
+            $('#confirmButton').on('click', function () {
+                //Create a variable to set the timer
+                let timerInterval;
+
+                //Configure and display the alert
+                Swal.fire({
+                    title: "Item successfully deleted. Reloading page",
+                    html: "Reloading page, please wait <b></b> milliseconds...",
+                    timer: 1000,
+                    allowOutsideClick: false,
+                    timerProgressBar: true,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        const timer = Swal.getPopup().querySelector("b");
+                        timerInterval = setInterval(() => {
+                            timer.textContent = `${Swal.getTimerLeft()}`;
+                        }, 100);
+                    },
+                    willClose: () => {
+                        clearInterval(timerInterval);
+                    }
+                }).then((result) => {
+                    if (result.dismiss === Swal.DismissReason.timer) {
+                        window.location.reload();
+                    }
+                });
+            });
+
+            //Appy the funcionality fot the update button of the applied best practise
+            $('#updateRow').on('click', function () {
+                //Hide the main modal
+                $('#modal').modal('hide');
+
+                //Store the best practise form modal into a variable
+                var bestPractiseModalForm = new bootstrap.Modal(document.getElementById('bestPractiseModalForm'));
+
+                //Show the modal
+                bestPractiseModalForm.show();
+            });
+
+            //Apply the funcionality to the main delete modal
+            $('#modalConfirmDelete').on('show.bs.modal', function () {
+                handleBestPractiseData_deleteModal(rowData_bestPractise, rowData);
+            });
+
+            //Apply the funconality to the confirm delete
+            $('#deleteRow').on('click', function () {
+                //Call the end point to delete the applied best practise
+                fetch(`/library/api/delete-row/${rowData[0]}/${"bestPractiseApplied"}`, {
+                    method: "DELETE"
+                })
+                    //Control the response
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error deleting the record');
+                        }
+
+                        //Hide the delete modal
+                        $('#modalConfirmDelete').modal('hide');
+
+                        //Call the method to display the delete alert
+                        deleteElement("Item successfully deleted. Reloading page");
+                    })
+            });
+
+            //Show the modal
+            $('#modal').modal('show');
+        });
+    });
+</script>

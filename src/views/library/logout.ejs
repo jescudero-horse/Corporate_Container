@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <!--TOAST-->
+    <%- include('partials/toast.ejs') %>
+
+        <div class="adminPanel">
+            <div class="container mt-5">
+                <h1 class="text-center">
+                    <%= title%>
+                </h1>
+            </div>
+        </div>
+</body>
+
+<script>
+    //Identify the toast
+    const toast = document.getElementById('liveToast');
+
+    //Configure the body of the toast
+    $('#liveToast .toast-body').html(
+        `
+            <p>Logging Out... please wait</p>
+
+            <button class="btn btn-primary" type="button" disabled>
+                <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
+                <span role="status">Loading...</span>
+            </button>
+        `
+    );
+
+    //Configure the toast
+    const toastBootstrap = new bootstrap.Toast(toast, {
+        autohide: false
+    });
+
+    //Show the toast
+    toastBootstrap.show();
+
+    //Configure a sleep to reload the actual page
+    setTimeout(() => window.location.href = "/library", 5000)
+</script>
+
+</html>

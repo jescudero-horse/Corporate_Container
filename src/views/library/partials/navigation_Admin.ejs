@@ -1,0 +1,88 @@
+<nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/library/selectCategories">
+            <img src="/assets/library/logo_HORSE.png" alt="Logo" class="navbar-logo">
+            Digital Library
+        </a>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Good practise
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/library/bestPractise_Admin">Best Practise</a></li>
+                        <li><a class="dropdown-item" href="/library/videoStation">Video Station</a></li>
+                        <li><a class="dropdown-item" href="/library/viewAppliedBestPractise">Applied Best Practise</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item" hidden>
+                    <a class="nav-link active" aria-current="page" href="/library/appList_Admin">App List</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/library/dataAnalyseReportsAdmin">Data Analyse
+                        Reports</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Microsoft Apps
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/library/powerApps_admin">PowerApps</a></li>
+                        <li><a class="dropdown-item" href="/library/powerAutomate_Admin">PowerAutomate</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item" hidden>
+                    <a class="nav-link active" aria-current="page" href="/library/3dModels_Admin">3D models</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/library/dataDriven_admin">Data Driven</a>
+                </li>
+
+                <li class="nav-item">
+                    <form id="logoutForm" action="/library/api/logout" method="POST">
+                        <button type="submit" class="nav-link active" aria-current="page">Log out</button>
+                    </form>
+                </li>
+
+                <li class="nav-item" hidden>
+                    <a class="nav-link active" aria-current="page" onclick="openChatBot()">Use the Chatbot <i
+                            class="bi bi-chat-square-dots-fill"></i></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="lottie-container"></div>
+</nav>
+
+<script>
+    //Function to confirm the exit user from the admin mode
+    function confirmLogOut() {
+        if (confirm("Do you want to exit from the admin mode?")) {
+            window.location.href = "/logOut"
+        }
+    }
+
+    //Create an instance of "Horsite"
+    const animation = lottie.loadAnimation({
+        container: document.getElementById('lottie-container'),
+        renderer: 'svg',
+        loop: false,
+        autoplay: false,
+        path: '/animations/library/Asistente.json'
+    });
+
+    /**
+     * Function to open the chat bot in a new tab
+     * */
+    function openChatBot() {
+        window.open('/library/ChatBot', '_blank');
+    }
+</script>

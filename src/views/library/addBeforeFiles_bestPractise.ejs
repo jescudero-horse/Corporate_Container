@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <div id="liveAlertPlaceHolder"></div>
+
+    <div class="adminPanel">
+        <div class="container mt-5">
+            <h1 class="text-center"><%- title%></h1>
+            <form id="uploadFiles" action="/upload-beforeFiles" method="POST" onsubmit="return validateForm(event)"
+                enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="beforeFiles" class="form-label">Before</label>
+                    <input class="form-control" type="file" id="beforeFiles" name="bf" accept=".png, .jpg, .jpeg"
+                        multiple>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Continue</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+<script>
+    /**
+     * Function to validate if the input files has files
+     * */
+    function validateForm(event) {
+        //Identify the place holder for the alerts
+        const alertPlaceHolder = document.getElementById('liveAlertPlaceHolder');
+
+        //Configure the method to configure the alert message
+        const appendAlert = (message, type) => {
+            const wrapper = document.createElement('div')
+            wrapper.innerHTML = [
+                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                `   <div>${message}</div>`,
+                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                '</div>'
+            ].join('')
+
+            alertPlaceHolder.append(wrapper);
+        }
+
+        //Initialize all the inputs files
+        const beforeFiles = document.getElementById('beforeFiles');
+
+        //Check the length of both input files
+        if (beforeFiles.files.length === 0) {
+            //Call the method to display the message alert
+            appendAlert('You have to add before files to complete the best practise source', 'danger')
+
+            //Move the window position view to the top
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+            //Stop propagation
+            event.preventDefault();
+        }
+    }
+</script>
+
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <script src="/script/library/videoStation.js"></script>
+    <script src="/script/library/getUserID.js"></script>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <div id="navigation">
+        <!--INCLUDE THE FILTERS FOR THE BEST PRACTISE-->
+        <%- include('partials/navigation.ejs') %>
+    </div>
+
+    <div id="navigation_admin">
+        <!--INCLUDE THE FILTERS FOR THE BEST PRACTISE - ADMIN MODE-->
+        <%- include('partials/navigation_Admin.ejs') %>
+    </div>
+
+    <div class="container">
+        <!--INCLUDE THE FILTERS FOR THE BEST PRACTISE-->
+        <%- include('partials/filters_bestPractise.ejs') %>
+    </div>
+
+    <div class="container">
+        <br>
+        <!--INCLUDE THE SEARCH BAR FOR THE VIDEO STATION-->
+        <%- include('partials/searchBar_videoStation.ejs') %>
+    </div>
+
+    <input type="text" id="ipn" name="userID" hidden>
+
+    <div class="container mt-3">
+        <div id="videosContainer" class="row">
+
+        </div>
+    </div>
+</body>
+
+<script>
+    //Hide the entities filters
+    document.getElementById('entitiesFilter').setAttribute('hidden', 'false');
+
+    //Hide the categorization filter
+    document.getElementById('categorizationFilter').setAttribute('hidden', 'true');
+</script>
+
+</html>

@@ -1,0 +1,396 @@
+<div class="row mb-3">
+    <div class="col">
+        <div class="mb-3 form-floating">
+            <input type="text" class="form-control" id="title" name="title" placeholder="Title">
+            <label for="title" class="form-label" style="color: #6c757d;">Title</label>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="mb-3 form-floating">
+            <input type="email" class="form-control" id="owner" name="owner" placeholder="Owner">
+            <label for="title" class="form-label" style="color: #6c757d;">Owner</label>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="form-floating">
+            <select class="form-select" id="type" name="type" aria-label="Type">
+                <option value="Canvas">Canvas</option>
+                <option value="Portals">Portals</option>
+                <option value="Model-Driven Apps">Model-Driven Apps</option>
+            </select>
+            <label for="typ" class="form-label" style="color: #6c757d;">Type</label>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description"></textarea>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="mb-3 form-floating">
+        <input type="date" class="form-control" id="created" name="created" placeholder="Created">
+        <label for="created" class="form-label" style="color: #6c757d;">Created</label>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="mb-3 form-floating">
+        <input type="url" class="form-control" id="url" name="url" placeholder="URL to project">
+        <label for="url" class="form-label" style="color: #6c757d;">URL to project</label>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="mb-3 form-floating">
+        <input type="url" class="form-control" id="sharepoint" name="sharepoint" placeholder="SharePoint">
+        <label for="sharePoint" class="form-label" style="color: #6c757d;">SharePoint</label>
+    </div>
+</div>
+
+<div class="mb-3" id="factories_div">
+    <label for="factory" class="form-label">Factory</label>
+    <ul class="list-group" id="factories">
+        <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="HLT" name="HLT" id="HLT">HLT
+        </li>
+
+        <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="Motores" name="motores" id="motores">Motores
+        </li>
+
+        <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="Sevilla" name="sevilla" id="sevilla">Sevilla
+        </li>
+
+        <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="Aveiro" name="aveiro" id="aveiro">Aveiro
+        </li>
+
+        <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="Oyak" name="oyak" id="oyak">Oyak
+        </li>
+
+        <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="Rumania" name="rumania" id="rumania">Rumania
+        </li>
+
+        <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="Curitiba" name="curitiba" id="curitiba">Curitiba
+        </li>
+
+        <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="Los Andes" name="losAndes" id="losAndes">Los
+            Andes
+        </li>
+
+        <li class="list-group-item">
+            <input class="form-check-input me-1" type="checkbox" value="Argentina" name="argentina"
+                id="argentina">Argentina
+        </li>
+    </ul>
+</div>
+
+<div class="form-check form-switch mb-3" id="switchPowerAutomate">
+    <input class="form-check-input" type="checkbox" role="switch" id="powerAutomate" name="powerAutomate">
+    <label class="form-check-label" for="powerAutomate">PowerAutomate</label>
+</div>
+
+<div class="mb-3">
+    <div class="container" id="powerAutomateForm" hidden>
+        <div class="row mb-3">
+            <div class="col">
+                <div class="mb-3 form-floating">
+                    <input type="text" class="form-control" id="flowName" name="flowName" placeholder="Flow name">
+                    <label for="Flow name" class="form-label" style="color: #6c757d;">Flow name</label>
+                </div>
+            </div>
+
+            <div class="col" hidden>
+                <div class="mb-3 form-floating">
+                    <input type="text" class="form-control" id="flowID" name="flowID" placeholder="Flow ID">
+                    <label for="Flow ID" class="form-label" style="color: #6c757d;">Flow ID</label>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="mb-3 form-floating">
+                    <input type="email" class="form-control" id="ownerPowerAutomate" name="ownerPowerAutomate"
+                        placeholder="Owner">
+                    <label for="Owner" class="form-label" style="color: #6c757d;">Owner</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <div class="mb-3">
+                <div class="form-floating">
+                    <select class="form-select" id="state" name="state" aria-label="State">
+                        <option value="Deactivated">Deactivated</option>
+                        <option value="Activated">Activated</option>
+                    </select>
+                    <label for="State" class="form-label" style="color: #6c757d;">State</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="descriptionPowerAutomate" name="descriptionPowerAutomate"></textarea>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <div class="mb-3 form-floating">
+                <input type="url" class="form-control" id="urlPowerAutomate" name="urlPowerAutomate" placeholder="URL">
+                <label for="URL" class="form-label" style="color: #6c757d;">URL</label>
+            </div>
+        </div>
+
+        <button id="addPowerAutomateButton" class="btn btn-outline-info" onclick="addPowerAutomate(event)">Add Power
+            Automate</button>
+
+        <button id="viewPowerAutomateButton" class="btn btn-outline-primary" onclick="viewPowerAutomate(event)">View
+            Power Automate</button>
+    </div>
+</div>
+
+<label for="list" class="form-label">Associated Lists</label>
+
+<div class="input-group mb-3">
+    <input type="url" class="form-control" id="inputURL" name="inputURL">
+
+    <div class="input-group-append">
+        <button class="btn btn-outline-info" id="addButton" type="button" onclick="validateUrl(event)"
+            type="button">Add</button>
+    </div>
+</div>
+
+<br><br>
+
+<div class="col-12">
+    <h4 style="text-align: center;">List URL</h4>
+    <ul class="list-group" id="urlList" name="urlList">
+
+    </ul>
+</div>
+
+<input type="text" id="urlJoined" name="urlJoined" hidden>
+<input type="text" id="factoriesJoined" name="factoriesJoined" hidden>
+<input type="text" id="powerAutomateArray" name="powerAutomateArray" hidden>
+
+<script>
+    //Create an array to store the information of the Power Automate
+    let powerAutomateArray = [];
+
+    //Identify all the neccesary elementos
+    var switchPower = document.getElementById('powerAutomate');
+    var powerAutomateForm = document.getElementById('powerAutomateForm');
+
+    //Apply the funcionality to the swtich
+    switchPower.addEventListener('change', function () {
+        //If the switch is on
+        if (switchPower.checked) {
+            //Display the power automate form
+            powerAutomateForm.removeAttribute('hidden');
+
+            //In other case...
+        } else {
+            //Hide the power automate form
+            powerAutomateForm.setAttribute('hidden', 'true');
+        }
+    });
+
+    /**
+     * Function to add the PowerAutomate into an array
+     * */
+    function addPowerAutomate(event) {
+        //Stop the propagation
+        event.preventDefault();
+
+        //Store the actual values from the power automate form
+        const flowName = document.getElementById('flowName').value,
+            flowId = document.getElementById('flowID').value,
+            owner = document.getElementById('ownerPowerAutomate').value,
+            state = document.getElementById('state').value,
+            descriptionPowerAutomate = document.getElementById('descriptionPowerAutomate').value,
+            urlPowerAutomate = document.getElementById('urlPowerAutomate').value
+
+        //If there is any input that is empty... display a message error
+        if (flowName === '' || owner === '' || state === '' || descriptionPowerAutomate === '' || urlPowerAutomate === '') {
+            console.error("Valores vacios \nFlow name: ", flowName, "\nnOwner: ", owner, "\nDescription: ", descriptionPowerAutomate, "\nURL: ", urlPowerAutomate);
+
+            //In other case...
+        } else {
+            //Create an array with the values of the Power Automate
+            const newPowerAutomate = [
+                flowName,
+                null,
+                owner,
+                state,
+                descriptionPowerAutomate,
+                urlPowerAutomate
+            ];
+
+            //Add the values into the Array
+            powerAutomateArray.push(newPowerAutomate);
+
+            console.log("Array de power automate: ", powerAutomateArray);
+
+            /**Empty the Power Automate form */
+            document.getElementById('flowName').value = '';
+            document.getElementById('flowID').value = '';
+            document.getElementById('ownerPowerAutomate').value = '';
+            document.getElementById('state').value = 'Deactivated';
+            document.getElementById('descriptionPowerAutomate').value = '';
+            document.getElementById('urlPowerAutomate').value = '';
+        }
+    }
+
+    /**
+     * Function to display a modal with the information of the PowerAutomate
+     * */
+    function viewPowerAutomate(event) {
+        //Stop propagation
+        event.preventDefault();
+
+        //Set the title of the modal
+        $('#modal .modal-title').text('View the Power Automate');
+
+        //Set the body of the modal
+        $('#modal .modal-body').html(`
+        <table id="modal-table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Flow name</th>
+                    <th>Owner</th>
+                    <th>State</th>
+                    <th>Description</th>
+                    <th>URL</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    `);
+
+        //Create an instance of the body of the modal
+        let tbody = $('#modal-table tbody');
+
+        //Delete the body of the table modal
+        tbody.empty();
+
+        //Iterate throw the Power Automate
+        powerAutomateArray.forEach((item, index) => {
+            console.log("ITEM: ", item);
+
+            //Create a row with the information
+            let row = `
+            <tr data-index="${index}"> 
+                <td>${item[0]}</td>
+                <td>${item[2]}</td>
+                <td>${item[3]}</td>
+                <td>${item[4]}</td>
+                <td><a href="${item[5]}" target="_blank">${item[5]}</a></td>
+                <td>
+                    <button class="btn btn-warning btn-sm edit-row" data-index="${index}"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-danger btn-sm delete-row" data-index="${index}"><i class="bi bi-trash3"></i></button>
+                </td>
+            </tr>
+        `;
+
+            //Add the row the body table
+            tbody.append(row);
+        });
+
+        //Set the footer of the modal
+        $('#modal .modal-footer').html(``);
+
+        //Apply the funcionality for the edit button
+        $('.edit-row').on('click', function () {
+            //Store the index of the element
+            let index = $(this).data('index');
+
+            //Call the method to open de edit modal
+            openEditModal(index);
+        });
+
+        //Apply the funcionality for the delete button
+        $('.delete-row').on('click', function () {
+            //Obtein the index of the element
+            let index = $(this).data('index');
+
+            //Delelete the element using the index
+            powerAutomateArray.splice(index, 1);
+
+            //Call the method again to render the modal
+            viewPowerAutomate(event);
+        });
+
+        //Display the modal
+        $('#modal').modal('show');
+    }
+
+    function openEditModal(index) {
+        //Obtein the element of the array using the index
+        const selectedItem = powerAutomateArray[index];
+
+        //Configure the title of the edit modal
+        $('#modal .modal-title').text('Edit Power Automate');
+
+        //Configure the body of the edit modal
+        $('#modal .modal-body').html(`
+            <form id="edit-powerAutomate-form">
+                <div class="form-group">
+                    <label for="flowName">Flow Name</label>
+                    <input type="text" class="form-control" id="flowNameEditMode" value="${selectedItem[0]}">
+                </div>
+                <div class="form-group">
+                    <label for="owner">Owner</label>
+                    <input type="email" class="form-control" id="ownerEditMode" value="${selectedItem[2]}">
+                </div>
+                <div class="form-group">
+                    <label for="state">State</label>
+                    <select class="form-control" id="stateEditMode">
+                        <option value="Activated" ${selectedItem[3] == 'Activated' ? 'selected' : ''}>Activated</option>
+                        <option value="Deactivated" ${selectedItem[3] == 'Deactivated' ? 'selected' : ''}>Desactivo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <input type="text" class="form-control" id="descriptionEditMode" value="${selectedItem[4]}">
+                </div>
+                <div class="form-group">
+                    <label for="url">URL</label>
+                    <input type="url" class="form-control" id="urlEditMode" value="${selectedItem[5]}">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        `);
+
+        //Configure the edit event to save the data
+        $('#edit-powerAutomate-form').on('submit', function (e) {
+            e.preventDefault();
+
+            //Update the events to save the elements
+            powerAutomateArray[index][0] = document.getElementById('flowNameEditMode').value || selectedItem[0];
+            powerAutomateArray[index][2] = document.getElementById('ownerEditMode').value || selectedItem[2];
+            powerAutomateArray[index][3] = document.getElementById('stateEditMode').value || selectedItem[3];
+            powerAutomateArray[index][4] = document.getElementById('descriptionEditMode').value || selectedItem[4];
+            powerAutomateArray[index][5] = document.getElementById('urlEditMode').value || selectedItem[5];
+
+            //Close the modal
+            $('#modal').modal('hide');
+            viewPowerAutomate(e);
+        });
+
+        //Display the modal
+        $('#modal').modal('show');
+    }
+
+</script>

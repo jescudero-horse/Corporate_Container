@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+        <script src="/script/library/bestPractise.js"></script>
+        <script src="/script/library/getUserID.js"></script>
+</head>
+
+<body>
+    <div id="liveAlertPlaceHolder"></div>
+    <input type="text" id="numberOfBestPractiase" hidden>
+    <input type="text" id="numberOfBestPractiaseApplied" hidden>
+
+    <!--MODAL-->
+    <%- include('partials/modal.ejs') %>
+
+        <!--INCLUDE THE FILTERS FOR THE BEST PRACTISE-->
+        <%- include('partials/filters_bestPractise.ejs') %>
+
+            <!--TOAST-->
+            <%- include('partials/toast.ejs') %>
+
+                <!--INCLUDE THE NAVIGATION PANEL (ADMIN MODE)-->
+                <%- include('partials/navigation_Admin.ejs') %>
+
+                    <div class="container">
+                        <h1 id="title"><%-title %></h1>
+
+                        <div class="col-md-8">
+                            <a class="btn btn-primary" id="button" href="/library/addBestPractise">
+                                <div class="text">Add information <i class="bi bi-plus-circle"></i></div>
+                            </a>
+
+                            <button id="filterButton" class=" btn btn-primary" type="button" data-bs-toggle="offcanvas"
+                                data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+                                Filters <i class="bi bi-funnel"></i>
+                            </button>
+
+                            <a id="buttonViewAppliedBestPractise" class="btn btn-success"
+                                href="/library/viewAppliedBestPractise">
+                                <div class="text">View the applied best practise <i class="bi bi-check-circle"></i>
+                                </div>
+                            </a>
+
+                            <button id="generateReportButton" type="button" class="btn btn-info"
+                                onclick="displayGenerateReportModal()">Generate report <i
+                                    class="bi bi-file-earmark-bar-graph-fill"></i></button>
+                        </div>
+
+                        <br>
+
+                        <!--SEARCH BAR COMPONENT-->
+                        <%- include('partials/searchBar.ejs') %>
+                            <br>
+
+                            <input type="text" id="ipn" hidden>
+
+                            <!--CONTENEDOR DE LAS TARJETAS-->
+                            <%- include('partials/dataTableBestPractise.ejs') %>
+
+                                <!--FOOTER-->
+                                <%- include('partials/footer.ejs') %>
+                    </div>
+</body>
+
+<script>
+    const tourSteps = [
+        {
+            element: "#title",
+            popover: {
+                title: "The Best Practise",
+                description: "Within this category, you will be able to view information about best practices from other factories.",
+                position: "auto"
+            }
+        },
+        {
+            element: '#searchBar_bestPractise',
+            popover: {
+                title: "Search bar",
+                description: "You can use the search bar to look for a best practice, as well as filter the best practices created by email or IPN.",
+                position: "auto"
+            },
+            onNext: () => {
+                //Creamos una instancia del botón de los filtros
+                const filterButton = document.querySelector('#filterButton');
+                console.log("Botón de filtro encontrado: ", filterButton);
+
+                //En caso de que exista el botón de filtro, hacemos clic en él
+                if (filterButton) {
+                    console.log("Haciendo clic en el botón de filtros");
+                    filterButton.click();
+                }
+
+                //Añadimos un timeOut
+                setTimeout(() => {
+                    const filterPanel = document.querySelector('#offcanvasExample');
+                    console.log("Estado actual del panel de filtros: ", filterPanel.style.display);
+                    
+                    //En caso de que el panel este oculto
+                    if (filterPanel && filterPanel.style.display === 'none') {
+                        //Mostramos el panel
+                        filterPanel.style.display = 'block'; 
+                        console.log("Panel de filtros mostrado.");
+                    }
+                }, 500);
+            }
+        },
+        {
+            element: '#filterButton',
+            popover: {
+                title: "Filter",
+                description: "By clicking on this button, you can filter the best practices by factory, category, tags, and more.",
+                position: "auto"
+            }
+        },
+        {
+            element: '#labelFactories',
+            popover: {
+                title: 'Factory filters',
+                description: "Within this container are the different factories by which you can filter the best practices. You should select one or more factories by which you want to filter.",
+                position: "auto"
+            }
+        },
+        {
+            element: '#categorizationLabel',
+            popover: {
+                title: "Categorization filter",
+                description: "Here you can filter the best practices by 'Good idea', 'Best practice', and/or 'Techno brick'.",
+                position: "auto"
+            }
+        },
+        {
+            element: '#categories_Label',
+            popover: {
+                title: "Categories filter",
+                description: "Here you can filter best practices by the categories they are associated with. Multiple categories can be selected.",
+                position: "auto"
+            }
+        },
+        {
+            element: "#applyFilters",
+            popover: {
+                title: "Apply filters",
+                description: "Once you have selected all the desired filters, you need to click on the apply filters button (green button).",
+                position: "auto"
+            }
+        },
+        {
+            element: '#clearFiltersButton',
+            popover: {
+                title: "Clear filters",
+                description: "By clicking on this button (red), all filters will be cleared and the page will be reloaded.",
+                position: "auto"
+            },
+            onNext: () => {
+                //Ocultamos el panel de filtros después de hacer clic en "Limpiar filtros"
+                const closeButton = document.querySelector('#cerrarPanelFiltros');
+                if (closeButton) {
+                    closeButton.click();
+                    console.log("Panel de filtros cerrado.");
+                }
+
+                setTimeout(() => {
+                    console.log("Esperando un momento...");
+                }, 5000);
+            }
+        },
+        {
+            element: '#buttonViewAppliedBestPractise',
+            popover: {
+                title: 'View the applied best practise',
+                description: "By clicking this button, you will find the best practices that users have applied to their respective factories.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: '#generateReportButton',
+            popover: {
+                title: 'Generate report',
+                description: "By clicking on this, a new window will open where you can view charts for each factory and categorization... You’ll be able to see where the best practices originated, which have been applied, and which have not.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: '#cardContainer',
+            popover: {
+                title: "Best practise container",
+                description: "Here you can view the best practices in the form of cards. Each card contains a main image, the title of the best practice, the email of the creator of the best practice record, and a button to view more detailed information.",
+                position: "top"
+            }
+        }
+    ];
+</script>
+</html>

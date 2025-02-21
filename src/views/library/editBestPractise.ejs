@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <script src="/script/library/editBestPractise.js"></script>
+    <script src="/script/library/getUserID.js"></script>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <!--MODALS-->
+    <%- include('partials/modal.ejs') %>
+
+        <div id="liveAlertPlaceHolder"></div>
+
+        <input type="text" id="ipn" name="ipn" hidden>
+
+        <div class="adminPanel">
+            <div class="container mt-5">
+                <h1 class="text-center"><%- title%></h1>
+                <input type="text" id="hiddenCategory" name="hiddenCategory" hidden>
+
+                <form id="editBestPractise" autocomplete="off" onsubmit="return validateForm(event)">
+
+                    <!--INCLUDE THE BEST PRACTISE FORM-->
+                    <%- include('partials/bestPractise_form.ejs') %>
+
+                        <input type="text" id="idBestPractise" name="idBestPractise" hidden>
+
+                        <button id="continueButtonForm" class="btn btn-primary">Continue</button>
+                </form>
+            </div>
+
+            <div class="container mt-5">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div id="beforeImagesDiv">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3>Before Images List</h3>
+                                <button id="addBeforeFile" class="btn btn-primary btn-sm" onclick="addFileModal(1)">
+                                    <i class="bi bi-plus-circle-fill"></i>
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">File Name</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="beforeList"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div id="afterImagesDiv">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3>After Images List</h3>
+                                <button id="addAfterFile" class="btn btn-primary btn-sm" onclick="addFileModal(0)">
+                                    <i class="bi bi-plus-circle-fill"></i>
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">File Name</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="afterList"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div id="otherFilesDiv">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3>Other Files List</h3>
+                                <button id="addOtherFile" class="btn btn-primary btn-sm" onclick="addFileModal(null)">
+                                    <i class="bi bi-plus-circle-fill"></i>
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">File Name</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="otherFilesList"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div id="mainImageDiv">
+                            <div clamainIss="d-flex justify-content-between align-items-center mb-4">
+                                <h3>Main Image</h3>
+                                <button id="addMainImage" class="btn btn-primary btn-sm" onclick="addFileModal(3)">
+                                    <i class="bi bi-plus-circle-fill"></i>
+                                </button>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-striped">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">File Name</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="mainImageList"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</body>
+
+<script>
+    //Disable the factory input
+    document.getElementById('factory').setAttribute('disabled', 'false');
+
+    function validateForm(event) {
+        //Identify the place holder for the alerts
+        const alertPlaceHolder = document.getElementById('liveAlertPlaceHolder');
+
+        //Configure the method to configure the alert message
+        const appendAlert = (message, type) => {
+            const wrapper = document.createElement('div')
+            wrapper.innerHTML = [
+                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                `   <div>${message}</div>`,
+                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                '</div>'
+            ].join('')
+
+            alertPlaceHolder.append(wrapper);
+        }
+
+        //Identify all the elements
+        var title = document.getElementById('title').value;
+        var factory = document.getElementById('factory').value;
+        var metier = document.getElementById('metier').value;
+        var line = document.getElementById('line').value;
+        var technology = document.getElementById('technology').value;
+        var keywords = document.getElementById('tags-input').value;
+        const owner = document.getElementById('owner').value;
+        const checkboxes = document.querySelectorAll('input[name="category"]');
+        var isChecked = false;
+
+        //Iterate throw the checkbox
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                isChecked = true;
+            }
+        });
+
+        //Check if the information is in the form
+        if (title === '' || factory === '' || metier === '' || line === '' || technology === '' || keywords === '' || owner === '' || isChecked === false) {
+            //Call the method to display the message alert
+            appendAlert('You have to insert all the neccesary information', 'danger');
+
+            //Move the window position view to the top
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+            event.preventDefault();
+        } else {
+            event.preventDefault();
+
+            const selectedCategories = document.querySelectorAll('input[type="checkbox"][name="category"]:checked');
+
+            const selectedValues = Array.from(selectedCategories).map(checkbox => checkbox.value);
+
+            const selectedString = selectedValues.join(';');
+
+            document.getElementById('hiddenCategory').value = selectedString;
+
+            //Use fetch() to call the end point to update the information of the best practise
+            fetch(`/library/api/update-data-bestPractise/${document.getElementById('idBestPractise').value}/${document.getElementById('title').value}/${document.getElementById('factory').value}/${document.getElementById('metier').value}/${document.getElementById('line').value}/${document.getElementById('technology').value}/${document.getElementById('hiddenCategory').value}/${document.getElementById('tags-input').value}/${document.getElementById('categorization').value}/${document.getElementById('owner').value}`, {
+                method: "POST"
+            })
+                //Control the response
+                .then(response => {
+                    if (!response.ok) {
+                        console.error("Error a la hora de actualizar la información de la buena práctica");
+                    } else {
+                        //Call the method to display the alert
+                        deleteElement("Successfully updated best practice");
+                    }
+                });
+        }
+    }
+</script>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <!--INCLUDE HEAD-->
+    <%- include('partials/head.ejs') %>
+        <script src="/script/library/powerApps.js"></script>
+        <script src="/script/library/getUserID.js"></script>
+        <script src="/script/library/information.js"></script>
+</head>
+
+<body>
+    <!-- MAIN MODAL -->
+    <%- include('partials/modal.ejs') %>
+
+        <!-- TOAST -->
+        <%- include('partials/toast.ejs') %>
+
+            <!--NAVIGATION PANEL (ADMIN MODE)-->
+            <%- include('partials/navigation_Admin.ejs') %>
+
+                <div class="container">
+                    <h1 id="titleCategory"><%-title %></h1>
+
+                    <!--INCLUDE THE MODAL-->
+                    <%- include('partials/modal.ejs') %>
+
+                        <input type="text" id="ipn" hidden>
+
+                        <div class="col-md-8">
+                            <a class="btn btn-primary" id="button" , href="/library/addPowerAppAdmin">
+                                <div class="text">Add information <i class="bi bi-plus-circle"></i></div>
+                            </a>
+
+                            <button id="filterButton" class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
+                                data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+                                Filters <i class="bi bi-funnel"></i>
+                            </button>
+
+                            <button id="viewReport" class="btn btn-light"
+                                onclick="openLink('https://abire7-m4.intra.renault.fr:8443/spotfire/wp/OpenAnalysis?file=/JMM/OPE/INFORMATION_MODEL/INFORMATION_LINKS/corporate_central/Report_digital_library')">View
+                                SpotFire report</button>
+
+                            <div class="btn-group" role="group">
+                                <div class="dropdown" id="tableOptions">
+                                    <button class="btn btn-secondary dropdown-toggle" data-bs-auto-close="outside"
+                                        type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Table options
+                                    </button>
+
+                                    <ul class="dropdown-menu" id="dropdown">
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <!--POWERAPPS FILTERS-->
+                        <%- include('partials/filters_powerApps.ejs') %>
+
+                            <!--DATATABLE POWER APPS-->
+                            <%- include('partials/dataTablePowerApps.ejs') %>
+                </div>
+
+                <!--FOOTER-->
+                <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    //Create a variable to store the ID of the powerApp
+    let idPowerApp;
+
+    //Store in a variable the modal
+    const modal = document.getElementById('modal');
+
+    //Create a method when the modal we will open
+    modal.addEventListener('shown.bs.modal', function () {
+        //Use fetch() to make the request to select all the associated sites using the powerApp ID
+        fetch(`/library/api/getAssociatedSites/${idPowerApp}`, {
+            method: 'GET'
+        })
+            //Control the response
+            .then(response => {
+                //If response is not ok
+                if (!response.ok) {
+                    console.error('No se han podido obtener los datos de los sitios asociados');
+                }
+
+                //Return the data
+                return response.json();
+            })
+
+            //Control the data
+            .then(data => {
+                //Create a variable to instance the URL list 
+                var ul = document.querySelector('#urlList');
+
+                //Iterate throw the elements data to display it into the URL list
+                data.forEach(item => {
+                    //Create a LI element
+                    var li = document.createElement('li');
+
+                    //Set the class of the LI element
+                    li.className = 'list-group-item';
+
+                    //Set the URL into the LI element
+                    li.textContent = item.urlSite;
+
+                    //Add an event listener to each LI elements of the URL list
+                    li.addEventListener('click', function () {
+                        //Store the URL into a variable
+                        var url = item.urlSite;
+
+                        //Check if the URL doesnt beggin with https://
+                        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                            url = 'http://' + url;
+                        }
+
+                        //Open the URL in another tab
+                        window.open(url, '_blank');
+                    })
+
+                    //Display the LI element into the URL list
+                    ul.appendChild(li);
+                });
+            });
+
+        //Use fetch() to make the request to select all the factories sites using the powerApp ID
+        fetch(`/library/api/getFactories/${idPowerApp}`, {
+            method: 'GET'
+        })
+            //Control the response
+            .then(response => {
+                //If the response is not ok
+                if (!response.ok) {
+                    console.error('No se han podido obtener los datos de las factories');
+                }
+
+                //Return de data
+                return response.json();
+            })
+
+            //Control the data
+            .then(data => {
+                //Create a variable to instance the factories list
+                var ul = document.querySelector('#factoriesList');
+
+                //Iterate throw the data to display the information into the list
+                data.forEach(item => {
+                    //Create a li element
+                    var li = document.createElement('li');
+
+                    //Set the class to the LI element
+                    li.className = 'list-group-item';
+
+                    //Set the factory to the LI elemet
+                    li.textContent = item.factory;
+
+                    //Display the LI elemento into the factories list
+                    ul.appendChild(li);
+                });
+            })
+
+        //Use fetch() to make the request to select all the factories sites using the powerApp ID
+        fetch(`/library/api/getPowerAutomate_PowerApp/${idPowerApp}`, {
+            method: 'GET'
+        })
+            //Control the response
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error fetching data');
+                }
+
+                return response.json();
+            })
+
+            //Control the data
+            .then(data => {
+                console.log("Datos obtenidos: ", data.length);
+
+                //If there have power automate...
+                if (data.length !== 0) {
+                    //Create an instance of the body of the table
+                    let tbody = $('#modal-table-powerAutomate tbody');
+
+                    //Empty the body of the table
+                    tbody.empty();
+
+                    //Iterate throw the data
+                    data.forEach(item => {
+                        console.log("Item: ", item);
+                        //Create a row with the Power Automate information
+                        let row = `
+                            <tr>
+                                <td>${item.flowName}</td>  <!-- Flow name -->
+                                <td>${item.owner}</td>  <!-- Owner -->
+                                <td>${item.state}</td>  <!-- State -->
+                                <td>${item.description}</td>  <!-- Description -->
+                                <td><a href="${item.url}" target="_blank">${item.url}</a></td>  <!-- URL -->
+                            </tr>
+                        `;
+
+                        //Add the row into the table
+                        tbody.append(row);
+                    });
+
+                    //In other case...
+                } else {
+                    //Hide the title of the Power Automate
+                    document.getElementById('titlePowerAutomate').setAttribute('hidden', 'true');
+
+                    //Hide the table of the Power Automate
+                    document.getElementById('modal-table-powerAutomate').setAttribute('hidden', 'true');
+                }
+            })
+    });
+
+    //Initialize the dataTable
+    $(document).ready(function () {
+        //Store in  variable de dataTable component
+        var table = $('#dataTable').DataTable({
+            columnDefs: [
+                { targets: 0, visible: false },
+                { targets: 8, visible: false },
+                { targets: 10, visible: false }
+            ],
+
+            //Configure the buttons to export the datatable 
+            buttons: [
+                //Configurate the copy button
+                {
+                    extend: 'copy',
+                    text: 'Copy to clipboard <i class="bi bi-clipboard2-data-fill"></i>',
+                    className: 'dropdown-item',
+                    exportOptions: {
+                        modifier: {
+                            selected: true
+                        }
+                    }
+                },
+
+                //Configurate the excel export button
+                {
+                    extend: 'excel',
+                    text: 'Export to Excel file <i class="bi bi-filetype-xlsx"></i>',
+                    className: 'dropdown-item',
+                    exportOptions: {
+                        modifier: {
+                            selected: true,
+                        }
+                    }
+                },
+
+                //Configurate the hide/show button
+                {
+                    extend: 'colvis',
+                    text: 'Show/Hide columns <i class="bi bi-eye"></i>',
+                    className: 'dropdown-item'
+                },
+
+                //Configure the personal PowerApps source
+                {
+                    text: 'View the personal list <i class="bi bi-list-ol"></i>',
+                    className: 'dropdown-item',
+                    action: function (e, dt, node, config) {
+                        //Store the IPN of the user
+                        const ipn = document.getElementById('ipn').value;
+
+                        //Filter the dataTable using the userID column and the value of the ipn hidden input
+                        $('#dataTable').DataTable().column(10).search(ipn).draw();
+
+                        //Identify the toast
+                        const toast = document.getElementById('liveToast');
+
+                        //Add the message and the  button to the body of the toast
+                        $('#liveToast .toast-body').html(
+                            `
+                                <p>If you want to return to the normal list, make a clic on the "Return to normal list"<p>
+                                <button onclick="returnNormalList(10)" type="button" class="btn btn-primary btn-sm">Return to normal list</button>
+                            `
+                        );
+
+                        //Configure the header of the toast
+                        $('#liveToast .toast-header').html(
+                            `
+                                <img src="/assets/library/HORSE_FAVICON.ico" class="rounded me-2" style="width: 50px; height: 50px;">
+                                <strong class="me-auto">Digital Library</strong>
+                            `
+                        )
+
+                        //Configure the toast
+                        const toastBootstrap = new bootstrap.Toast(toast, {
+                            autohide: false
+                        });
+
+                        //Show the toast
+                        toastBootstrap.show();
+                    }
+                }
+            ]
+        });
+
+        //Add the buttons to the dropdown
+        $('#dropdown').append(table.buttons().container());
+
+        //Appy the funcionability to the row of the dataTable
+        $('#dataTable tbody').on('click', 'tr', function () {
+            //Store the row information into a variable
+            var rowData = table.row(this).data();
+
+            //Create an array to store the index wich we want to show the modal
+            const columnIndex = [0, 1, 2, 3, 4]
+
+            //Store the index of the actual column
+            var clickedColumnIndex = $(event.target).closest('td').index();
+
+            //Store the ID of the powerApp
+            idPowerApp = rowData[0];
+
+            //Configure the title of the modal
+            $('#modal .modal-title').text('Row Details: ' + rowData[1]);
+
+            //Check if the actual index of the column is in the array with the available index
+            if (columnIndex.includes(clickedColumnIndex)) {
+                //Configure the body of the modal
+                $('#modal .modal-body').html(`
+                        <table id="modal-table" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Owner</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Created</th>
+                                <th>URL</th>
+                                <th>SharePoint</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <th>` + rowData[1] + `</th>
+                                <th>` + rowData[2] + `</th>
+                                <th>` + rowData[3] + `</th>
+                                <th>` + rowData[4] + `</th>
+                                <th>` + rowData[5] + `</th>
+                                <th>` + rowData[6] + `</th>
+                                <th>` + rowData[7] + `</th>
+                            </tr>
+                            
+                            </tbody>
+                        </table>
+
+                        <div class="col-12">
+                        <h4 style="text-align: center;">Associated Sites</h4>
+                        <ul class="list-group" id="urlList" name="urlList">
+
+                        </ul>
+
+                        <br>
+
+                        <h4 style="text-align: center;">Factories</h4>
+                        <ul class="list-group" id="factoriesList" name="factoriesList">
+
+                        </ul>
+
+                        <br>
+
+                        <h4 style="text-align: center;" id="titlePowerAutomate">Power Automate</h4>                        
+                        <table id="modal-table-powerAutomate" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Flow name</th>
+                                    <th>Owner</th>
+                                    <th>State</th>
+                                    <th>Description</th>
+                                    <th>URL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                `);
+
+                //Store the IPN of the user
+                const ipn = document.getElementById('ipn').value;
+
+                //Check if the IPN of the actual user is the creator of the PowerApp
+                if (ipn === rowData[10]) {
+                    //Add the neccesary buttons
+                    $('#modal .modal-footer').html(
+                        `
+                            <button type="button" class="btn btn-outline-danger" data-bs-target="#modalConfirmDelete"
+                                data-bs-toggle="modal" id="deleteButtonMainModal"><i class="bi bi-trash-fill"></i> Delete</button>
+                            <button type="button" class="btn btn-primary" id="updateRow"><i class="bi bi-pencil-square"></i> Update</button>                                              
+                        `
+                    );
+
+                    //Apply the funcionability to the update button of the modal
+                    $('#updateRow').on('click', function () {
+                        /** Create an instance of the buttons to extract the URL */
+                        const buttonProject = document.querySelector('.url-to-project');
+                        const buttonSharepoint = document.querySelector('.url-sharepoint');
+
+                        /** Store the UURL for each button */
+                        const urlProject = obtainURL(buttonProject);
+                        const urlSharepoint = obtainURL(buttonSharepoint);
+
+                        /** Assign the URLs to echa position */
+                        rowData[6] = urlProject;
+                        rowData[7] = urlSharepoint;
+
+                        //Convert the row information into JSON 
+                        const rowDataJson = encodeURIComponent(JSON.stringify(rowData));
+
+                        //Redirect to the page to upload the data source and we send the data source information in the URL
+                        window.location.href = `/library/editPowerApp?data=${rowDataJson}`;
+                    });
+
+                    //Only add the close button
+                } else {
+                    $('#modal .modal-footer').html(
+                        `
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        `
+                    );
+                }
+
+                //Show the modal
+                $('#modal').modal('show');
+
+                //Apply the funcionability to the update button of the modal
+                $('#updateRow').on('click', function () {
+                    //Convert the row information into JSON 
+                    const rowDataJson = encodeURIComponent(JSON.stringify(rowData));
+
+                    //Redirect to the page to upload the data source and we send the data source information in the URL
+                    window.location.href = `/library/editPowerApp?data=${rowDataJson}`;
+                })
+            }
+
+            //Configure the title of the confirm delete modal
+            $('#modalConfirmDelete .modal-title').text('Do you want to delete this source?');
+
+            //Configure the body of the delete modal
+            $('#modalConfirmDelete .modal-body').text(rowData[1]);
+
+            //Configure the funcionability to the confirm button of the delete modal of the data source
+            $('#deleteRow').on('click', function () {
+                //Calle the method to delete the data source using the ID and the name of the table
+                fetch(`/library/api/delete-row/${rowData[0]}/${"powerApps"}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error deleting the record');
+                        }
+
+                        //Hide the delete modal
+                        $('#modalConfirmDelete').modal('hide');
+
+                        //Call the method to display the delete alert
+                        deleteElement("Item successfully deleted. Reloading page");
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+    });
+
+    /**
+     * Function to obtein the URL from a button
+     * */
+    function obtainURL(button) {
+        //Store the onClick attribute of the button
+        const onclickAttribute = button.getAttribute('onclick');
+
+        //Create a variable to store the URL
+        let url;
+
+        //If the button has the onClick attribute...
+        if (onclickAttribute) {
+            /** Store the URL */
+            const urlStartIndex = onclickAttribute.indexOf("'") + 1;
+            const urlEndIndex = onclickAttribute.lastIndexOf("'");
+            url = onclickAttribute.substring(urlStartIndex, urlEndIndex);
+
+            //In other case...
+        } else {
+            console.log("El botón no tiene el atributo onclick");
+        }
+
+        return url;
+    }
+
+    //Configre the array with the information
+    const tourSteps = [
+    {
+            element: '#titleCategory',
+            popover: {
+                title: 'PowerApps',
+                description: "Within this category, you can add new PowerApps, consult other Apps from other people, as well as delete and update the information of your own reports... In case you want to use a PowerApp created by someone else, you should get in touch with them to obtain the necessary permissions.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: '#button',
+            popover: {
+                title: 'Add information',
+                description: "By clicking this button, you can add your own PowerApp by completing a form.",
+                position: 'right'
+            }
+        },
+        {
+            element: '#filterButton',
+            popover: {
+                title: 'Filters',
+                description: 'If you press this button, you can display a menu where you can make use of the available filters',
+                position: 'right'
+            }
+        },
+        {
+            element: '#viewReport',
+            popover: {
+                title: 'View report',
+                description: "By clicking this button, you will be able to view a report of the available information… you will need to log in with your ARCA credentials.",
+                position: 'bottom',
+            },
+        },
+        {
+            element: '#tableOptions',
+            popover: {
+                title: 'View report',
+                description: "By clicking this button, a menu will appear where you can export the information of the PowerApps into an Excel file, hide or show columns, as well as view your personal list of PowerApps that you have contributed to in the personal PowerApps library.",
+                position: 'bottom',
+            },
+        },
+        {
+            element: "#dt-search-0",
+            popover: {
+                title: 'Search bar',
+                description: 'By using the search bar, you can filter through all the elements of the table...',
+                position: 'left'
+            }
+        },
+        {
+            element: "#dt-length-0",
+            popover: {
+                title: 'Entries per page',
+                description: "Here you can set the number of entries you want to display in the table.",
+                position: 'right'
+            }
+        }
+    ];
+</script>
+
+</html>

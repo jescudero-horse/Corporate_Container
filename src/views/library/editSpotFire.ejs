@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <%- include('partials/head.ejs') %>
+        <script src="/script/library/editSpotFire.js"></script>
+</head>
+
+<body>
+    <div id="liveAlertPlaceHolder"></div>
+
+    <div class="adminPanel">
+        <div class="container mt-5">
+            <h1 class="text-center"><%- title%></h1>
+            <form id="addAppForm" action="/library/api/updateSpotfire" method="POST" onsubmit="return validateForm(event)"
+                autocomplete="off">
+                <!--SPOTFIRE FORM-->
+                <%- include('partials/spotFire_form.ejs') %>
+
+                    <button type="submit" class="btn btn-primary">Continue</button>
+            </form>
+        </div>
+    </div>
+
+    <!--FOOTER-->
+    <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    /**
+     * Function to validate the form to avoid empty elements
+     * */
+    function validateForm(event) {
+        //Identify the place holder for the alers
+        const alertPlaceHolder = document.getElementById('liveAlertPlaceHolder');
+
+        //Configure the method to configure the alert message
+        const appendAlert = (message, type) => {
+            const wrapper = document.createElement('div')
+            wrapper.innerHTML = [
+                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                `   <div>${message}</div>`,
+                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                '</div>'
+            ].join('')
+
+            alertPlaceHolder.append(wrapper);
+        }
+
+        //Identify all the necesary elements
+        var title = document.getElementById("title").value;
+        var dataSource = document.getElementById('dataSource').value;
+
+        //Verify if one of the parent checbox are checked
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        var h4CheckboxesChecked = false;
+
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.parentNode.tagName.toLowerCase() === 'h4') {
+                h4CheckboxesChecked = true;
+            }
+        });
+
+        //Check if the parent checkbox are checked
+        if (!h4CheckboxesChecked) {
+            //Call the method to display the message alert
+            appendAlert('You have to select one checkbox of function', 'danger');
+
+            //Move the window position view to the top
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            })
+
+            event.preventDefault();
+        } else if (title === "" || dataSource == "") {
+            //Call the method to display the message alert
+            appendAlert('You have to insert a title and the data source for the new Data Analysse source', 'danger');
+
+            //Move the window position view to the top
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            })
+
+            event.preventDefault();
+        }
+    }
+</script>
+
+</html>

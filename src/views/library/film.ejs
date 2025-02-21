@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Film</title>
+    <script src="/script/library/film.js"></script>
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <%- include('partials/modal.ejs') %>
+
+        <div class="container">
+            <h1>Film de fabricación</h1>
+
+            <button class="btn btn-primary" id="botonBuscador" onclick="buscador()">Short time</button>
+
+            <button class="btn btn-outline-primary" id="botonShortTime" onclick="foreCast()">Forecast</button>
+
+            <button class="btn btn-info" id="selectorEtapa" onclick="selectorEtapas()">Selector de etapas</button>
+        </div>
+
+        <div class="list" id="list">
+            <div class="table-responsive">
+                <table id="dataTable" class="table table-light table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">OF</th>
+                            <th scope="col">OF acabado</th>
+                            <th scope="col">Referencia SIMPECA</th>
+                            <th scope="col">Referencia componente</th>
+                            <th scope="col">Coeficiente de montaje</th>
+                            <th scope="col">Piezas por UM</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="body"></tbody>
+                </table>
+            </div>
+        </div>
+</body>
+
+<script>
+    //Create variables to store the category, the "F" and the coefficient
+    let categoriaSeleccionada = "", operacionSeleccionada = "", coefficient = "";
+
+    /**
+     * Function to configure the stage from
+     * */
+    function selectorEtapas() {
+        //Configure the title of the modal
+        $('#modal .modal-title').text('Selecciona una etapa');
+
+        //Configure the body of the modal
+        $('#modal .modal-body').html(`
+            <div class="mb-3 form-floating">
+                <input type="text" class="form-control" id="reference" name="refence" placeholder="Reference">
+                <label for="title" class="form-label" style="color: #6c757d;">Referencia</label>
+            </div>
+
+            <div class="form-floating">
+                    <select class="form-select" id="categoria" name="categoria" aria-label="Categoria">
+                        <option value="unloading_loading">UNLOADING/LOADING</option>
+                        <option value="shopping">SHOPPING</option>
+                        <option value="preparation">PREPARATION</option>
+                        <option value="distribution">DISTRIBUTION</option>
+                        <option value="miscellaneous">MISCELLANEOUS</option>
+                        <option value="management_of_void_and_waste">MANAGEMENT OF VOID AND WASTE</option>
+                    </select>
+                    <label for="Categoria" class="form-label" style="color: #6c757d;">Categoria</label>
+                </div>
+            </div><br>
+
+            <div class="form-floating">
+                <select class="form-select" id="operacion" aria-label="Operación">
+                    
+                </select>
+                <label for="operacion">Operación</label>
+            </div>
+        `);
+
+        //Create an array with the information of the stages
+        const operaciones = {
+            unloading_loading: [
+                { value: "F2", text: "Unloading at the quay" },
+                { value: "F4", text: "Maritime unloading at the quay" },
+                { value: "F5", text: "Unloading on a flat area" },
+                { value: "F6", text: "Spreading (unstacking) of UMs" },
+                { value: "F7", text: "Control / validation of reception" },
+                { value: "F8", text: "Relabeling of UMs" },
+                { value: "F9", text: "CKD packaging bursting" },
+                { value: "F29", text: "Loading empty packaging" },
+                { value: "F45", text: "Truck image preparation before loading" },
+                { value: "F46", text: "Loading for shipment" }
+            ]
+        }
+
+        //Apply the funcionality for the operation dropdown
+        $('#categoria').on('change', function () {
+            //Store the category selected
+            categoriaSeleccionada = $(this).val();
+
+            //Create an instance of the dropdown
+            const operacionesDropdown = $('#operacion');
+
+            //Assign the coefficient
+            coefficient = document.getElementById('reference').value;
+
+            console.log("COEFFICIENT: ", coefficient);
+
+            console.log("> Operacion seleccionada: ", categoriaSeleccionada)
+
+            //Clean the options
+            operacionesDropdown.empty();
+
+            //Check if the categories match
+            if (categoriaSeleccionada) {
+                operaciones[categoriaSeleccionada].forEach(function (op) {
+                    operacionesDropdown.append(`<option value="${op.value}">${op.text}</option>`);
+                });
+
+            } else {
+                operacionesDropdown.append('<option value="">Seleccione una operación</option>');
+            }
+        });
+
+        //Apply the funcionality for the operation
+        $('#operacion').on('change', function () {
+            //Store the operation name
+            operacionSeleccionada = $(this).val();
+            console.log("> Operación seleccionada: ", operacionSeleccionada);
+        });
+
+        //Configure the footer of the modal
+        $('#modal .modal-footer').html(`
+            <button class="btn btn-primary" id="cargarEtapa">Aceptar</button>
+        `);
+
+        //Apply the funcionality for the footer button
+        $('#cargarEtapa').on('click', function () {
+            //Use fetch to retrieve the information from the ""
+            fetch(`/library/api/getEN_IFM/${operacionSeleccionada}`, {
+                method: "GET"
+            })
+
+                //Control the response
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error fetching data');
+                    }
+
+                    return response.json();
+                })
+
+                //Control the data
+                .then(data => {
+                    //Create ther variables to store the information
+                    let comment, distance_empty_zone, id, loading_type, engins, number_of_packages_loaded_at_once, engines, code_mtm3, correspondence, speed;
+
+                    //Iterate throw the data to store the information
+                    data.forEach(item => {
+                        console.log("ITEM: ", item);
+                        comment = item.comments,
+                            distance_empty_zone = item.distance_empty_zone,
+                            id = item.id,
+                            loading_type = item.loading_type,
+                            engins = item.engins,
+                            number_of_packages_loaded_at_once = item.number_of_packages_loaded_at_once,
+                            code_mtm3 = item.code_MTM3,
+                            correspondence = item.correspondance;
+                        speed = item.speed;
+                    });
+
+                    //Hide the main modal
+                    $('#modal').modal('hide');
+
+                    //Configure the title of the modal informatiomn 
+                    $('#modalInformation .modal-title').text(categoriaSeleccionada, ":");
+
+                    //Configure the body of the modal information with the F29 standard information
+                    $('#modalInformation .modal-body').html(`
+                        <div class="container">
+                            <h4>Comments</h4>
+                                <div class="input-group">
+                                    <textarea id="comment_input" name="comment_input" class="form-control" disabled></textarea>
+                                </div>
+                                <br><hr>
+
+                            <h4>Settings</h4>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon1">Distance empty zone</span>
+                                    <input type="number" id="distance_empty_zone_input" name="distance_empty_zone_input" class="form-control" placeholder="Distance empty zone" aria-label="Distance empty zone" aria-describedby="basic-addon1">
+                                </div>
+
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon1">Number of packages loaded at once (stack)</span>
+                                    <input type="number" id="number_packages_at_once_input" name="number_packages_at_once_input" class="form-control" placeholder="Number of packages loaded at once (stack)" aria-label="Number of packages loaded at once (stack)" aria-describedby="basic-addon1">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="exampleSelect" class="form-label">Loading type</label>
+                                    <select class="form-select" id="loading_type_input" name="loading_type_input">
+                                        <option value="At the quay">At the quay</option>
+                                        <option value="Air plane">Air plane</option>
+                                    </select>
+                                </div>
+
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon1">Number of UC per pallet</span>
+                                    <input type="number" id="number_of_uc_per_pallet" name="nunber_of_uc_per_pallet" class="form-control" placeholder="Number of UC per pallet" aria-label="Number of UC per pallet" aria-describedby="basic-addon1" disabled>
+                                </div>
+                                <br><hr>
+
+                            <h4>Handling conditions</h4>
+                                <div class="mb-3">
+                                    <label for="machine used" class="form-label">Machine used</label>
+                                    <select class="form-select" id="machine_used_input" name="machine_used_input">
+                                        <option value="Accompanied electric pallet truck">Accompanied electric pallet truck</option>
+                                        <option value="Electric pallet truck with seated driver">Electric pallet truck with seated driver</option>
+                                        <option value="Electric pallet truck with accompanying stacker">Electric pallet truck with accompanying stacker</option>
+                                        <option value="Electric front stacker">Electric front stacker</option>
+                                        <option value="Electric stacker with retractable mast">Electric stacker with retractable mast</option>
+                                        <option value="Thermal front stacker">Thermal front stacker</option>
+                                        <option value="Electric tractor 200 to 500 daN">Electric tractor 200 to 500 daN</option>
+                                        <option value="Electric tractor 1500 daN">Electric tractor 1500 daN</option>
+                                        <option value="Thermal tractor (agricultural)">Thermal tractor (agricultural)</option>
+                                        <option value="None">None</option>
+                                    </select>
+                                </div>
+
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon1">MTM3 Code</span>
+                                    <input type="text" id="mtm3_code_input" name="mtm3_code_input" class="form-control" placeholder="MTM3 Code" aria-label="MTM3 Code" aria-describedby="basic-addon1" disabled>
+                                </div>
+
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon1">Correspondence</span>
+                                    <input type="text" id="correspondence_input" name="correspondence_input" class="form-control" placeholder="Correspondence" aria-label="Correspondence" aria-describedby="basic-addon1" disabled>
+                                </div>
+
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon1">Number of packages</span>
+                                    <input type="number" id="number_packages_input" name="number_packages_input" class="form-control" placeholder="Number of packages" aria-label="Number of packages" aria-describedby="basic-addon1" disabled>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="exampleSelect" class="form-label">Speed</label>
+                                    <select class="form-select" id="speed_input" name="name_input">
+                                        <option value="10">10 km/h</option>
+                                        <option value="12">12 km/h</option>
+                                        <option value="15">15 km/h</option>
+                                        <option value="20">20 km/h</option>
+                                    </select>
+                                </div>
+                                <br><hr>
+
+                            <table id="modal-table" class="table table-striped">
+                                <thread>
+                                    <tr>
+                                        <th>METHOD OF OPERATION</th>
+                                        <th>SYMBOL</th>
+                                        <th>DISTANCE</th>
+                                        <th>FREQUENCY</th>
+                                        <th>TIME</th>
+                                    </tr>
+                                </thread>
+
+                                <tbody>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    `);
+
+                    /**Set the information */
+                    //Comment category
+                    document.getElementById('comment_input').value = comment;
+
+                    //Setting category
+                    document.getElementById('distance_empty_zone_input').value = distance_empty_zone;
+                    document.getElementById('number_packages_at_once_input').value = number_of_packages_loaded_at_once;
+                    document.getElementById('loading_type_input').value = loading_type;
+
+                    //Handling conditions category
+                    document.getElementById('machine_used_input').value = engins;
+                    document.getElementById('mtm3_code_input').value = code_mtm3;
+                    document.getElementById('correspondence_input').value = correspondence;
+                    document.getElementById('number_packages_input').value = number_of_packages_loaded_at_once;
+                    document.getElementById('speed_input').value = speed;
+
+                    //Configure the foot of the modal
+                    $('#modalInformation .modal-footer').html(``);
+
+                    //Display the modal information
+                    $('#modalInformation').modal('show');
+
+                    //Use fetch to retrieve the information from the method table
+                    fetch(`/library/api/getMethodOperation/${operacionSeleccionada}`, {
+                        method: "GET"
+                    })
+
+                        //Control the response
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Error fetching data');
+                            }
+
+                            return response.json();
+                        })
+
+                        //Control the data
+                        .then(data => {
+                            //Call the method to display the information into the tablwe body
+                            displayMethodTable(data);
+                        })
+
+                    //Use fetch to retrieve the number of UC using the coefficient
+                    fetch(`/library/api/getNumberUC/${coefficient}`, {
+                        method: "GET"
+                    })
+
+                        //Control the response
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Error fetching data');
+                            }
+
+                            return response.json();
+                        })
+
+                        //Control the data
+                        .then(data => {
+                            console.log("Datos obtenidos: ", data);
+
+                            //Store the value into the input of number of UC per pallet
+                            document.getElementById('number_of_uc_per_pallet').value = data[0].total_pieces;
+                        });
+                });
+        });
+
+        //Display the modal
+        $('#modal').modal('show');
+    }
+
+    /***
+     * Function to display the information into the method table in the modal
+     * */
+    function displayMethodTable(data) {
+        //Create an instance of the table body
+        const tbody = document.querySelector('#modal-table tbody');
+
+        //Iterate through the data
+        data.forEach(item => {
+            //Create a row for each item
+            const row = document.createElement('tr');
+
+            //Create the cell for the method
+            const methodCell = document.createElement('td');
+            methodCell.textContent = item.method_operation;
+
+            //Create the cell for the symbol
+            const symbolCell = document.createElement('td');
+            symbolCell.textContent = item.symbol;
+
+            //Create the cell for the distance
+            const distanceCell = document.createElement('td');
+            distanceCell.textContent = item.distance;
+
+            //Create the cell for the frequency (with an input to make it editable)
+            const frequencyCell = document.createElement('td');
+            const frequencyInput = document.createElement('input');
+            frequencyInput.type = 'text';
+            frequencyInput.value = item.frequency;
+            frequencyInput.classList.add('form-control');
+            frequencyCell.appendChild(frequencyInput);
+
+            //Create the cell for the time
+            const timeCell = document.createElement('td');
+            timeCell.textContent = item.time;
+
+            //Add the cells into the row
+            row.appendChild(methodCell);
+            row.appendChild(symbolCell);
+            row.appendChild(distanceCell);
+            row.appendChild(frequencyCell);
+            row.appendChild(timeCell);
+
+            //Add the row into the table body
+            tbody.appendChild(row);
+        });
+    }
+
+    /**
+ * Function to configure and display the Forecast modal
+ * */
+    function foreCast() {
+        console.log("Dentro de la función forecast");
+
+        //Configure the title of the modal
+        $('#modal .modal-title').text('Introduzca la información en el campo');
+
+        //Configure the body of the modal
+        $('#modal .modal-body').html(`
+            <div class="container">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">Referencia del componente</span>
+                    <input type="text" class="form-control" id="reference" name="reference" placeholder="Referencia del componente" aria-label="Referencia del componente" aria-describedby="basic-addon1" required>
+                </div>
+            </div>
+        `);
+
+        //Configure the footer of the modal
+        $('#modal .modal-footer').html(`
+            <button id="botonRealizarBusquedaForecat" onclick="realizarBusqueda_foreCast()" class="btn btn-primary">Calcular cantidad de embalaje a mover</button>
+        `);
+
+        //Display the modal
+        $('#modal').modal('show');
+    }
+
+    /**
+     * Function to configure and display the search modal
+     * */
+    function buscador() {
+        //Configure the title of the modal
+        $('#modal .modal-title').text("Introduzca los campos para realizar la busqueda");
+
+        //Configure the body of the modal
+        $('#modal .modal-body').html(`
+            <div class="container">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">Referencia componente</span>
+                    <input type="text" class="form-control" id="referenciaPieza" name="referenciaPieza" placeholder="Referencia componente" aria-label="Referencia componente" aria-describedby="basic-addon1" required>
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon2">Línea</span>
+                    <input type="text" class="form-control" id="linea" name="linea" placeholder="Línea" aria-label="Línea" aria-describedby="basic-addon2" required>
+                </div>
+            </div>
+        `);
+
+        //Configure the footer of the modal
+        $('#modal .modal-footer').html(`
+            <div class="container">
+                <button id="botonRealizarBusqueda" onclick="realizarBusqueda()" class="btn btn-primary">Cantidad de emabalje a mover</button>
+            </div>
+        `);
+
+        //Display the modal
+        $('#modal').modal('show');
+    }
+
+    /**
+     * Function to configure the search of the Forecast
+     * */
+    function realizarBusqueda_foreCast() {
+        //Store the value of the reference input
+        const reference = document.getElementById('reference').value;
+
+        //If the input isnt empty
+        if (reference !== '') {
+            //Use the fetch to call the end point to select the information
+            fetch(`/library/api/getForecast/${reference}`, {
+                method: "GET"
+            })
+
+                //Control the response
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error fetching data');
+                    }
+
+                    //Return the data
+                    return response.json();
+                })
+
+                //Control the data
+                .then(data => {
+                    console.log("Datos obtenidos: ", data);
+
+                    //Close the main modal
+                    $('#modal').modal('hide');
+
+                    //Add the title to the components modal
+                    $('#componetsModal .modal-title').text('Datos obtenidos para la referencia: ', reference);
+
+                    //Configure the title of the components modal
+                    $('#componetsModal .modal-body').html(`
+                        <div class="container">
+                            <h5>Información para la referencia ${reference}</h5>
+                        </div>
+
+                        <div id="table-components-forecast" class="table-responsive">
+
+                        </div>
+                    `);
+
+                    //Configure the footer
+                    $('#componetsModal .modal-footer').html(`
+                        <button id ="anotherQuery" class="btn btn-primary">Realizar otra consulta</button>
+                    `);
+
+                    //Apply the funcionality for the button
+                    $('#anotherQuery').on('click', function () {
+                        //Hide the components modal
+                        $('#componetsModal').modal('hide');
+
+                        //Display the main modal
+                        $('#modal').modal('show');
+                    });
+
+                    //Create a variable that contain the table HTML
+                    let tableHTML = `
+                        <table class="table table-striped table-bordered table-hover">
+                            <tbody>
+                                <tr id="reference-row">
+                                    <th>Componente</th>
+                                </tr>
+
+                                <tr id="coefficient-row">
+                                    <th>Coeficientes</th>
+                                </tr>
+
+                                <tr>
+                                    <th id="total-cell"></th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+
+                    //Create a variable to store the sum and the percentage
+                    let totalSum = 0, percentage = 0;
+
+                    //Append the table into the div
+                    $('#table-components-forecast').html(tableHTML);
+
+                    //Iterate throw the data
+                    data.forEach(item => {
+                        //Add the reference of composant
+                        $('#reference-row').append(`<td>${item.reference_composant}</td>`);
+
+                        //Add the coefficient montage
+                        $('#coefficient-row').append(`<td>${item.coefficient_montage_BE}</td>`);
+
+                        //Add the coeeficient sum
+                        totalSum += parseInt(item.coefficient_montage_BE);
+                    });
+
+                    //Iterate throw the data again to calculate the percentage
+                    data.forEach(item => {
+                        //Create a variable to store the percentage
+                        percentage = (parseInt(item.coefficient_montage_BE) / totalSum) * 100;
+                    })
+
+                    //Add the total and the percentage into the total cell
+                    $('#total-cell').append(`<td>TOTAL: ${totalSum}<br>${percentage.toFixed(2)}%</td>`);
+
+                    //Display the components modal
+                    $('#componetsModal').modal('show');
+                });
+        }
+    }
+
+    /**
+     * Function to display the quantity of packaging to be moved and the component table
+     * */
+    function realizarBusqueda() {
+        //Store in variables the reference of the piece and the line
+        const referenciaPieza = document.getElementById("referenciaPieza").value;
+        const linea = document.getElementById("linea").value;
+
+        //Check if one of the inputs is empty
+        if (referenciaPieza === '' || linea === '') {
+            //Display an error
+            console.error("Los campos no pueden estar vacíos");
+            alert("Por favor, rellena todos los campos.");
+        } else {
+            //Fetch and handle both requests in parallel
+            Promise.all([
+                fetch(`/library/api/getPackingQuantity/${referenciaPieza}/${linea}`, { method: "GET" }),
+                fetch(`/library/api/getComponents/${linea}`, { method: "GET" })
+            ])
+                .then(async ([responsePacking, responseComponents]) => {
+                    //Check if both responses are OK
+                    if (!responsePacking.ok) throw new Error('Error fetching packing data');
+                    if (!responseComponents.ok) throw new Error('Error fetching components data');
+
+                    //Parse both responses
+                    const packingData = await responsePacking.json();
+                    const componentsData = await responseComponents.json();
+
+                    console.log("Componentes: ", componentsData.data_components, "\nReferencia: ", componentsData.data_reference);
+
+                    //Close the original modal
+                    $('#modal').modal('hide');
+
+                    //Configure the modal with the results
+                    $('#componetsModal .modal-title').text("Datos obtenidos");
+                    $('#componetsModal .modal-body').html(`
+                        <div class="container">
+                            <ul>
+                                <li>Cantidad de embalaje a mover en 8 horas: ${Math.ceil(packingData.total_resultados / 8)}</li>
+                            </ul>
+                        </div><br>
+
+                        <h5>Información para la referencia de componente ${referenciaPieza}</h5><br>
+
+                        <div id="table-component" class="table-responsive">
+
+                        </div>
+
+                        <hr>
+
+                        <h5>Información de todos los componentes de la línea ${linea}</h5><br>
+
+                        <div id="table-components" class="table-responsive">
+                                
+                        </div>
+                    `);
+
+                    //Configure the footer
+                    $('#componetsModal .modal-footer').html(`
+                        <button id="anotherQuery" class="btn btn-primary">Realizar otra consulta</button>
+                    `);
+
+                    //Apply functionality to the button
+                    $('#anotherQuery').on('click', function () {
+                        //Hide the components modal
+                        $('#componetsModal').modal('hide');
+
+                        //Display the main modal
+                        $('#modal').modal('show');
+                    });
+
+                    //Store the reference and the components
+                    const reference = componentsData.data_reference, components = componentsData.data_components;
+
+                    //Store in a variable the table information
+                    let tableHTML = '<table class="table table-bordered"><thead><tr><th></th>';
+
+                    //Iterate throw the components information
+                    components.forEach(componente => {
+                        tableHTML += `<th>${componente.reference_composant}</th>`;
+                    });
+
+                    //Add the close tags
+                    tableHTML += '</tr></thead><tbody>';
+
+                    //Create an array to store all the promise
+                    let promises = [];
+
+                    //Create an array to store the sums
+                    const sums = Array(components.length).fill(0);
+
+                    //Iterate throw the references
+                    reference.forEach((reference, index) => {
+                        //Iterate throw the components
+                        components.forEach((component, compIndex) => {
+                            //Create a promise to obtein the components number
+                            const promise = fetch(`/library/api/getCountComponent/${reference.reference_motor}/${component.reference_composant}`, {
+                                method: 'GET'
+                            })
+                                //Control the response
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('Error fetching data');
+                                    }
+                                    return response.json();
+                                })
+                                //Control the data
+                                .then(data => {
+                                    //Accumulate the count for each component
+                                    sums[compIndex] += data.count;
+                                    return `<td>${data.count}</td>`;
+                                })
+
+                                //Control the error
+                                .catch(error => {
+                                    console.error('Error fetching count:', error);
+                                    return '<td>Error</td>';
+                                });
+
+                            //Add the promise into the array of promises
+                            promises.push(promise);
+                        });
+
+                        //Close the tag
+                        tableHTML += '</tr>';
+                    });
+
+                    //Wait for all the promises
+                    Promise.all(promises).then(cells => {
+                        //Store the index
+                        let rowIndex = 0, referencePiezaColumnIndex = -1;
+
+                        //Store the sums 
+                        let rowSums = [], totalSum = 0;
+
+                        /**ALL COMPONENTS */
+                        //Iterathe throw the references
+                        reference.forEach((reference, refIndex) => {
+                            //Variable to store the sum in the row
+                            let rowSum = 0;
+
+                            //Add the references into the table
+                            tableHTML += `<tr><th>${reference.reference_motor}</th>`;
+
+                            //Iterate throe the components to fill the cell on the table
+                            components.forEach((component, compIndex) => {
+                                //Store the value of the cell
+                                const cellValue = cells[rowIndex * components.length + compIndex];
+
+                                //Assign the value
+                                tableHTML += cellValue;
+
+                                //Extract the number value from the cell
+                                const valorNumerico = parseInt(cellValue.replace('<td>', '').replace('</td>', ''), 10) || 0;
+
+                                //Sum the value for ech row
+                                rowSum += valorNumerico;
+
+                                //Save the index if the reference composant match
+                                if (component.reference_composant === referenciaPieza) {
+                                    referencePiezaColumnIndex = compIndex;
+                                }
+                            });
+
+                            //Store the sum value from the row
+                            rowSums.push(rowSum);
+
+                            //Sum the values from all the row
+                            totalSum += rowSum;
+
+                            console.log("TOTAL SUM: ", totalSum);
+
+                            //Add the value
+                            tableHTML += `<td><strong>${rowSum}</strong></td>`;
+
+                            //Close the tag
+                            tableHTML += '</tr>';
+                            rowIndex++;
+                        });
+
+                        //Create a total row for the sum
+                        let totalRow = `<tr><th>TOTAL</th>`;
+
+                        //Iterate throw the sums
+                        sums.forEach(sum => {
+                            //Storage the percentage
+                            const percentage = totalSum ? ((sum / totalSum) * 100).toFixed(2) : 0;
+
+                            //Add the values into the row
+                            totalRow += `<td>${sum} (${percentage}%)</td>`;
+                        });
+
+                        //Add the total sum value
+                        totalRow += `<td><strong>${totalSum}</strong></td>`;
+                        tableHTML += totalRow + '</tr>';
+
+                        //Insert the table into the all components section
+                        document.getElementById('table-components').innerHTML = tableHTML;
+
+                        // Ahora, copia los valores de la columna que coincide con referenciaPieza en #table-component
+
+                        /**ONE REFERENCE */
+                        if (referencePiezaColumnIndex !== -1) {
+                            //Initialize the table
+                            let tableComponentHTML = '<table class="table table-bordered"><thead><tr><th>Referencia motor acabado</th><th>Cantidad a mover</th></tr></thead><tbody>';
+
+                            //Create a variable to store the su row
+                            let sumColumna = 0;
+
+                            //Iterate throw the references
+                            reference.forEach((reference, refIndex) => {
+                                const columnValue = cells[refIndex * components.length + referencePiezaColumnIndex];
+                                const valorNumericoColumna = parseInt(columnValue.replace('<td>', '').replace('</td>', ''), 10) || 0;
+                                sumColumna += valorNumericoColumna;
+
+                                tableComponentHTML += `<tr><td>${reference.reference_motor}</td><td>${valorNumericoColumna}</td></tr>`;
+                            });
+
+                            //Store the percentage
+                            const percentage = totalSum ? ((sumColumna / totalSum) * 100).toFixed(2) : 0;
+
+                            //Add the values into the table
+                            tableComponentHTML += `
+                                <tr>
+                                    <td><strong>TOTAL</strong></td>
+                                    <td><strong>${sumColumna} (${percentage}%)</strong></td>
+                                </tr>
+                            `;
+
+                            //Close the tags
+                            tableComponentHTML += '</tbody></table>';
+
+                            //Add the table into the category
+                            document.getElementById('table-component').innerHTML = tableComponentHTML;
+                        } else {
+                            console.error('No se encontró la columna correspondiente a referenciaPieza');
+                        }
+                    });
+
+                    //Display the modal information
+                    $('#componetsModal').modal('show');
+                })
+
+                //Control the error
+                .catch(error => {
+                    console.error("Error al realizar la búsqueda: ", error);
+                    alert("Hubo un problema al realizar la búsqueda. Por favor, intenta nuevamente.");
+                });
+        }
+    }
+
+    //Documet ready to use jQuery
+    $(document).ready(function () {
+        //Configure the dataTable inputs (paging, search input...)
+        $('#dataTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "info": false,
+            "lengthChange": true,
+            "autoWidth": false,
+
+            //Configure the columns
+            "columnDefs": [
+                {
+                    "targets": false,
+                    "className": "dt-center"
+                }
+            ]
+        })
+    });
+</script>

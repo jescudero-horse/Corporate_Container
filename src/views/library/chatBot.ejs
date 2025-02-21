@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/sources/js/socket.io.min.js"></script>
+        <style>
+            #chatContainer {
+                background-color: #464646;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                margin-bottom: 20px;
+            }
+
+            #respuestas {
+                margin-top: 20px;
+                max-height: 300px;
+                overflow-y: auto;
+                padding: 10px;
+                border: 1px solid #063479;
+                border-radius: 5px;
+                background-color: #f9f9f9;
+            }
+
+            #respuestas p {
+                margin: 5px 0;
+                padding: 5px;
+                border-radius: 3px;
+                background-color: #063479;
+                color: white;
+            }
+
+            .chat-input {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .chat-input input {
+                flex: 1;
+                margin-right: 10px;
+            }
+
+            .suggestions {
+                margin-top: 20px;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                background-color: #3f474f;
+            }
+
+            .suggestions h5 {
+                margin-bottom: 10px;
+            }
+
+            .suggestions button {
+                margin: 5px;
+            }
+        </style>
+</head>
+
+<body>
+    <div id="chatContainer" class="shadow-sm p-4 container mt-5">
+        <h1 class="h4 mb-3">Chatbot</h1>
+        <div id="respuestas" class="mb-3"></div>
+
+        <div class="suggestions mt-3" id="categorias"></div>
+        <br>
+
+        <div class="chat-input">
+            <input id="pregunta" type="text" class="form-control"
+                placeholder="Type your question or use the default questions." />
+            <button id="enviar" class="btn btn-primary">Send</button>
+        </div>
+    </div>
+
+    <script src="/scripts/socket.js"></script>
+    <script>
+        //Use fetch to load the questions
+        fetch('/chatBot/chatBot.json')
+            .then(response => response.json())
+            .then(data => {
+                cargarCategorias(data.categorias);
+            })
+            .catch(error => console.error('Error al cargar el JSON:', error));
+
+        /**
+         * Function to load the categories and displkay it into the div
+         * */
+        function cargarCategorias(categorias) {
+            //Instance the categories container
+            const categoriasContainer = document.getElementById('categorias');
+
+            //Iterate throw the categories
+            categorias.forEach(categoria => {
+                //Create a div elemento for each category
+                const categoriaDiv = document.createElement('div');
+
+                //Apply the style for the div
+                categoriaDiv.className = 'mb-3';
+
+                //Instance the title category
+                const categoriaTitle = document.createElement('h5');
+
+                //Apply the name of the title
+                categoriaTitle.innerText = categoria.nombre;
+
+                //Add the title into the div category
+                categoriaDiv.appendChild(categoriaTitle);
+
+                //Iterate throw each questions
+                categoria.preguntas.forEach(pregunta => {
+                    //Create and instance a button
+                    const button = document.createElement('button');
+
+                    //Apply the style for the button
+                    button.className = 'btn btn-secondary m-1';
+
+                    //Add the question into the button
+                    button.innerText = pregunta;
+
+                    //Apply the funcionality for each question
+                    button.onclick = () => agregarPregunta(pregunta);
+
+                    //Add the button into the caregores div
+                    categoriaDiv.appendChild(button);
+                });
+
+                //Add the category into the categories div
+                categoriasContainer.appendChild(categoriaDiv);
+            });
+        }
+
+        /**
+         * Function to send the question into the socket question
+         * */
+        function agregarPregunta(pregunta) {
+            //Store the question
+            document.getElementById('pregunta').value = pregunta;
+
+            //Apply the funcionality for the send button
+            document.getElementById('enviar').click();
+        }
+    </script>
+</body>
+
+</html>

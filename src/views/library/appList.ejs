@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <%- include('partials/head.ejs') %>
+        <script src="/script/library/appList.js"></script>
+</head>
+
+<body>
+    <!--MODAL-->
+    <%- include('partials/modal.ejs') %>
+        <!--INCLUDE THE NAVIGATION PANEL-->
+        <%- include('partials/navigation.ejs') %>
+
+            <div class="container">
+                <h1><%-title %></h1>
+            </div>
+
+            <!--DATATABLE CONTROLS-->
+            <%- include('partials/dataTableControl.ejs') %>
+
+                <div class="btn-group" role="group">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" data-bs-auto-close="outside" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Table options
+                        </button>
+
+                        <ul class="dropdown-menu" id="dropdown">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- DATATABLE APP-->
+                <%- include('partials/dataTableApp.ejs') %>
+
+                    <!--FOOTER-->
+                    <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    //Initialize the dataTable
+    $(document).ready(function () {
+        //Apply the funcionabiity to the left button
+        $('#scrollLeftButton').click(function () {
+            $('#list').animate({
+                'marginLeft': "-=250px"
+            })
+        });
+
+        //Apply the funcionability to the rigth button
+        $('#scrollRightButton').click(function () {
+            $('#list').animate({
+                'marginLeft': "+=200px"
+            });
+        });
+
+        //Apply the funcionability to the reset position
+        $('#scrollResetButton').click(function () {
+            $('#list').animate({
+                'marginLeft': "0px"
+            });
+        });
+
+        //Store and configure the dataTable
+        var datatable = $('#dataTable').DataTable({
+            //Add the responsive attribute to adapt the table to the sceeen size
+            responsive: true,
+
+            //Hide some columns
+            columnDefs: [
+                { targets: 0, visible: false },
+                { targets: 3, visible: false },
+                { targets: 4, visible: false },
+                { targets: 5, visible: false },
+                { targets: 6, visible: false },
+                { targets: 7, visible: false },
+                { targets: 8, visible: false },
+                { targets: 0, visible: false },
+                { targets: 10, visible: false },
+                { targets: 11, visible: false },
+                { targets: 12, visible: false },
+                { targets: 13, visible: false },
+                { targets: 14, visible: false },
+                { targets: 21, visible: false }
+            ],
+
+            //Configure the show/hide columns
+            buttons: [
+                {
+                    extend: 'colvis',
+                    text: 'Show/Hide columns <i class="bi bi-eye"></i>',
+                    className: 'dropdown-item'
+                }
+            ]
+        });
+
+        //Add the buttons to the dropdown table options
+        $('#dropdown').append(datatable.buttons().container());
+
+        //Apply the funcionability to the row of the dataTable
+        $('#dataTable tbody').on('click', 'tr', function () {
+            //Store the data row into a variable
+            var rowData = datatable.row(this).data();
+
+            /* EXTRAER ATRIBUTO SRC DE CADA IMAGEN DEL ROWDATA */
+
+            //Configure the title of the modal with the IRN number
+            $('.modal-title').text(rowData[1]);
+
+            //Configure the body of the modal
+            $('#modal .modal-body').html(
+                `
+                <table id="modal-table" class="table table-striped">
+                    <tread>
+                    <tr>
+                        <th scope="col">CI Number</th>
+                        <th scope="col">Short Name</th>
+                        <th scope="col">KM Long name</th>
+                        <th scope="col">KM Short Name</th>
+                        <th scope="col">Long name</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">SIA</th>
+                        <th scope="col">Install status</th>
+                        <th scope="col">Criticality</th>
+                        <th scope="col">Support groups</th>
+                        <th scope="col">Bussines Line</th>
+                        <th scope="col">Group level usage</th>
+                        <th scope="col">Owned by</th>
+                        <th scope="col">Managed by</th>
+                        <th scope="col">Led by</th>
+                        <th scope="col">Developed by</th>
+                        <th scope="col">Hosting provider</th>
+                        <th scope="col">Execution platform</th>
+                        <th scope="col">Domain IRN</th>
+                        <th scope="col">Sub-Domain</th>
+                        <th scope="col">CMDB Description </th>
+                        <th scope="col">Created</th>
+                        <th scope="col">Created by</th>
+                        <th scope="col">Updated</th>
+                        <th scope="col">Updated by</th>
+                    </tr>
+                    </tread>
+
+                    <tbody>
+                        <tr>
+                            <th>` + rowData[1] + `</th>
+                            <th>` + rowData[2] + `</th>
+                            <th>` + rowData[3] + `</th>
+                            <th>` + rowData[4] + `</th>
+                            <th>` + rowData[5] + `</th>
+                            <th>` + rowData[6] + `</th>
+                            <th>` + rowData[7] + `</th>
+                            <th>` + rowData[8] + `</th>
+                            <th>` + rowData[9] + `</th>
+                            <th>` + rowData[10] + `</th>
+                            <th>` + rowData[11] + `</th>
+                            <th>` + rowData[12] + `</th>
+                            <th>` + rowData[13] + `</th>
+                            <th>` + rowData[14] + `</th>
+                            <th>` + rowData[15] + `</th>
+                            <th>` + rowData[16] + `</th>
+                            <th>` + rowData[17] + `</th>
+                            <th>` + rowData[18] + `</th>
+                            <th>` + rowData[19] + `</th>
+                            <th>` + rowData[20] + `</th>
+                            <th>` + rowData[21] + `</th>
+                            <th>` + rowData[22] + `</th>
+                            <th>` + rowData[23] + `</th>
+                            <th>` + rowData[24] + `</th>
+                            <th>` + rowData[25] + `</th>
+                        </tr>
+                    </tbody>
+                </table>
+                `
+            );
+
+            //Add only the close button
+            $('#modal .modal-footer').html(
+                `
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                `
+            )
+
+            //Show the modal
+            $('#modal').modal('show');
+        });
+    });
+</script>
+
+</html>

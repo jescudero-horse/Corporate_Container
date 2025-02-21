@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <script src="/script/library/previewBestPractise.js"></script>
+    <script src="/script/library/getUserID.js"></script>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+
+        <style>
+            /* Center the celds */
+            td,
+            th {
+                vertical-align: middle;
+            }
+
+            /* Center and make bigger the columns title */
+            th {
+                text-align: center;
+                font-size: 1.25rem;
+            }
+
+            #imagePreviewContainer {
+                border: 2px solid #dee2e6;
+                padding: 10px;
+                background-color: #f8f9fa;
+                border-radius: 8px;
+            }
+        </style>
+</head>
+
+<body>
+    <input type=" text" id="id" name="id" hidden>
+    <div id=" liveAlertPlaceHolder"></div>
+
+    <!--MODAL-->
+    <%- include('partials/modal.ejs') %>
+
+        <!--TOAST-->
+        <%- include('partials/toast.ejs') %>
+
+            <input type="text" id="ipn" hidden>
+
+            <div class="adminPanel">
+                <div class="container mt-5">
+                    <h1 class="text-center"><%- title%></h1>
+                    <form>
+                        <!--INCLUDE THE BEST PRACTISE FORM-->
+                        <%- include('partials/bestPractise_form.ejs') %>
+                    </form>
+                </div>
+
+                <div class="container mt-5">
+                    <h3>Main Image</h3>
+                    <div id="mainImageContainer" class="text-center">
+                        <!-- Imagen a mostrar -->
+                        <img id="mainImage" alt="Main Image" class="img-fluid rounded shadow"
+                            style="max-width: 100%; height: auto;">
+                    </div>
+
+                    <hr>
+                </div>
+
+                <div class="container">
+                    <h3 id="beforeImage">Before Images</h3>
+                    <div class="splide" id="splideBeforeImages">
+                        <div class="splide__track">
+                            <ul class="splide__list">
+
+                            </ul>
+                        </div>
+                        <div class="splide__arrows">
+                            <button class="splide__arrow splide__arrow--prev"><i class="bi bi-arrow-left"></i></button>
+                            <button class="splide__arrow splide__arrow--next"><i class="bi bi-arrow-right"></i></button>
+                        </div>
+                        <div class="splide__pagination"></div>
+                    </div>
+
+                    <br><br><br>
+
+                    <h3 id="afterImage">After Images</h3>
+                    <div class="splide" id="splideAfterImages">
+                        <div class="splide__track">
+                            <ul class="splide__list">
+
+                            </ul>
+                        </div>
+                        <div class="splide__arrows">
+                            <button class="splide__arrow splide__arrow--prev"><i class="bi bi-arrow-left"></i></button>
+                            <button class="splide__arrow splide__arrow--next"><i class="bi bi-arrow-right"></i></button>
+                        </div>
+                        <div class="splide__pagination"></div>
+                    </div>
+                </div>
+
+                <br><br><br>
+
+                <div class="container mt-5" id="listFileDiv">
+                    <h3 class="mb-4" id="listFilesTitle">List Files</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped table-bordered table-sm">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th scope="col">File Name</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fileList">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="container">
+                    <h3 id="comment">Comments</h3>
+
+                    <div class="container mt-5">
+                        <div id="commentsContainer" class="row">
+
+                        </div>
+                    </div>
+
+                    <button id="addCommentButton" class="btn btn-primary" onclick="displayCommentModal()"><i
+                            class="bi bi-chat-dots"></i> Add comment</button>
+                </div>
+            </div>
+
+            <!--FOOTER-->
+            <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    //Initialize de Splide of before images
+    document.addEventListener('DOMContentLoaded', function () {
+        /** Call the method to initialize the splide carousel of the before and after images */
+        initializeSplide('splideBeforeImages');
+        initializeSplide('splideAfterImages');
+
+        //Call the end point to retrieve the IPN of the user
+        fetch('/library/api/user-id')
+            //Control the response
+            .then(response => response.json())
+
+            //Control the data
+            .then(data => {
+                //If the user is logged in
+                if (data.userId) {
+                    //Show the add comment button
+                    document.getElementById('addCommentButton').setAttribute('hiden', 'true');
+
+                    //In other case...
+                } else {
+                    //Hide the button
+                    document.getElementById('addCommentButton').setAttribute('hidden', 'false');
+                }
+            });
+    });
+
+    /**
+     * Method to initialize the Splide carousel
+     * */
+    function initializeSplide(splideId) {
+        new Splide(`#${splideId}`, {
+            type: 'loop',
+            perPage: 3,
+            arrows: true,
+            pagination: true,
+            autoplay: true,
+            interval: 3000,
+        });
+    }
+
+    /**Disable the inputs*/
+    document.getElementById('title').setAttribute('disabled', 'true');
+    document.getElementById('factory').setAttribute('disabled', 'true');
+    document.getElementById('metier').setAttribute('disabled', 'true');
+    document.getElementById('line').setAttribute('disabled', 'true');
+    document.getElementById('technology').setAttribute('disabled', 'true');
+    document.getElementById('owner').setAttribute('disabled', 'true');
+    document.getElementById('categorization').setAttribute('disabled', 'true');
+    document.getElementById('categoryDiv').setAttribute('disabled', 'true');
+    document.getElementById('tags-input').setAttribute('readonly', 'true');
+
+    //Store the checkbox
+    const checkboxes = document.querySelectorAll('.form-check-input');
+
+    //Iterate throw the checkbx
+    checkboxes.forEach(checkbox => {
+        //Disable the checkbox
+        checkbox.disabled = true;
+    });
+</script>
+
+</html>

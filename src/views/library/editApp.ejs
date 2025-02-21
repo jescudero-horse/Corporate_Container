@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+        <script src="/script/library/editApp.js"></script>
+
+</head>
+
+<body>
+    <div id="liveAlertPlaceHolder"></div>
+
+    <div class="adminPanel">
+        <div class="container mt-5">
+            <h1 class="text-center"><%- title%></h1>
+            <form id="editAppForm" action="/library/api/updateApp" method="POST" onsubmit="return validateForm(event)"
+                autocomplete="off">
+
+                <!--INPUT APP-->
+                <%- include('partials/app_form.ejs') %>
+
+                    <button type="submit" class="btn btn-primary">Continue</button>
+            </form>
+        </div>
+    </div>
+
+    <!--FOOTER-->
+    <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    /**
+     * Function to check the information of the forms
+     * */
+    function validateForm(event) {
+        //Identify the place holder for the alerts
+        const alertPlaceHolder = document.getElementById('liveAlertPlaceHolder');
+
+        //Configure the method to configure the alert message
+        const appendAlert = (message, type) => {
+            const wrapper = document.createElement('div')
+            wrapper.innerHTML = [
+                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                `   <div>${message}</div>`,
+                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                '</div>'
+            ].join('')
+
+            alertPlaceHolder.append(wrapper);
+        }
+
+        //Identify and store all the elements
+        const variables = [
+            ciNumber = document.getElementById('ciNumber').value,
+            shortName = document.getElementById('shortName').value,
+            KMLongName = document.getElementById('KMLongName').value,
+            KMShortName = document.getElementById('KMShortName').value,
+            type = document.getElementById('type').value,
+            installStatus = document.getElementById('installStatus').value,
+            criticality = document.getElementById('criticality').value,
+            supportGroups = document.getElementById('supportGroups').value,
+            bussinesLine = document.getElementById('bussinesLine').value,
+            groupLevelUsage = document.getElementById('groupLevelUsage').value,
+            ownedBy = document.getElementById('ownedBy').value,
+            managedByOrgType = document.getElementById('managedByOrgType').value,
+            ledBy = document.getElementById('ledBy').value,
+            executionPlatform = document.getElementById('executionPlatform').value,
+            domainIRN = document.getElementById('domainIRN').value,
+            subDomain = document.getElementById('subDomain').value,
+            cmdbDescription = document.getElementById('cmdbDescription').value,
+            created = document.getElementById('created').value,
+            createdBy = document.getElementById('createdBy').value,
+            updated = document.getElementById('updated').value,
+            updatedBy = document.getElementById('updatedBy').value
+        ]
+
+        //Iterate throw the elements aray
+        variables.forEach(value => {
+            //Store the boolean that means if the element is empty
+            let emptyValue = isEmpty(value);
+
+            //Check the boolean
+            if (emptyValue) {
+                console.log("Hay un elemento vacio");
+
+                //Call the method to display the message alert
+                appendAlert('Verify if all the inputs are correct', 'danger');
+
+                //Move the windows to the top
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+
+                //Stop the event
+                event.preventDefault();
+            }
+        })
+    }
+
+    /**
+     * Function to check if a value is empty
+     * */
+    function isEmpty(value) {
+        if (value === '' || value === undefined) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+</script>
+
+</html>

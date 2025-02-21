@@ -1,0 +1,274 @@
+<div class="row mb-3">
+    <div class="mb-3">
+        <div class="mb-3 form-floating">
+            <input type="title" class="form-control" id="title" name="title" placeholder="Title">
+            <label for="title" class="form-label" style="color: #6c757d;">Title</label>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="form-floating">
+            <select class="form-select" id="factory" name="factory" aria-label="Factory">
+                <option value="HLT">HLT</option>
+                <option value="Motores">Motores</option>
+                <option value="Sevilla">Sevilla</option>
+                <option value="Aveiro">Aveiro</option>
+                <option value="Oyak">Oyak</option>
+                <option value="Rumania">Rumania</option>
+                <option value="Curitiba">Curitiba</option>
+                <option value="Los Andes">Los Andes</option>
+                <option value="Argentina">Argentina</option>
+            </select>
+            <label for="factory" class="form-label" style="color: #6c757d;">Factory</label>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col">
+        <div class="form-floating">
+            <select class="form-select" id="typeReport" name="typeReport" aria-label="Type report">
+                <option value="Performance">Performance</option>
+                <option value="Quality">Quality</option>
+                <option value="Security">Security</option>
+                <option value="Costs">Costs</option>
+            </select>
+            <label for="Type report" class="form-label" style="color: #6c757d;">Type report</label>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="form-floating">
+            <select class="form-control" id="platform" name="platform">
+                <option value="Looker">Looker</option>
+                <option value="SpotFire">SpotFire</option>
+                <option value="NodeRed - Tiempo Real">NodeRed - Real Time</option>
+                <option value="WebIntelligence BI4">WebIntelligence BI4</option>
+                <option value="Others">Others</option>
+            </select>
+            <label for="Platform" class="form-label" style="color: #6c757d;">Platform</label>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label id="labelFunction" for="functions">Functions</label>
+    <div class="row">
+        <div class="col">
+            <div class="solo" id="htl-card">
+                <h4><input type="checkbox" id="function1" name="function1">HLT</h4>
+                <ul>
+                    <li><input type="checkbox" id="function-1-subfunction-1" name="function-1-subfunction-1">Logistic
+                    </li>
+                    <li><input type="checkbox" id="function-1-subfunction-2" name="function-1-subfunction-2">Quality
+                    </li>
+                    <li><input type="checkbox" id="function-1-subfunction-3" name="function-1-subfunction-3">Process
+                        Engineering</li>
+                    <li><input type="checkbox" id="function-1-subfunction-4" name="function-1-subfunction-4">Product
+                        Engineering</li>
+                </ul>
+            </div>
+
+            <div class="solo" id="motores-card">
+                <h4><input type="checkbox" id="function2" name="function2">Motores</h4>
+                <ul>
+                    <li><input type="checkbox" id="function-2-subfunction-5" name="function-2-subfunction-5">Machining
+                    </li>
+                    <li><input type="checkbox" id="function-2-subfunction-6" name="function-2-subfunction-6">Assembly
+                    </li>
+                    <li><input type="checkbox" id="function-2-subfunction-7" name="function-2-subfunction-7">Injection
+                    </li>
+                </ul>
+            </div>
+
+            <div class="solo" id="sevilla-card">
+                <h4><input type="checkbox" id="function3" name="function3">Sevilla</h4>
+                <ul>
+                    <li><input type="checkbox" id="function-3-subfunction-8" name="function-3-subfunction-8">Assembly
+                    </li>
+                    <li><input type="checkbox" id="function-3-subfunction-9" name="function-3-subfunction-9">Machining
+                    </li>
+                    <li><input type="checkbox" id="function-3-subfunction-10" name="function-3-subfunction-10">Heat
+                        treatments</li>
+                </ul>
+            </div>
+
+            <div class="solo" id="oyak-card">
+                <h4><input type="checkbox" id="function4" name="function4">Aveiro</h4>
+                <ul>
+                    <li><input type="checkbox" id="function-4-subfunction-11" name="function-4-subfunction-11">Assembly
+                    </li>
+                    <li><input type="checkbox" id="function-4-subfunction-12" name="function-4-subfunction-12">Machining
+                    </li>
+                    <li><input type="checkbox" id="function-4-subfunction-13" name="function-4-subfunction-13">Heat
+                        treatments</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="solo" id="oyak-card">
+                <h4><input type="checkbox" id="function5" name="function5">Oyak</h4>
+            </div>
+
+            <div class="solo" id="rumania-card">
+                <h4><input type="checkbox" id="function6" name="function6">Rumania</h4>
+            </div>
+
+            <div class="solo" id="curitiba-card">
+                <h4><input type="checkbox" id="function7" name="function7">Curitiba</h4>
+            </div>
+
+            <div class="solo" id="losAndes-card">
+                <h4><input type="checkbox" id="function8" name="function8">Los Andes</h4>
+            </div>
+
+            <div class="solo" id="argentina-card">
+                <h4><input type="checkbox" id="function9" name="function9">Argentina</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- <div class="mb-3">
+    <label for="functions" class="form-label">Functions</label>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="solo mb-3">
+                <div class="card-header">
+                    <h4><input type="checkbox" id="function1" name="function1"> HLT</h4>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><input type="checkbox" id="function-1-subfunction-1" name="function-1-subfunction-1"> Logistic</li>
+                    <li class="list-group-item"><input type="checkbox" id="function-1-subfunction-2" name="function-1-subfunction-2"> Quality</li>
+                    <li class="list-group-item"><input type="checkbox" id="function-1-subfunction-3" name="function-1-subfunction-3"> Process Engineering</li>
+                    <li class="list-group-item"><input type="checkbox" id="function-1-subfunction-4" name="function-1-subfunction-4"> Product Engineering</li>
+                </ul>
+            </div>
+
+            <div class="solo mb-3">
+                <div class="card-header">
+                    <h4><input type="checkbox" id="function2" name="function2"> Motores</h4>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><input type="checkbox" id="function-2-subfunction-5" name="function-2-subfunction-5"> Machining</li>
+                    <li class="list-group-item"><input type="checkbox" id="function-2-subfunction-6" name="function-2-subfunction-6"> Assembly</li>
+                    <li class="list-group-item"><input type="checkbox" id="function-2-subfunction-7" name="function-2-subfunction-7"> Injection</li>
+                </ul>
+            </div>
+
+            <div class="solo mb-3">
+                <div class="card-header">
+                    <h4><input type="checkbox" id="function3" name="function3"> Sevilla</h4>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><input type="checkbox" id="function-3-subfunction-8" name="function-3-subfunction-8"> Assembly</li>
+                    <li class="list-group-item"><input type="checkbox" id="function-3-subfunction-9" name="function-3-subfunction-9"> Machining</li>
+                    <li class="list-group-item"><input type="checkbox" id="function-3-subfunction-10" name="function-3-subfunction-10"> Heat treatments</li>
+                </ul>
+            </div>
+
+            <div class="solo mb-3">
+                <div class="card-header">
+                    <h4><input type="checkbox" id="function4" name="function4"> Aveiro</h4>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><input type="checkbox" id="function-4-subfunction-11" name="function-4-subfunction-11"> Assembly</li>
+                    <li class="list-group-item"><input type="checkbox" id="function-4-subfunction-12" name="function-4-subfunction-12"> Machining</li>
+                    <li class="list-group-item"><input type="checkbox" id="function-4-subfunction-13" name="function-4-subfunction-13"> Heat treatments</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="solo mb-3">
+                <div class="card-header">
+                    <h4><input type="checkbox" id="function5" name="function5"> Oyak</h4>
+                </div>
+            </div>
+
+            <div class="solo mb-3">
+                <div class="card-header">
+                    <h4><input type="checkbox" id="function6" name="function6"> Rumania</h4>
+                </div>
+            </div>
+
+            <div class="solo mb-3">
+                <div class="card-header">
+                    <h4><input type="checkbox" id="function7" name="function7"> Curitiba</h4>
+                </div>
+            </div>
+
+            <div class="solo mb-3">
+                <div class="card-header">
+                    <h4><input type="checkbox" id="function8" name="function8"> Los Andes</h4>
+                </div>
+            </div>
+
+            <div class="solo mb-3">
+                <div class="card-header">
+                    <h4><input type="checkbox" id="function9" name="function9"> Argentina</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+
+<div class="mb-3">
+    <div class="mb-3 form-floating">
+        <input type="url" class="form-control" id="location" name="location" placeholder="Location/URL">
+        <label for="location" class="form-label" style="color: #6c757d;">Location/URL</label>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="mb-3 form-floating">
+        <input type="text" class="form-control" id="description" name="description" placeholder="Description">
+        <label for="location" class="form-label" style="color: #6c757d;">Description</label>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="mb-3 form-floating">
+        <input type="url" class="form-control" id="videoTutorial" name="videoTutorial" placeholder="Video tutorial">
+        <label for="videoTutorial" class="form-label" style="color: #6c757d;">Video tutorial</label>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="mb-3 form-floating">
+        <input type="text" class="form-control" id="dataSource" name="dataSource" placeholder="Data source">
+        <label for="dataSource" class="form-label" style="color: #6c757d;">Data source</label>
+    </div>
+</div>
+
+<div class="form-check form-switch mb-3">
+    <input class="form-check-input" type="checkbox" role="switch" id="sentElementals" name="sentElementals">
+    <label class="form-check-label" for="sentElementals">Sent elementals</label>
+</div>
+
+<div class="form-check form-switch mb-3">
+    <input class="form-check-input" type="checkbox" role="switch" id="renault" name="renault">
+    <label class="form-check-label" for="renault">Renault</label>
+</div>
+
+<div class="input-group mb-3">
+    <div class="mb-3 form-floating">
+        <input type="contact" class="form-control" id="contact" name="contact" placeholder="Reference email">
+        <label for="contact" class="form-label" style="color: #6c757d;">Contact</label>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="mb-3 form-floating">
+        <input type="comment" class="form-control" id="comments" name="comments" placeholder="Reference email">
+        <label for="comment" class="form-label" style="color: #6c757d;">Comments</label>
+    </div>
+</div>
+
+<input type="hidden" id="id" name="id">

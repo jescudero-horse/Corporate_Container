@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <script src="/scripts/blueprints.js"></script>
+    <script src="/script/library/getUserID.js"></script>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <!--NAVIGATION PANEL (ADMIN MODE)-->
+    <%- include('partials/navigation_Admin.ejs') %>
+
+        <!--MODAL-->
+        <%- include('partials/modal.ejs') %>
+
+            <!--TOAST-->
+            <%- include('partials/toast.ejs') %>
+
+                <input type="text" id="ipn" hidden>
+
+                <div class="container">
+                    <h1><%-title %></h1>
+
+                    <div class="container">
+                        <a class="btn btn-primary" id="button" , href="/library/add3dModel">
+                            <div class="text">Add 3D model <i class="bi bi-plus-circle"></i></div>
+                        </a>
+
+                        <!--TABLE OPTIONS-->
+                        <%- include('partials/tableOptions.ejs') %>
+                    </div>
+
+                    <br>
+
+                    <!--BLUEPRINTS DATATABLE-->
+                    <%- include('partials/dataTableBlueprints.ejs') %>
+                </div>
+
+                <!--FOOTER-->
+                <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    $(document).ready(function () {
+        //Store and initialize the dataTable
+        var dataTable = $('#dataTable').DataTable({
+            //Hide some columns
+            columnDefs: [
+                { targets: 0, visible: false },
+                { targets: 4, visible: false },
+                { targets: 5, visible: false }
+            ],
+
+            //Configure the buttons
+            buttons: [
+                //Configure the show/hide columns button
+                {
+                    extend: 'colvis',
+                    text: 'Show/Hide columns <i class="bi bi-eye"></i>',
+                    className: 'dropdown-item'
+                },
+
+                //Configure the personal blueprint source
+                {
+                    text: 'View the personal list <i class="bi bi-list-ol"></i>',
+                    action: function (e, dt, node, config) {
+                        //Store the IPN of the user
+                        const ipn = document.getElementById('ipn').value;
+
+                        //Filter the dataTable using the userID column and the value of the ipn hidden input
+                        $('#dataTable').DataTable().column(5).search(ipn).draw();
+
+                        //Identify the toast
+                        const toast = document.getElementById('liveToast');
+
+                        //Add the message and the  button to the body of the toast
+                        $('#liveToast .toast-body').html(
+                            `
+                                <p>If you want to return to the normal list, make a clic on the "Return to normal list"<p>
+                                <button onclick="returnNormalList(26)" type="button" class="btn btn-primary btn-sm">Return to normal list</button>
+                            `
+                        );
+
+                        //Configure the header of the toast
+                        $('#liveToast .toast-header').html(
+                            `
+                                <img src="/assets/library/HORSE_FAVICON.ico" class="rounded me-2" style="width: 50px; height: 50px;">
+                                <strong class="me-auto">Digital Library</strong>
+                            `
+                        )
+
+                        //Configure the toast
+                        const toastBootstrap = new bootstrap.Toast(toast, {
+                            autohide: false
+                        });
+
+                        //Show the toast
+                        toastBootstrap.show();
+                    }
+                }
+            ]
+        });
+
+        //Add the butttons to the dropDown
+        $('#dropdown').append(dataTable.buttons().container());
+
+        //Store in a variable the dataTable
+        var table = $('#dataTable').DataTable();
+        
+        //Apply the funcionability to each row
+        $('#dataTable tbody').on('click', 'tr', function () {
+            //Store the information of the rows
+            var rowData = table.row(this).data();
+
+            //Create a temporally div
+            var tempDiv = document.createElement('div');
+
+            //Add the image data in the div
+            tempDiv.innerHTML = rowData[3];
+
+            //Store the image element
+            const imageElement = tempDiv.querySelector('img');
+
+            //Store the image path
+            const imagePath = imageElement ? imageElement.getAttribute('src') : null;
+
+            //Configure the title of the modal
+            $('.modal-title').text(rowData[1]);
+
+            //Configure the body of the modal
+            $('#modal .modal-body').html(
+                `
+                    <div class="col-6 mx-auto">
+                        <img src="${imagePath}" style="display: flex; justify-content: center; align-items: center; max-width: 100%; height: 250px; object-fit: contain;"
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="inputGroup-sizing-default">Description</span>
+                            <textarea class="form-control" disabled="true">${rowData[2]}</textarea>
+                        </div>
+                    </div>
+                `
+            );
+
+            //Store the IPN of the user
+            const ipn = document.getElementById('ipn').value;
+
+            //Check if the IPN of the actual user match with the creator of the blueprint
+            if (ipn === rowData[5]) {
+                //Add the neccesary buttons
+                $('#modal .modal-footer').html(
+                    `
+                        <button type="button" class="btn btn-outline-danger" data-bs-target="#modalConfirmDelete"
+                            data-bs-toggle="modal" id="deleteButtonMainModal"><i class="bi bi-trash3"></i> Delete</button>
+                        <button type="button" class="btn btn-primary" id="updateRow"><i class="bi bi-pen"></i> Update</button>
+                        <button type="button" class="btn btn-dark" onclick="previewModel('${rowData[4]}')" id="previewModel"><i class="bi bi-eye-fill"></i> Preview 3D model</button>
+                    `
+                );
+
+                //In other case...
+            } else {
+                //Only add the close button
+                $('#modal .modal-footer').html(
+                    `
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-dark" onclick="previewModel('${rowData[4]}')" id="previewModel"><i class="bi bi-eye-fill"></i> Preview 3D model</button>
+                    `
+                );
+            }
+
+            //Show the modal
+            $('#modal').modal('show');
+
+            //Apply the funcionability to the update button of the modal
+            $('#updateRow').on('click', function () {
+                //Store the row information into a JSON value
+                const rowDataJson = encodeURIComponent(JSON.stringify(rowData));
+
+                //Redirect to the edit blueprint and sent the row information
+                window.location.href = `/library/editModel?data=${rowDataJson}`;
+            });
+
+            //Configure the title of the confirm delete modal
+            $('#modalConfirmDelete .modal-title').text('Do you want to delete this source?');
+
+            //Configure the body of the delete modal
+            $('#modalConfirmDelete .modal-body').text(rowData[1]);
+
+            //Configure the funcionability to the confirm of the delete modal of the blueprint
+            $('#deleteRow').on('click', function () {
+                //Call the end point to delete the data source using the ID and the name of the table
+                fetch(`/library/api/delete-row/${rowData[0]}/${"blueprints"}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            console.error('Error deleting the record');
+                        }
+
+                        //Hide the delete modal
+                        $('#modalConfirmDelete').modal('hide');
+
+                        //Call the method to disp¡lay the delete alert
+                        deleteElement("Item successfully deleted. Reloading page");
+                    })
+                    .catch(error => {
+                        console.error('Error: ', error);
+                    });
+            });
+        });
+    });
+</script>
+
+</html>

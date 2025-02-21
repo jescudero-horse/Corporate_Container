@@ -1,0 +1,63 @@
+<div class="row mb-3">
+    <div class="col">
+        <div class="mb-3 form-floating">
+            <input type="text" class="form-control" id="flowName" name="flowName" placeholder="Flow name">
+            <label for="Flow name" class="form-label" style="color: #6c757d;">Flow name</label>
+        </div>
+    </div>
+
+    <div class="col" hidden>
+        <div class="mb-3 form-floating">
+            <input type="text" class="form-control" id="flowID" name="flowID" placeholder="Flow ID">
+            <label for="Flow ID" class="form-label" style="color: #6c757d;">Flow ID</label>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="mb-3 form-floating">
+            <input type="email" class="form-control" id="owner" name="owner" placeholder="Owner">
+            <label for="Owner" class="form-label" style="color: #6c757d;">Owner</label>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="mb-3">
+        <div class="form-floating">
+            <select class="form-select" id="state" name="state" aria-label="State">
+                <option value="Deactivated">Deactivated</option>
+                <option value="Activated">Activated</option>
+            </select>
+            <label for="State" class="form-label" style="color: #6c757d;">State</label>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" name="description"></textarea>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="mb-3 form-floating">
+        <input type="url" class="form-control" id="url" name="url" placeholder="URL">
+        <label for="URL" class="form-label" style="color: #6c757d;">URL</label>
+    </div>
+
+    <div class="col" id="factorie_div">
+        <div class="form-floating">
+            <select class="form-select" id="factory" name="factory" aria-label="Factory">
+                <option value="PFA">PFA</option>
+                <option value="Curitiba">Curitiba</option>
+                <option value="Motores">Motores</option>
+                <option value="Mioveni">Mioveni</option>
+                <option value="Bursa">Bursa</option>
+                <option value="Aveiro">Aveiro</option>
+                <option value="Sevilla">Sevilla</option>
+                <option value="CMC">CMC</option>
+            </select>
+            <label for="factory" class="form-label" style="color: #6c757d;">Factory</label>
+        </div>
+    </div>
+</div>
+

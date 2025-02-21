@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/script/library/getUserID.js"></script>
+    <title><%- title%></title>
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body class="alert"></body>
+
+<script>
+    //Call the method to display the update alert
+    updateElement('/library/appList_Admin');
+</script>
+
+</html>

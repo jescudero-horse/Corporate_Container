@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <!--INCLUDE THE HEADER-->
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <!--NAVIGATION PANEL (ADMIN MODE)-->
+    <%- include('partials/navigation_Admin.ejs') %>
+
+        <div class="container">
+            <h1><%- title%></h1>
+        </div>
+
+        <!--BUTTON WITH THE CATEGORIES-->
+        <%- include('partials/categories.ejs') %>
+
+            <!--FOOTER-->
+            <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    //Identify all the buttons
+    const appList = document.getElementById('appList');
+    const dataReports = document.getElementById('dataReports');
+    const microsoftApps = document.getElementById('microsoftApps');
+    const models = document.getElementById('models');
+    const practise = document.querySelector('[data-custom=practise]');
+    const training = document.getElementById('training');
+    const dataDriven = document.getElementById('dataDriven');
+
+    //Add the href attribute with the routes
+    appList.setAttribute('href', '/library/appList_Admin');
+    dataReports.setAttribute('href', '/library/dataAnalyseReportsAdmin');
+    microsoftApps.setAttribute('href', '');
+    models.setAttribute('href', '/library/3dModels_Admin');
+    bestPractise.setAttribute('href', '/library/bestPractise_Admin');
+    training.setAttribute('href', '/library/training_Admin');
+    dataDriven.setAttribute('href', '/library/dataDriven_admin');
+
+    /* Hide the blueprints and the training categorie */
+    training.setAttribute('hidden', 'true');
+
+    //Call the metod to apply the funcionality for the microsoft apps div
+    applyDropdownFunctionality('microsoftApps', 'buttonContainer');
+
+    //Call the method to apply the funcionality for the practise div
+    applyDropdownFunctionality('practise', 'buttonContainer-practise');
+
+    /**
+     * Function to apply the funcionality for each section category (hide/show buttons)
+     * */
+    function applyDropdownFunctionality(elementId, buttonContainerId) {
+        //Store the element of the div section
+        const element = document.getElementById(elementId);
+
+        //Store the element of the buttons container
+        const buttonContainer = document.getElementById(buttonContainerId);
+
+        //Apply the funcionality for the div section
+        element.addEventListener('click', function (event) {
+            //Prevent default
+            event.preventDefault();
+
+            //Check if the button container is hiden...
+            if (buttonContainer.classList.contains('hidden')) {
+                buttonContainer.classList.remove('hidden');
+                buttonContainer.classList.add('fade-in');
+
+                //Apply the funcionality for he Microsoft Apps sections
+                if (elementId === 'microsoftApps') {
+                    const powerAppsButton = document.getElementById('powerAppsButton');
+                    const powerAutomateButton = document.getElementById('powerAutomateButton');
+
+                    if (powerAppsButton && powerAutomateButton) {
+                        powerAppsButton.addEventListener('click', function () {
+                            window.location.href = '/library/powerApps_Admin';
+                        });
+
+                        powerAutomateButton.addEventListener('click', function () {
+                            window.location.href = '/library/powerAutomate_Admin';
+                        });
+                    }
+
+                    //Apply the funcionality for the practise section
+                } else if (elementId === 'practise') {
+                    const bestPractiseButton = document.getElementById('bestPractise');
+                    const videoStationButton = document.getElementById('videoStation');
+                    const appliedBestPractiseButton = document.getElementById('appliedBestPractise');
+
+                    appliedBestPractiseButton.removeAttribute('hidden');
+
+                    if (bestPractiseButton && videoStationButton) {
+                        bestPractiseButton.addEventListener('click', function () {
+                            window.location.href = '/library/bestPractise_Admin';
+                        });
+
+                        videoStationButton.addEventListener('click', function () {
+                            window.location.href = '/library/videoStation';
+                        });
+
+                        appliedBestPractiseButton.addEventListener('click', function () {
+                            window.location.href = '/library/viewAppliedBestPractise';
+                        });
+                    }
+                }
+
+                //In other case...
+            } else {
+                buttonContainer.classList.remove('fade-in');
+                buttonContainer.classList.add('fade-out');
+
+                setTimeout(function () {
+                    buttonContainer.classList.add('hidden');
+                    buttonContainer.classList.remove('fade-out');
+                }, 500);
+            }
+        });
+    }
+
+    /**
+     * Function to configure Driver.js
+     * */
+    function onAnimationComplete() {
+        //Instance the object
+        const driver = new Driver();
+
+        //Configre the array with the information
+        const tourSteps = [
+            {
+                element: '#appList',
+                popover: {
+                    title: 'App List',
+                    description: 'Here you can view all the applications that are available in Horse. As you are authenticated (admin mode), you will be able to access more information as well as add, update, or delete your own records.',
+                    position: 'right'
+                }
+            },
+            {
+                element: '#dataReports',
+                popover: {
+                    title: 'Data Analysis Report',
+                    description: 'Here you can see all the available reports... remember to use the filters and the search bar to refine your search. As you are authenticated (admin mode), you will be able to access more information as well as add, update, or delete your own records.',
+                    position: 'right',
+                },
+            },
+            {
+                element: '#microsoftApps',
+                popover: {
+                    title: 'Microsoft Apps',
+                    description: 'Within this category, you can search for information about Power Apps and Power Automate... remember to ask the user for permission to use them. As you are authenticated (admin mode), you will be able to access more information as well as add, update, or delete your own records.',
+                    position: 'left',
+                },
+            },
+            {
+                element: "#practise",
+                popover: {
+                    title: 'Practise',
+                    description: 'Within this category, you will find the different best practices, along with the applied best practices for each category. You can use the report generator and the video library... As you are authenticated (admin mode), you will be able to access more information as well as add, update, or delete your own records.',
+                    position: 'right'
+                }
+            }
+        ];
+
+        //Use the driver object to configure the steps
+        driver.defineSteps(tourSteps);
+
+        //Set a time out
+        setTimeout(function () {
+            driver.start();
+        }, 100);
+
+        //Stop the animation
+        animation.stop();
+    }
+
+    //Apply the funcionality for the lottie container
+    document.getElementById('lottie-container').addEventListener('click', function () {
+        //Set the speed for the animator
+        animation.setSpeed(2);
+
+        //Play the animation
+        animation.play();
+
+        //Wait for the animation and call the method
+        animation.addEventListener('complete', onAnimationComplete);
+    });
+</script>
+
+</html>

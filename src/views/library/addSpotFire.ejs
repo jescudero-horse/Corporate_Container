@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <!-- INCLUDE THE HEADER -->
+    <%- include('partials/head.ejs') %>
+        <script src="/script/library/information.js"></script>
+</head>
+
+<body>
+    <div id="liveAlertPlaceHolder"></div>
+
+    <div class="adminPanel">
+        <div class="container mt-5">
+            <h1 class="text-center"><%- title%></h1>
+
+            <!-- INCLUDE THE MODAL -->
+            <%- include('partials/modal.ejs') %>
+
+                <!-- INCLUDE THE ASSISTANT BUTTON -->
+                <%- include('partials/floatingButton.ejs') %>
+
+                    <!-- LIVE TOAST -->
+                    <%- include('partials/toast.ejs') %>
+
+                        <form id="addAppForm" action="/library/api/insert-data-spotfire" method="POST"
+                            onsubmit="return validateForm(event)" autocomplete="off">
+
+                            <!--SPOTFIRE FORM-->
+                            <%- include('partials/spotFire_form.ejs') %>
+
+                                <button id="continue" type="submit" class="btn btn-primary">Continue</button>
+                        </form>
+        </div>
+    </div>
+
+    <!--FOOTER-->
+    <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    //Identify the toast
+    const toast = document.getElementById('liveToast');
+
+    //Set the message using JQuery
+    $('#liveToast .toast-body').text('The task of assigning the number has been automated. If necessary, you can change the assigned number by updating the item.');
+
+    //Configure the toast
+    const toastBootstrap = new bootstrap.Toast(toast, {
+        autohide: false
+    });
+
+    //Show the toast
+    toastBootstrap.show();
+
+    /**
+     * Function to validate the from to avoid empty elements
+     * */
+    function validateForm(event) {
+        //Identify the place holder for the alerts
+        const alertPlaceHolder = document.getElementById('liveAlertPlaceHolder');
+
+        //Configure the method to configure the alert message
+        const appendAlert = (message, type) => {
+            const wrapper = document.createElement('div')
+            wrapper.innerHTML = [
+                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                `   <div>${message}</div>`,
+                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                '</div>'
+            ].join('')
+
+            alertPlaceHolder.append(wrapper);
+        }
+
+        //Identify all the necesary elements
+        var title = document.getElementById("title").value;
+        var dataSource = document.getElementsByName("dataSource").value;
+        var location = document.getElementById('location').value;
+
+        //Verify if one of the parent checbox are checked
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        var h4CheckboxesChecked = false;
+
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.parentNode.tagName.toLowerCase() === 'h4') {
+                h4CheckboxesChecked = true;
+            }
+        });
+
+        //Check if the parent checkbox are checked
+        if (!h4CheckboxesChecked) {
+            //Call the method to display the message alert
+            appendAlert('You have to select one checkbox of function', 'danger')
+
+            //Move the window position view to the top
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+            event.preventDefault();
+        } else if (title === "" || dataSource === "" || location === '') {
+            //Call the method to display the messahe alert
+            appendAlert('You have to insert a title, location and the data source for the new Data Analyse source', 'danger')
+
+            //Move the window position view to the top
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+            //Stop the propagation
+            event.preventDefault();
+        }
+    }
+
+    //Configre the array with the information
+    const tourSteps = [
+        {
+            element: '#title',
+            popover: {
+                title: 'Title',
+                description: "Here you should fill in the name of the report.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: '#factory',
+            popover: {
+                title: 'Factory',
+                description: "Here you should select the factory from which the report originates.",
+                position: 'bottom',
+            },
+        },
+        {
+            element: "#typeReport",
+            popover: {
+                title: 'Type report',
+                description: "Here you should select the type of report.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: "#platform",
+            popover: {
+                title: 'Platform',
+                description: "Here you must select the platform on which the report is available.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: "#labelFunction",
+            popover: {
+                title: 'Function/Subfunction',
+                description: "Here you should fill in both the function and the sub-function that the report serves.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: "#location",
+            popover: {
+                title: 'URL',
+                description: "In this field, you should fill in the access URL for the report.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: "#description",
+            popover: {
+                title: 'Description',
+                description: "Within this field, you should fill in a description that serves as a reference for the users.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: "#videoTutorial",
+            popover: {
+                title: 'Video tutorial',
+                description: "This field is not mandatory... this field is used to fill in a URL with a tutorial video.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: "#dataSource",
+            popover: {
+                title: 'Data source',
+                description: "This field should be filled in with the data source of the report.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: "#renault",
+            popover: {
+                title: "Will Renault use this report?",
+                description: "This switch should be marked in case the report will be used by Renault personnel.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: "#contact",
+            popover: {
+                title: 'Contact',
+                description: "This field should be filled in with the email of the person who created the report or a collaborator... so that users can contact them in case of questions/problems.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: "#comments",
+            popover: {
+                title: 'Comment',
+                description: "Field for the user who created this report to add any information they deem necessary.",
+                position: 'bottom'
+            }
+        },
+        {
+            element: "#continue",
+            popover: {
+                title: 'Continue',
+                description: "Once you have all the fields of your report completely ready, you should click on the 'Continue' button to upload the information to the website.",
+                position: 'right'
+            }
+        },
+    ];
+
+    /**
+     * Method to load when the form is loaded
+     */
+    window.addEventListener('DOMContentLoaded', function () {
+        //Apply the funcionality for the lottie container
+        document.getElementById('floatin_button_assistant').addEventListener('click', function () {
+            //Set the speed for the animator
+            animation.setSpeed(2);
+
+            //Play the animation
+            animation.play();
+
+            //Wait for the animation and call the method
+            animation.addEventListener('complete', function () {
+                onAnimationComplete(tourSteps);
+            });
+        });
+    });
+</script>
+
+</html>

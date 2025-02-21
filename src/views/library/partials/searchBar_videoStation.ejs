@@ -1,0 +1,37 @@
+<div class="container">
+    <div class="d-flex align-items-center">
+        <input id="searchBar_videoStation" class="form-control me-2" type="search" autocomplete="off"
+            placeholder="Search..." style="width: 500px;">
+        <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample"
+            aria-controls="offcanvasExample">
+            Filters <i class="bi bi-funnel"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    //Apply the funcionality of the search bar
+    $('#searchBar_videoStation').on('keyup', function () {
+        //Store the input value into lower case
+        var searchText = this.value.toLowerCase();
+
+        //Iterate throw the video container
+        $('#videosContainer .col-md-3').each(function () {
+            //Store the actual column
+            var col = $(this);
+
+            //Store the title of the best practise
+            var title = col.find('.card-body .input-group-text').first().text().toLowerCase();
+
+            //Store the IPN of the author of their best practise
+            var ipn = col.find('.card-footer .input-group-text').text().toLowerCase();
+
+            //Check if the title or the IPN match with the input value of the search bar
+            if (title.indexOf(searchText) !== -1 || ipn.indexOf(searchText) !== -1) {
+                col.show();
+            } else {
+                col.hide();
+            }
+        });
+    })
+</script>

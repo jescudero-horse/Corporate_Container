@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <script src="/script/library/appList.js"></script>
+    <script src="/script/library/getUserID.js"></script>
+    <!--INCLUDE THE HEAD-->
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <!--MODAL-->
+    <%- include('partials/modal.ejs') %>
+
+        <!--TOAST-->
+        <%- include('partials/toast.ejs') %>
+
+            <!--NAVIGATION PANEL (ADMIN MODE)-->
+            <%- include('partials/navigation_Admin.ejs') %>
+
+                <input type="text" id="ipn" hidden>
+
+                <div class="container">
+                    <h1><%-title %></h1>
+
+                    <div class="container">
+                        <a href="/library/addApp" class="btn btn-primary">
+                            <div class="text">Add app <i class="bi bi-plus-circle"></i></div>
+                        </a>
+
+                        <!--TABLE OPTIONS-->
+                        <%- include('partials/tableOptions.ejs') %>
+                    </div>
+                    <br>
+
+                    <!--DATATABLE CONTROLS-->
+                    <%- include('partials/dataTableControl.ejs') %>
+                </div>
+
+                <!-- DATATABLE APP-->
+                <%- include('partials/dataTableApp.ejs') %>
+
+                    <!--FOOTER-->
+                    <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    //Initialize the dataTable
+    $(document).ready(function () {
+        //Apply the funcionabiity to the left button
+        $('#scrollLeftButton').click(function () {
+            $('#list').animate({
+                'marginLeft': "-=250px"
+            })
+        });
+
+        //Apply the funcionability to the rigth button
+        $('#scrollRightButton').click(function () {
+            $('#list').animate({
+                'marginLeft': "+=200px"
+            });
+        });
+
+        //Apply the funcionability to the reset position
+        $('#scrollResetButton').click(function () {
+            $('#list').animate({
+                'marginLeft': "0px"
+            });
+        });
+
+        //Configure the buttons and hide columns
+        var datatable = $('#dataTable').DataTable({
+            columnDefs: [
+                { targets: 0, visible: false },
+                { targets: 3, visible: false },
+                { targets: 4, visible: false },
+                { targets: 5, visible: false },
+                { targets: 6, visible: false },
+                { targets: 7, visible: false },
+                { targets: 8, visible: false },
+                { targets: 0, visible: false },
+                { targets: 10, visible: false },
+                { targets: 11, visible: false },
+                { targets: 12, visible: false },
+                { targets: 13, visible: false },
+                { targets: 14, visible: false },
+                { targets: 21, visible: false },
+                { targets: 26, visible: false }
+            ],
+
+            //Configure the buttons to export the datatable 
+            buttons: [
+                //Configurate the copy button
+                {
+                    extend: 'copy',
+                    text: 'Copy to clipboard <i class="bi bi-clipboard2-data-fill"></i>',
+                    className: 'dropdown-item',
+                    exportOptions: {
+                        modifier: {
+                            selected: true
+                        }
+                    }
+                },
+
+                //Configurate the excel export button
+                {
+                    extend: 'excel',
+                    text: 'Export to Excel file <i class="bi bi-filetype-xlsx"></i>',
+                    className: 'dropdown-item',
+                    exportOptions: {
+                        modifier: {
+                            selected: true,
+                        }
+                    }
+                },
+
+                //Configurate the hide/show columns button
+                {
+                    extend: 'colvis',
+                    text: 'Show/Hide columns <i class="bi bi-eye"></i>',
+                    className: 'dropdown-item'
+                },
+
+                //Configure the personal data source
+                {
+                    text: 'View the personal list <i class="bi bi-list-ol"></i>',
+                    className: 'dropdown-item',
+                    action: function (e, dt, node, config) {
+                        //Store the IPN of the user
+                        const ipn = document.getElementById('ipn').value;
+
+                        //Filter the dataTable using the userID column and the value of the ipn hidden input
+                        $('#dataTable').DataTable().column(26).search(ipn).draw();
+
+                        //Identify the toast
+                        const toast = document.getElementById('liveToast');
+
+                        //Add the message and the  button to the body of the toast
+                        $('#liveToast .toast-body').html(
+                            `
+                                <p>If you want to return to the normal list, make a clic on the "Return to normal list"<p>
+                                <button onclick="returnNormalList(26)" type="button" class="btn btn-primary btn-sm">Return to normal list</button>
+                            `
+                        );
+
+                        //Configure the header of the toast
+                        $('#liveToast .toast-header').html(
+                            `
+                                <img src="/assets/library/HORSE_FAVICON.ico" class="rounded me-2" style="width: 50px; height: 50px;">
+                                <strong class="me-auto">Digital Library</strong>
+                            `
+                        )
+
+                        //Configure the toast
+                        const toastBootstrap = new bootstrap.Toast(toast, {
+                            autohide: false
+                        });
+
+                        //Show the toast
+                        toastBootstrap.show();
+                    }
+                }
+            ]
+        });
+
+        //Add the buttons to the dropdown
+        $('#dropdown').append(datatable.buttons().container());
+
+        //Store in a variable the dataTable
+        var table = $('#dataTable').DataTable();
+
+        $('#dataTable tbody').on('click', 'tr', function () {
+            //Store the row information into a variable
+            var rowData = table.row(this).data();
+
+            //Configure the title of the modal
+            $('.modal-title').text(rowData[1]);
+
+            //Configure the body of the modal
+            $('#modal .modal-body').html(
+                `
+                <table id="modal-table" class="table table-striped">
+                    <tread>
+                    <tr>
+                        <th scope="col">CI Number</th>
+                        <th scope="col">Short Name</th>
+                        <th scope="col">KM Long name</th>
+                        <th scope="col">KM Short Name</th>
+                        <th scope="col">Long name</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">SIA</th>
+                        <th scope="col">Install status</th>
+                        <th scope="col">Criticality</th>
+                        <th scope="col">Support groups</th>
+                        <th scope="col">Bussines Line</th>
+                        <th scope="col">Group level usage</th>
+                        <th scope="col">Owned by</th>
+                        <th scope="col">Managed by</th>
+                        <th scope="col">Led by</th>
+                        <th scope="col">Developed by</th>
+                        <th scope="col">Hosting provider</th>
+                        <th scope="col">Execution platform</th>
+                        <th scope="col">Domain IRN</th>
+                        <th scope="col">Sub-Domain</th>
+                        <th scope="col">CMDB Description </th>
+                        <th scope="col">Created</th>
+                        <th scope="col">Created by</th>
+                        <th scope="col">Updated</th>
+                        <th scope="col">Updated by</th>
+                    </tr>
+                    </tread>
+
+                    <tbody>
+                        <tr>
+                            <th>` + rowData[1] + `</th>
+                            <th>` + rowData[2] + `</th>
+                            <th>` + rowData[3] + `</th>
+                            <th>` + rowData[4] + `</th>
+                            <th>` + rowData[5] + `</th>
+                            <th>` + rowData[6] + `</th>
+                            <th>` + rowData[7] + `</th>
+                            <th>` + rowData[8] + `</th>
+                            <th>` + rowData[9] + `</th>
+                            <th>` + rowData[10] + `</th>
+                            <th>` + rowData[11] + `</th>
+                            <th>` + rowData[12] + `</th>
+                            <th>` + rowData[13] + `</th>
+                            <th>` + rowData[14] + `</th>
+                            <th>` + rowData[15] + `</th>
+                            <th>` + rowData[16] + `</th>
+                            <th>` + rowData[17] + `</th>
+                            <th>` + rowData[18] + `</th>
+                            <th>` + rowData[19] + `</th>
+                            <th>` + rowData[20] + `</th>
+                            <th>` + rowData[21] + `</th>
+                            <th>` + rowData[22] + `</th>
+                            <th>` + rowData[23] + `</th>
+                            <th>` + rowData[24] + `</th>
+                            <th>` + rowData[25] + `</th>
+                        </tr>
+                    </tbody>
+                </table>
+                `
+            );
+
+            //Store the IPN of the log in user
+            const ipn = document.getElementById('ipn').value;
+
+            //Check if the IPN of the actual user is the creator of the data source
+            if (ipn === rowData[26]) {
+                //Add the neccesary buttons
+                $('#modal .modal-footer').html(
+                    `
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-outline-danger" data-bs-target="#modalConfirmDelete"
+                            data-bs-toggle="modal" id="deleteButtonMainModal">Delete</button>
+                        <button type="button" class="btn btn-primary" id="updateRow">Update</button>                                              
+                    `
+                );
+
+                //Apply the funcionability to the update button of the modal
+                $('#updateRow').on('click', function () {
+                    //Convert the row information into JSON 
+                    const rowDataJson = encodeURIComponent(JSON.stringify(rowData));
+
+                    //Redirect to the page to upload the data source and we send the data source information in the URL
+                    window.location.href = `/library/editDataReportAdmin?data=${rowDataJson}`;
+                });
+
+                //Only add the close button
+            } else {
+                $('#modal .modal-footer').html(
+                    `
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    `
+                );
+            }
+
+            //Show the modal
+            $('#modal').modal('show');
+
+            //Apply the funcionability to the update button of the modal
+            $('#updateRow').on('click', function () {
+                const rowDataJson = encodeURIComponent(JSON.stringify(rowData));
+
+                //Redirect to the page to update the app information and we send the app info
+                window.location.href = `/library/editApp?data=${rowDataJson}`;
+            });
+
+            //Configure the title of the delete modal
+            $('#modalConfirmDelete .modal-title').text('Do you want to delete this app?');
+
+            //Confire the body of the delete modal
+            $('#modalConfirmDelete .modal-body').text(rowData[1]);
+
+            //Apply the funcionability of the confirm delete modal
+            $('#deleteRow').on('click', function () {
+                //Calle the method to delete the data source using the ID and the name of the table
+                fetch(`/library/api/delete-row/${rowData[0]}/${"app"}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error deleting the record');
+                        }
+
+                        //Hide the delete modal
+                        $('#modalConfirmDelete').modal('hide');
+
+                        //Call the method to display the delete alert
+                        deleteElement("Item successfully deleted. Reloading page");
+                    })
+                    .catch(error => {
+                        console.error('Error: ', error);
+                    })
+            });
+        });
+    });
+</script>
+
+</html>

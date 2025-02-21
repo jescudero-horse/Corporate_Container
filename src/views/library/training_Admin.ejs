@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <script src="/scripts/training.js"></script>
+    <script src="/script/library/getUserID.js"></script>
+    <!--INCLUDE THE HEAD-->
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body>
+    <!--MODAL-->
+    <%- include('partials/modal.ejs') %>
+
+        <!--TOAST-->
+        <%- include('partials/toast.ejs') %>
+
+            <!--NAVIGATION PANEL (ADMIN MODE)-->
+            <%- include('partials/navigation_Admin.ejs') %>
+
+                <input type="text" id="ipn" hidden>
+
+                <div class="container">
+                    <h1><%-title %></h1>
+
+                    <div class="col-md-4">
+                        <button type="button" id="addTrainingSource" class="btn btn-primary">Add training source <i
+                                class="bi bi-plus-circle"></i></button>
+
+                        <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+                            Filters <i class="bi bi-funnel"></i>
+                        </button>
+
+                        <!--TABLE OPTIONS-->
+                        <%- include('partials/tableOptions.ejs') %>
+                    </div>
+
+                    <br>
+                </div>
+
+                <div class="container">
+                    <!--INCLUDE THE TRAINING DATATABLE-->
+                    <%- include('partials/dataTableTraining.ejs') %>
+                </div>
+
+                <!--FOOTER-->
+                <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    function validateForm(event, option) {
+        console.log("Dentro del método VALIDATE FORM");
+
+        //Identify all the elements
+        var title = document.getElementById('title').value;
+        var description = document.getElementById('description').value;
+        var url = document.getElementById('url').value;
+
+        //If one of the inputs are void...
+        if (title == '' || description == '' || url == '') {
+            //Call the method to display the alert
+            voidInput();
+
+            //Stop propagation
+            event.preventDefault();
+
+            //In other case...
+        } else {
+            if (option == 1) {
+                //Call the method to display the success edit source
+                updateElement("/library/training_Admin");
+            } else {
+                //Call the method to display the success add source
+                addElement("New Training source add", "View the training source list", "/library/training_Admin");
+            }
+        }
+    }
+
+    //Apply the funcionality for the add training source button
+    document.getElementById('addTrainingSource').addEventListener('click', function () {
+        //Configure the title of the add training source modal
+        $('#bestPractiseModalForm .modal-title').text("Add a new training source");
+
+        //Configure the body of the add traning source modal
+        $('#bestPractiseModalForm .modal-body').html(`
+            <form id="addSourceForm" action="/insert-data-training" method="POST" autocomplete="OFF" onsubmit="return validateForm(event)">
+                <div class="container">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">Title</span>
+                        <input type="text" class="form-control" aria-label="Title" id="title" name="title" aria-describedby="basic-addon1">
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-text">Description</span>
+                        <textarea class="form-control" aria-label="Description" id="description" name="description"></textarea>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <label class="input-group-text" for="categoryLabel">Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="Procedure">Procedure</option>
+                            <option value="Formation">Formation</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-text">URL</span>
+                        <input type="url" class="form-control" aria-label="URL" id="url" name="url"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Add source</button>
+            </form>
+        `);
+
+        //Show the modal
+        $('#bestPractiseModalForm').modal('show');
+    });
+
+    //Initialize tbhe dataTable
+    $(document).ready(function () {
+        //Configure the buttons and hide columns
+        var table = $('#dataTable').DataTable({
+            //Configure the columns
+            columnDefs: [
+                { targets: 0, visible: false },
+                { targets: 5, visible: false }
+            ],
+
+            //Configure the buttons
+            buttons: [
+                //Configurate the copy button
+                {
+                    extend: 'copy',
+                    text: 'Copy to clipboard <i class="bi bi-clipboard2-data-fill"></i>',
+                    className: 'dropdown-item',
+                    exportOptions: {
+                        modifier: {
+                            selected: true
+                        }
+                    }
+                },
+
+                //Configurate the excel export button
+                {
+                    extend: 'excel',
+                    text: 'Export to Excel file <i class="bi bi-filetype-xlsx"></i>',
+                    className: 'dropdown-item',
+                    exportOptions: {
+                        modifier: {
+                            selected: true,
+                        }
+                    }
+                },
+
+                //Configurate the hide/show button
+                {
+                    extend: 'colvis',
+                    text: 'Show/Hide columns <i class="bi bi-eye"></i>',
+                    className: 'dropdown-item'
+                },
+
+                //Configure the personal data source
+                {
+                    text: 'View the personal list <i class="bi bi-list-ol"></i>',
+                    className: 'dropdown-item',
+                    action: function (e, dt, node, config) {
+                        //Store the IPN of the user
+                        const ipn = document.getElementById('ipn').value;
+
+                        //Filter the dataTable using the userID column and the value of the ipn hidden input
+                        $('#dataTable').DataTable().column(5).search(ipn).draw();
+
+                        //Identify the toast
+                        const toast = document.getElementById('liveToast');
+
+                        //Add the message and the  button to the body of the toast
+                        $('#liveToast .toast-body').html(
+                            `
+                                <p>If you want to return to the normal list, make a clic on the "Return to normal list"<p>
+                                <button onclick="returnNormalList(5)" type="button" class="btn btn-primary btn-sm">Return to normal list</button>
+                            `
+                        );
+
+                        //Configure the header of the toast
+                        $('#liveToast .toast-header').html(
+                            `
+                                <img src="/assets/library/HORSE_FAVICON.ico" class="rounded me-2" style="width: 50px; height: 50px;">
+                                <strong class="me-auto">Digital Library</strong>
+                            `
+                        );
+
+                        //Configure the toast
+                        const toastBootstrap = new bootstrap.Toast(toast, {
+                            autohide: false
+                        });
+
+                        //Show the toast
+                        toastBootstrap.show();
+                    }
+                }
+            ]
+        });
+
+        //Add the buttons to the dropdown
+        $('#dropdown').append(table.buttons().container());
+
+        //Apply the funcionality to the row of the dataTable
+        $('#dataTable').on('click', 'tr', function () {
+            //Store the row information into a variable
+            var rowData = table.row(this).data();
+
+            console.log("ROW DATA: ", rowData);
+
+            //Configure the title of the modal
+            $('#modal .modal-title').text(rowData[1]);
+
+            console.log(rowData[3])
+
+            //Configure the body of the modal
+            $('#modal .modal-body').html(`
+                <table id="modal-table" class="table table-striped">
+                    <thread>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>URL</th>
+                        </tr>
+                    </thread>
+
+                    <tbody>
+                        <tr>
+                            <th>` + rowData[1] + `</th>
+                            <th>` + rowData[2] + `</th>
+                            <th>` + rowData[3] + `</th>
+                            <th>` + rowData[4] + `</th>
+                        </tr>
+                    </tbody>
+                </table>
+            `);
+
+            //Create a temporally div to extract the information
+            var temElement = document.createElement('div');
+
+            //Add the HTML of the URL
+            temElement.innerHTML = rowData[4];
+
+            //Store the information of the URL
+            var urlText = temElement.textContent;
+
+            //Use the CSS selector to find the button
+            const button = document.querySelector('.btn.btn-primary');
+            let url = "";
+
+            //If the button was found
+            if (button) {
+                //Store the attribute of the button
+                const onclickAttribute = button.getAttribute('onclick');
+
+                //If we have the attribute
+                if (onclickAttribute) {
+                    /** Store the URL from the attribute */
+                    const urlStartIndex = onclickAttribute.indexOf("'") + 1;
+                    const urlEndIndex = onclickAttribute.lastIndexOf("'");
+                    url = onclickAttribute.substring(urlStartIndex, urlEndIndex);
+
+                    //Apply the funcionability to the button of the table modal
+                    $('#modal-table tbody tr td:nth-child(5)').html(`<a href="${url}" target="_blank">${url}</a>`);
+                } else {
+                    console.log("El botón no tiene atributo onclick.");
+                }
+            } else {
+                console.log("No se encontró ningún botón con la clase '.btn.btn-primary'.");
+            }
+
+            //Check if the IPN of the actual user match with the creator of the source
+            if (document.getElementById('ipn').value == rowData[5]) {
+                //Add the neccesay buttons on the modal
+                $('#modal .modal-footer').html(
+                    `
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-outline-danger" data-bs-target="#modalConfirmDelete"
+                            data-bs-toggle="modal" id="deleteButtonMainModal">Delete</button>
+                        <button type="button" class="btn btn-primary"data-bs-target="#bestPractiseModalForm" id="updateRow">Update</button>                                              
+                    `
+                );
+
+                //Apply the funcionability to the update button of the modal
+                $('#updateRow').on('click', function () {
+                    //Hide the main modal
+                    $('#modal').modal('hide');
+
+                    //Configure the title of the update training source modal
+                    $('#bestPractiseModalForm .modal-title').text("Update this training source: ", rowData[1]);
+
+                    //Configure the body of the update training source modal
+                    $('#bestPractiseModalForm .modal-body').html(`
+                        <form id="addSourceForm" action="/update-data-training" method="POST" autocomplete="OFF" onsubmit="return validateForm(event, 1)">
+                            <input type="text" id="id" name="id" value="${rowData[0]}" hidden>
+                            <div class="container">
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text" id="basic-addon1">Title</span>
+                                    <input type="text" class="form-control" aria-label="Title" id="title" name="title" aria-describedby="basic-addon1" value="${rowData[1]}">
+                                </div>
+
+                                <div class="input-group">
+                                    <span class="input-group-text">Description</span>
+                                    <textarea class="form-control" aria-label="Description" id="description" name="description">${rowData[2]}</textarea>
+                                </div>
+
+                                <div class="input-group mb-3">
+                                    <label class="input-group-text" for="categoryLabel">Category</label>
+                                    <select class="form-select" id="category" name="category" selected="${rowData[3]}">
+                                        <option value="Formation" ${rowData[3] === 'Procedure' ? 'selected' : ''}>Procedure</option>
+                                        <option value="Formation" ${rowData[3] === 'Formation' ? 'selected' : ''}>Formation</option>
+                                    </select>
+                                </div>
+
+                                <div class="input-group">
+                                    <span class="input-group-text">URL</span>
+                                    <input type="url" class="form-control" aria-label="URL" id="url" name="url" value="${url}"></textarea>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Add source</button>
+                        </form>
+                    `);
+
+                    //Show the modal
+                    $('#bestPractiseModalForm').modal('show');
+                });
+
+                //In other case...
+            } else {
+                //only add the close button
+                $('#modal .modal-footer').html(
+                    `
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    `
+                );
+            }
+
+            //Show the modal
+            $('#modal').modal('show');
+
+            //Configure the title of the delete modal
+            $('#modalConfirmDelete .modal-title').text('Do you want to delete this source?');
+
+            //Configure the body of the delete modal
+            $('#modalConfirmDelete .modal-body').text(rowData[1]);
+
+            //Configure the funcionability to the confirm button of the delete modal of the training source
+            $('#deleteRow').on('click', function () {
+                deleteSource(rowData[0], 'training');
+            });
+
+            //Show the main modal
+            $('#modal').modal('show');
+        });
+    });
+</script>

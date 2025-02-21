@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <!--INCLUDE THE HEADERS-->
+    <%- include('partials/head.ejs') %>
+</head>
+
+<body class="alert"></body>
+
+<script>
+    //Build a bootStrap style button
+    const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+            confirmButton: "btn btn-success",
+            cancelButton: "btn btn-danger",
+            denyButton: "btn btn-secondary"
+        },
+        buttonsStyling: false
+    });
+
+    //Configure the alert
+    swalWithBootstrapButtons.fire({
+        title: "New Blueprint add",
+        text: "Do you want to add another?",
+        icon: "success",
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        denyButtonText: "View the 3D models list",
+        reverseButtons: false,
+        allowOutsideClick: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = "/library/add3dModel";
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            window.location.href = "/library/selectCategories";
+        } else if (result.isDenied) {
+            window.location.href = "/library/3dModels_Admin";
+        }
+    });
+</script>
+
+</html>

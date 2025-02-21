@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <%- include('partials/head.ejs') %>
+        <script src="/script/library/powerApps.js"></script>
+        <script src="/script/library/information.js"></script>
+</head>
+
+<body>
+    <!-- MAIN MODAL -->
+    <%- include('partials/modal.ejs') %>
+
+        <!--NAVIGATION PANEL-->
+        <%- include('partials/navigation.ejs') %>
+
+            <!-- LIVE TOAST -->
+            <%- include('partials/toast.ejs') %>
+
+                <div class="container">
+                    <h1><%-title %></h1>
+
+                    <div class="col-md-4">
+                        <button id="filterButton" class="btn btn-primary" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+                            Filters <i class="bi bi-funnel"></i>
+                        </button>
+
+                        <button id="viewReport" class="btn btn-light"
+                            onclick="openLink('https://abire7-m4.intra.renault.fr:8443/spotfire/wp/OpenAnalysis?file=/JMM/OPE/INFORMATION_MODEL/INFORMATION_LINKS/corporate_central/Report_digital_library')">View
+                            SpotFire report</button>
+                    </div>
+
+                    <!--MODAL-->
+                    <%- include('partials/modal.ejs') %>
+
+                        <!--POWERAPPS FILTERS-->
+                        <%- include('partials/filters_powerApps.ejs') %>
+
+                            <!--DATATABLE POWER APPS-->
+                            <%- include('partials/dataTablePowerApps.ejs') %>
+                </div>
+
+                <!--FOOTER-->
+                <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    //Create a variable to store the ID of the powerApp
+    let idPowerApp;
+
+    //Store in a variable the modal
+    const modal = document.getElementById('modal');
+
+    //Create a method when the modal we will open
+    modal.addEventListener('shown.bs.modal', function () {
+        //Use fetch() to make the request to select all the associated sites using the powerApp ID
+        fetch(`/library/api/getAssociatedSites/${idPowerApp}`, {
+            method: 'GET'
+        })
+            //Control the response
+            .then(response => {
+                if (!response.ok) {
+                    console.error('No se han podido obtener los datos de los sitios asociados');
+                }
+                return response.json();
+            })
+
+            //Control the data
+            .then(data => {
+                //Create a variable to instance the URL list 
+                var ul = document.querySelector('#urlList');
+
+                //Iterate throw the elements data to display it into the URL list
+                data.forEach(item => {
+                    //Create a LI element
+                    var li = document.createElement('li');
+
+                    //Set the class of the LI element
+                    li.className = 'list-group-item';
+
+                    //Set the URL into the LI element
+                    li.textContent = item.urlSite;
+
+                    //Add an event listener to each LI elements of the URL list
+                    li.addEventListener('click', function () {
+                        //Store the URL into a variable
+                        var url = item.urlSite;
+
+                        //Check if the URL doesnt beggin with https://
+                        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                            url = 'http://' + url;
+                        }
+
+                        //Open the URL in another tab
+                        window.open(url, '_blank');
+                    })
+
+                    //Display the LI element into the URL list
+                    ul.appendChild(li);
+                });
+            });
+
+        //Use fetch() to make the request to select all the factories sites using the powerApp ID
+        fetch(`/library/api/getFactories/${idPowerApp}`, {
+            method: 'GET'
+        })
+            //Control the response
+            .then(response => {
+                //If the response is not ok
+                if (!response.ok) {
+                    console.error('No se han podido obtener los datos de las factories');
+                }
+
+                //Return de data
+                return response.json();
+            })
+
+            //Control the data
+            .then(data => {
+                //Create a variable to instance the factories list
+                var ul = document.querySelector('#factoriesList');
+
+                //Iterate throw the data to display the information into the list
+                data.forEach(item => {
+                    //Create a li element
+                    var li = document.createElement('li');
+
+                    //Set the class to the LI element
+                    li.className = 'list-group-item';
+
+                    //Set the factory to the LI elemet
+                    li.textContent = item.factory;
+
+                    //Display the LI elemento into the factories list
+                    ul.appendChild(li);
+                });
+            })
+
+        //Use fetch() to make the request to select all the factories sites using the powerApp ID
+        fetch(`/library/api/getPowerAutomate_PowerApp/${idPowerApp}`, {
+            method: 'GET'
+        })
+            //Control the response
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error fetching data');
+                }
+
+                return response.json();
+            })
+
+            //Control the data
+            .then(data => {
+                console.log("Datos obtenidos: ", data.length);
+
+                //If there have power automate...
+                if (data.length !== 0) {
+                    //Create an instance of the body of the table
+                    let tbody = $('#modal-table-powerAutomate tbody');
+
+                    //Empty the body of the table
+                    tbody.empty();
+
+                    //Iterate throw the data
+                    data.forEach(item => {
+                        console.log("Item: ", item);
+                        //Create a row with the Power Automate information
+                        let row = `
+                            <tr>
+                                <td>${item.flowName}</td>  <!-- Flow name -->
+                                <td>${item.owner}</td>  <!-- Owner -->
+                                <td>${item.state}</td>  <!-- State -->
+                                <td>${item.description}</td>  <!-- Description -->
+                                <td><a href="${item.url}" target="_blank">${item.url}</a></td>  <!-- URL -->
+                            </tr>
+                        `;
+
+                        //Add the row into the table
+                        tbody.append(row);
+                    });
+
+                    //In other case...
+                } else {
+                    //Hide the title of the Power Automate
+                    document.getElementById('titlePowerAutomate').setAttribute('hidden', 'true');
+
+                    //Hide the table of the Power Automate
+                    document.getElementById('modal-table-powerAutomate').setAttribute('hidden', 'true');
+                }
+            })
+    });
+
+    //Initialize the dataTable and hide the firs column (ID)
+    $(document).ready(function () {
+        //Store in  variable de dataTable component
+        var table = $('#dataTable').DataTable();
+
+        //Hide the ID column
+        $('#dataTable').DataTable().column(0).visible(false);
+
+        //Hide the PowerAutomate column
+        $('#dataTable').DataTable().column(8).visible(false);
+
+        //Hide the userID column
+        $('#dataTable').DataTable().column(10).visible(false);
+
+        //Apply the funcionability to the row of the dataTable
+        $('#dataTable tbody').on('click', 'tr', function () {
+            //Store the row information into a variable
+            var rowData = table.row(this).data();
+
+            //Create an array to store the index wich we want to show the modal
+            const columnIndex = [0, 1, 2, 3, 4]
+
+            //Store the index of the actual column
+            var clickedColumnIndex = $(event.target).closest('td').index();
+
+            //Store the ID of the powerApp
+            idPowerApp = rowData[0];
+
+            //Hide the update and the delete buttons of the modal
+            $('#updateRow').hide();
+            $('#deleteButtonMainModal').hide();
+
+            //Configure the title of the modal
+            $('#modal .modal-title').text('Row Details: ' + rowData[1]);
+
+            //Check if the actual index of the column is in the array with the available index
+            if (columnIndex.includes(clickedColumnIndex)) {
+                //Configure the body of the modal
+                $('#modal .modal-body').html(`
+                        <table id="modal-table" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Owner</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Created</th>
+                                <th>URL</th>
+                                <th>SharePoint</th>
+                                <th class="powerAutomateColumn">PowerAutomate Name</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <th>` + rowData[1] + `</th>
+                                <th>` + rowData[2] + `</th>
+                                <th>` + rowData[3] + `</th>
+                                <th>` + rowData[4] + `</th>
+                                <th>` + rowData[5] + `</th>
+                                <th>` + rowData[6] + `</th>
+                                <th>` + rowData[7] + `</th>
+                                <td class="powerAutomateColumn">` + (rowData[9] != null ? rowData[9] : '') + `</td>
+                            </tr>
+                            
+                            </tbody>
+                        </table>
+
+                        <div class="col-12">
+                        <h4 style="text-align: center;">Associated Sites</h4>
+                        <ul class="list-group" id="urlList" name="urlList">
+
+                        </ul>
+
+                        <br>
+
+                        <h4 style="text-align: center;">Factories</h4>
+                        <ul class="list-group" id="factoriesList" name="factoriesList">
+
+                        </ul>
+
+                        <br>
+
+                        <h4 style="text-align: center;" id="titlePowerAutomate">Power Automate</h4>                        
+                        <table id="modal-table-powerAutomate" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Flow name</th>
+                                    <th>Owner</th>
+                                    <th>State</th>
+                                    <th>Description</th>
+                                    <th>URL</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                `);
+
+                //If the PowerAutomate is NULL...
+                if (rowData[9] == null) {
+                    //Hide the column in the modal table
+                    $('#modal-table .powerAutomateColumn').hide();
+                }
+
+                //Show the modal
+                $('#modal').modal('show');
+            }
+        })
+    });
+
+    //Configre the array with the information
+    const tourSteps = [
+        {
+            element: '#filterButton',
+            popover: {
+                title: 'Filters',
+                description: 'If you press this button, you can display a menu where you can make use of the available filters',
+                position: 'right'
+            }
+        },
+        {
+            element: '#viewReport',
+            popover: {
+                title: 'View report',
+                description: "By clicking this button, you will be able to view a report of the available information… you will need to log in with your ARCA credentials.",
+                position: 'bottom',
+            },
+        },
+        {
+            element: "#dt-search-0",
+            popover: {
+                title: 'Search bar',
+                description: 'By using the search bar, you can filter through all the elements of the table...',
+                position: 'left'
+            }
+        },
+        {
+            element: "#dt-length-0",
+            popover: {
+                title: 'Entries per page',
+                description: "Here you can set the number of entries you want to display in the table.",
+                position: 'right'
+            }
+        }
+    ];
+</script>
+
+</html>

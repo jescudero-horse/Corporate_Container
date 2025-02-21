@@ -1,0 +1,75 @@
+<nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="/assets/library/logo_HORSE.png" alt="Logo" class="navbar-logo">
+            Digital Library
+        </a>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item" id="appListNav" hidden>
+                    <a class="nav-link active" aria-current="page" href="/library/appList">App List</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Good practise
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/library/bestPractise">Best Practise</a></li>
+                        <li><a class="dropdown-item" href="/library/videoStation">Video Station</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/library/dataAnalyseReports">Data Analyse
+                        Reports</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Microsoft Apps
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/library/powerApps">PowerApps</a></li>
+                        <li><a class="dropdown-item" href="/library/powerAutomate">PowerAutomate</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item" hidden>
+                    <a class="nav-link active" aria-current="page" href="/library/3dModels">3D models</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/library/dataDriven">Data Driven</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/library/adminPanel">Log In</a>
+                </li>
+
+                <li class="nav-item" hidden>
+                    <a class="nav-link active" onclick="openChatBot()" aria-current="page">Use the Chatbot <i class="bi bi-chat-square-dots-fill"></i></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="lottie-container"></div>
+</nav>
+
+<script>
+    //Create an instance of "Horsito"
+    const animation = lottie.loadAnimation({
+        container: document.getElementById('lottie-container'),
+        renderer: 'svg',
+        loop: false,
+        autoplay: false,
+        path: '/animations/library/Asistente.json'
+    });
+
+    /**
+     * Function to open the chatbot in a new tab
+     * */
+    function openChatBot() {
+        window.open('/library/Chatbot', '_blank');
+    }
+</script>

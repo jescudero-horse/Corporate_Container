@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%- title%></title>
+    <%- include('partials/head.ejs') %>
+        <script src="/scripts/blueprints.js"></script>
+</head>
+
+<body>
+    <!--NAVIGATION PANEL-->
+    <%- include('partials/navigation.ejs') %>
+
+        <!--MODAL-->
+        <%- include('partials/modal.ejs') %>
+
+            <input type="text" id="imagePath" hidden>
+
+            <div class="container">
+                <h1><%-title %></h1>
+
+                <br>
+
+                <!--BLUEPRINTS DATATABLE-->
+                <%- include('partials/dataTableBlueprints.ejs') %>
+            </div>
+
+            <!--FOOTER-->
+            <%- include('partials/footer.ejs') %>
+</body>
+
+<script>
+    $(document).ready(function () {
+        //Store and intitialize the dataTable component
+        var table = $('#dataTable').DataTable({
+            columnDefs: [
+                { targets: 0, visible: false },
+                { targets: 4, visible: false },
+                { targets: 5, visible: false }
+            ]
+        });
+
+        //Apply the funcionability to each row
+        $('#dataTable tbody').on('click', 'tr', function () {
+            //Store the information of the row
+            var rowData = table.row(this).data();
+
+            //Create a temporally div
+            var tempDiv = document.createElement('div');
+
+            //Add the image data in the div
+            tempDiv.innerHTML = rowData[3];
+
+            //Store the image element
+            const imageElement = tempDiv.querySelector('img');
+
+            //Store the image path
+            const imagePath = imageElement ? imageElement.getAttribute('src') : null;
+
+            //Configure the title of the modal
+            $('.modal-title').text(rowData[1]);
+
+            //Configure the body of the modal
+            $('#modal .modal-body').html(
+                `
+                    <div class="col-6 mx-auto">
+                        <img src="${imagePath}" style="display: flex; justify-content: center; align-items: center; max-width: 100%; height: 250px; object-fit: contain;"
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="inputGroup-sizing-default">Description</span>
+                            <textarea class="form-control" disabled="true">${rowData[2]}</textarea>
+                        </div>
+                    </div>
+                `
+            );
+
+            //Configure the button of the modal
+            $('#modal .modal-footer').html(
+                `
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="previewModel('${rowData[4]}')" id="previewModel">Preview model</button>
+                `
+            );
+
+            //Show the modal
+            $('#modal').modal('show');
+        });
+    });
+</script>
+
+</html>
