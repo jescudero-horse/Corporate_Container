@@ -43,7 +43,3 @@ Corporate-Container/
 ## 👨‍💻 Developer
 
 Developed by **jesus.escudero-extern@horse.tech** (Team of **raquel.hernansanz@horse.tech**) at **Horse Valladolid**.
-
----
-
-✨ We hope this project helps with information and logistics management! ✨
