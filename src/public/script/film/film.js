@@ -961,10 +961,10 @@ function generarTablasPorEtapa(etapas) {
                                             <thead>
                                                 <tr class="bg-gray-100">
                                                     <th class="px-4 py-2 border">Operación</th>
-                                                    <th class="px-4 py-2 border">Símbolo</th>
-                                                    <th class="px-4 py-2 border">Distancia</th>
+                                                    <th class="px-4 py-2 border">Símbolo (estándar MTM3)</th>
+                                                    <th class="px-4 py-2 border">Distancia (metros)</th>
                                                     <th class="px-4 py-2 border"><i class="bi bi-arrow-clockwise"></i></th>
-                                                    <th class="px-4 py-2 border"><i class="bi bi-clock-history"></i></th>
+                                                    <th class="px-4 py-2 border"><i class="bi bi-clock-history"></i> Minutos</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -974,7 +974,7 @@ function generarTablasPorEtapa(etapas) {
                                         if (etapa.symbol === 'TL' || etapa.symbol === 'TV' && f === 'F29') {
                                             distanceValue = distancia_total;
                                             tiempoCalculado = TL_TV;
-                                        } else if (etapa.symbol === 'CDV' || etapa.symbol === 'CDL') {
+                                        } else if (etapa.symbol === 'CDV') {
                                             tiempoCalculado = CDV_CDL;
                                         } else if (etapa.symbol === 'NC') {
                                             distanceValue = numero_cruces;
@@ -995,9 +995,9 @@ function generarTablasPorEtapa(etapas) {
                                             distanceValue = distancia_total;
                                             tiempoCalculado = TC_TL;
                                         } else if (etapa.symbol === 'DS10') {
-                                            tiempoCalculado = DS10;
+                                            tiempoCalculado = (DS10 * etapaDeF.cantidad_a_mover) / 100;
                                         } else if (etapa.symbol === 'CDL') {
-                                            tiempoCalculado = CDL;
+                                            tiempoCalculado = (CDL * etapaDeF.cantidad_a_mover) / 100;
                                         } else if (etapa.symbol === 'CCPE') {
                                             tiempoCalculado = CCPE;
                                         } else if (etapa.symbol === 'TC') {
@@ -1078,9 +1078,9 @@ function generarTablasPorEtapa(etapas) {
                                             timeAtUC = timeAtUM / totalPieces;
 
                                         } else if (etapa.symbol === 'DC113') {
-                                            tiempoCalculado = etapaDeF.cantidad_a_mover * DC113;
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * DC113) / 100;
                                         } else if (etapa.symbol === 'CDC') {
-                                            tiempoCalculado = etapaDeF.cantidad_a_mover * CDC;
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * CDC) / 100;
                                         }
 
                                         if (speed === 10) {
