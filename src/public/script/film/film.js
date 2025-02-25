@@ -1,5 +1,5 @@
 //Creamos las variable globales que hacen falta
-let cantidad_a_mover = [], referencia_componente, categoria_seleccionada, operacion_seleccionada, puestoID, linea, fs_totales, ultimoBotonPulsado, conteosPorPuesto = [], contador = 0, cantidadAMoverCadena, mote, planta, tipo_carga = "UM", tipo_operacion = "Programa_Expedicion_Forklift", primer_dia;
+let cantidad_a_mover = [], referencia_componente, categoria_seleccionada, operacion_seleccionada, puestoID, linea, fs_totales, ultimoBotonPulsado, conteosPorPuesto = [], contador = 0, cantidadAMoverCadena, mote, planta, tipo_carga = "UM", tipo_operacion = "Programa_Expedicion_Forklift", primer_dia, numero_picadas;
 
 //Variable global donde almacenarems en un diccionario la referencia y el número de embalajes
 let referencia_embalaje = {};
@@ -894,6 +894,7 @@ function generarTablasPorEtapa(etapas) {
                             let totalPieces = totalPiecesData[0].total_pieces || 1;
                             let timeAtUC = timeAtUM / totalPieces;
                             let color_etapa;
+                            let actividad_en_minutos_final;
 
                             //Creamos un if para controlar la distancia total de la etapa y asi poder modificar el color de la misma... en caso de la distancia sea de 0 a 49
                             if (distancia_total >= 0 && distancia_total <= 49) {
@@ -1121,6 +1122,10 @@ function generarTablasPorEtapa(etapas) {
                                             valor = 1;
                                         }
 
+                                        if (f === 'Descarga camión en muelle (UM)') {
+                                            actividad_en_minutos_final = ((DC113 + CDC + DS10 + CDL) + (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100);
+                                        }
+
                                         return `
                                     <tr>
                                         <td class="px-4 py-2 border">${etapa.method_operation}</td>
@@ -1137,7 +1142,7 @@ function generarTablasPorEtapa(etapas) {
                                                     <td class="px-4 py-2 border font-semibold">Metros<br>${distancia_total}</td>
                                                     <td class="px-4 py-2 border font-semibold">Velocidad<br>${valor}</td>
                                                     <td class="px-4 py-2 border font-semibold">${etapaDeF.cantidad_a_mover}
-                                                    <td class="px-4 py-2 border">${distancia_total * valor}</td>
+                                                    <td class="px-4 py-2 border">${(distancia_total * valor * etapaDeF.cantidad_a_mover) / 100}</td>
                                                 </tr>
 
                                                 <tr>
@@ -1145,7 +1150,7 @@ function generarTablasPorEtapa(etapas) {
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos</td>
-                                                    <td class="px-4 py-2 border">${actividad_en_minutos}</td>
+                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final}</td>
                                                 </tr>
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Tiempo UM</td>
@@ -1985,7 +1990,7 @@ function configurarModal_F29(data) {
                 <input type="number" id="numero_paquetes_cargados" name="numero_paquetes_cargados" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Número de paquetes cargados a la vez (pila)" value="0">
             </div>
             <!--Tipo de carga-->
-            <div class="mb-4">
+            <div class="mb-4" hidden>
                 <label class="block text-gray-700 font-medium mb-2">Tipo de carga</label>
                 <select class="w-full p-2 border border-gray-300 rounded-md" id="tipo_carga" name="tipo_carga">
                     <option value="Muelle">Muelle</option>
@@ -2683,6 +2688,9 @@ function anyadirEtapa(id) {
             //Almacenamos en la variable global el tipo de carga
             tipo_carga = document.getElementById('tipoCarga').value;
 
+            //Almacenamos en una variable el número de picadas
+            numero_picadas = document.getElementById('numeroPicadas').value;
+
             //Almacenamos las referencias separadas por ";"
             const referencias = referencia_componente.split(";").map(ref => ref.trim()).filter(ref => ref !== "");
 
@@ -2793,7 +2801,6 @@ function obtenerValorCarga(item, cantidad_a_expedir, tipo_operacion) {
             if (!response.ok) {
                 //Llamamos a la función para mostrar la alerta para informar al usuario
                 mostrarAlerta('Error al obtener el valor de la carga', 'La referencia no pertenece al turno del puesto', 'error', 0);
-
             }
 
             //Devolvemos los datos
@@ -3037,7 +3044,7 @@ function subirEtapa() {
         referencia_embalaje = encodeURIComponent(JSON.stringify(referencia_embalaje));
 
         //Iniciamos la solicitud GET para añadir la etapa al puesto
-        fetch(`/film/api/anyadirEtapa/${puestoID}/${referencia_embalaje}/${encodeURIComponent(operacion_seleccionada)}/${mote}/${tipo_operacion}`, {
+        fetch(`/film/api/anyadirEtapa/${puestoID}/${referencia_embalaje}/${encodeURIComponent(operacion_seleccionada)}/${mote}/${tipo_operacion}/${numero_picadas}`, {
             method: "POST"
         })
             //Controlamos la respuesta
