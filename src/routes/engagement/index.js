@@ -234,6 +234,66 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
             `;
             break;
 
+        //En caso de que sea "De imagen camión a stock (UM)":
+        case 'De imagen camión a stock (UM)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, PS14, CDC, DS14, CDL)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+            
+        //En caso de que sea "De stock a estantería (UM)":
+        case 'De stock a estantería (UM)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, PS14, CDC, DS15 CDL)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+        
+        //En caso de que sea "De imagen camión a estantería (UM)":
+        case 'De imagen camión a estantería (UM)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, PS14, CDC, DS15 CDL)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+
+        //En caso de que sea "Apertura (UM)":
+        case 'Apertura (UM)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, DC, D1, W5, TT, M1, AL)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+
+        //En caso de que sea "Gestión de residuos (UM)":
+        case 'Gestión de residuos (UM)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, DC, D1, W5, TT, M1, AL)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+
+        //En caso de que sea "Plegar y apilar (UC)":
+        case 'Plegar y apilar (UC)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, p2, l2, g1, p5)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+
         default:
             query = null;
     }
@@ -448,6 +508,89 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 44, //PS15
                 30, //DI21
                 6 //CDL
+            );
+            break;
+
+        //En caso de que sea "De imagen camión a stock (UM)"
+        case 'De imagen camión a stock (UM)':
+            data.push(
+                null, //Linea 
+                10, //Máquina usada
+                10, //Velocidad
+                38, //PS14
+                6, //CDC
+                38, //DS14
+                6 //CDL
+            );
+            break;
+
+        //En caso de que sea "De stock a estantería (UM)"
+        case 'De stock a estantería (UM)':
+            data.push(
+                null, //Linea 
+                10, //Máquina usada
+                10, //Velocidad
+                38, //PS14
+                6, //CDC
+                49, //DS15
+                6 //CDL
+            );
+            break;
+
+        //En caso de que sea "De imagen camión a estantería (UM)"
+        case 'De imagen camión a estantería (UM)':
+            data.push(
+                null, //Linea 
+                10, //Máquina usada
+                10, //Velocidad
+                38, //PS14
+                6, //CDC
+                49, //DS15
+                6 //CDL
+            );
+            break;
+
+        //En caso de que sea "Apertura (UM)"
+        case 'Apertura (UM)':
+            data.push(
+                null, //Linea 
+                10, //Máquina usada
+                10, //Velocidad
+                4, //DC
+                6, //D1
+                1, //W5
+                20, //TT
+                7, //M1
+                2 //AL
+            );
+            break;
+
+        //En caso de que sea "Gestión de residuos (UM)"
+        case 'Gestión de residuos (UM)':
+            data.push(
+                null, //Linea 
+                10, //Máquina usada
+                10, //Velocidad
+                4, //DC
+                6, //D1
+                1, //W5
+                35, //TT
+                7, //M1
+                2 //AL
+            );
+            break;
+
+        //En caso de que sea "Plegar y apilar (UC)"
+        case 'Plegar y apilar (UC)':
+            data.push(
+                null, //Linea 
+                10, //Máquina usada
+                10, //Velocidad
+                1, //p2
+                1, //l2
+                1, //g1
+                2, //p5
+                1 //p2
             );
             break;
 

@@ -863,7 +863,7 @@ function generarTablasPorEtapa(etapas) {
             .then(etapasData => {
                 etapasDeF.forEach((etapaDeF, index) => {
                     /** Almacenamos las variable necesarias */
-                    var { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21 } = inicializarVariablesEtapas(etapaDeF);
+                    var { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, p2, l2, g1, p5 } = inicializarVariablesEtapas(etapaDeF);
 
                     //En caso de que no haya una descripción para la etapa....
                     if (mote_etapa === null || mote_etapa === "null") {
@@ -985,7 +985,7 @@ function generarTablasPorEtapa(etapas) {
                                         } else if (etapa.symbol === 'PS10') {
                                             tiempoCalculado = PS10;
                                         } else if (etapa.symbol === 'PS14') {
-                                            tiempoCalculado === PS14;
+                                            tiempoCalculado = (PS14 * etapaDeF.cantidad_a_mover) / 100;
                                         } else if (etapa.symbol === 'CC124') {
                                             etapa.symbol = simbolo_especial;
                                             distanceValue = valor_simbolo_especial;
@@ -1085,6 +1085,28 @@ function generarTablasPorEtapa(etapas) {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * PS15) / 100;
                                         } else if (etapa.symbol === 'DI21') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * DI21) / 100;
+                                        } else if (etapa.symbol === 'DS14') {
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * DS14) / 100;
+                                        } else if (etapa.symbol === 'DS15') {
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * DS15) / 100;
+                                        } else if (etapa.symbol === 'DC') {
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * DC) / 100;
+                                        } else if (etapa.symbol === 'D1') {
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * D1) / 100;
+                                        } else if (etapa.symbol === 'W5') {
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * W5) / 100;
+                                        } else if (etapa.symbol === 'TT') {
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * TT) / 100;
+                                        } else if (etapa.symbol === 'AL') {
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * AL) / 100;
+                                        } else if (etapa.symbol === 'p2') {
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * p2) / 100;
+                                        } else if (etapa.symbol === 'l2') {
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * l2) / 100;
+                                        } else if (etapa.symbol === 'g1') {
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * g1) / 100;
+                                        } else if (etapa.symbol === 'p5') {
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * p5) / 100;
                                         }
 
                                         if (speed === 10) {
@@ -2422,9 +2444,20 @@ function inicializarVariablesEtapas(etapaDeF) {
     const CDC = etapaDeF.CDC ? etapaDeF.CDC : '0';
     const PS15 = etapaDeF.PS15 ? etapaDeF.PS15 : '0';
     const DI21 = etapaDeF.DI21 ? etapaDeF.DI21 : '0';
+    const DS14 = etapaDeF.DS14 ? etapaDeF.DS14 : '0';
+    const DS15 = etapaDeF.DS15 ? etapaDeF.DS15 : '0';
+    const DC = etapaDeF.DC ? etapaDeF.DC : '0';
+    const D1 = etapaDeF.D1 ? etapaDeF.D1 : '0';
+    const W5 = etapaDeF.W5 ? etapaDeF.W5 : '0';
+    const TT = etapaDeF.TT ? etapaDeF.TT : '0';
+    const AL = etapaDeF.AL ? etapaDeF.AL : '0';
+    const p2 = etapaDeF.p2 ? etapaDeF.p2 : '0';
+    const l2 = etapaDeF.l2 ? etapaDeF.l2 : '0';
+    const g1 = etapaDeF.g1 ? etapaDeF.g1 : '0';
+    const p5 = etapaDeF.p5 ? etapaDeF.p5 : '0';
 
     //Devolvemos las variables
-    return { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21 };
+    return { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, p2, l2, g1, p5 };
 }
 
 /**
