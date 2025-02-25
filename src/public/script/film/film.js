@@ -863,7 +863,7 @@ function generarTablasPorEtapa(etapas) {
             .then(etapasData => {
                 etapasDeF.forEach((etapaDeF, index) => {
                     /** Almacenamos las variable necesarias */
-                    var { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3 } = inicializarVariablesEtapas(etapaDeF);
+                    var { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC } = inicializarVariablesEtapas(etapaDeF);
 
                     //En caso de que no haya una descripción para la etapa....
                     if (mote_etapa === null || mote_etapa === "null") {
@@ -1076,6 +1076,11 @@ function generarTablasPorEtapa(etapas) {
 
                                             timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
                                             timeAtUC = timeAtUM / totalPieces;
+
+                                        } else if (etapa.symbol === 'DC113') {
+                                            tiempoCalculado = etapaDeF.cantidad_a_mover * DC113;
+                                        } else if (etapa.symbol === 'CDC') {
+                                            tiempoCalculado = etapaDeF.cantidad_a_mover * CDC;
                                         }
 
                                         if (speed === 10) {
@@ -1211,8 +1216,26 @@ function gestionarEtapa_Visualizacion(data) {
             break;
 
         default:
+            confifurarModal_general(data);
             break;
     }
+}
+
+function confifurarModal_general(data) {
+    //Configuramos el cuerpo del modal
+    $('#modal .modal-body').html(`
+        <div class="container mx-auto p-4">
+            <div class="mt-6 flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
+            </div>
+        </div>
+    `);
+
+    //Llamamos a la función para configurar el footer del modal
+    configurarFooterModal_Etapa(data[0].id, data[0].F);
+
+    //Mostramos el modal
+    $('#modal').modal('show');
 }
 
 /**
@@ -2391,9 +2414,11 @@ function inicializarVariablesEtapas(etapaDeF) {
     const CHMAN = etapaDeF.CHMAN ? etapaDeF.CHMAN : '0';
     const CHMAN_2 = etapaDeF.CHMAN_2 ? etapaDeF.CHMAN_2 : '0';
     const CHMAN_3 = etapaDeF.CHMAN_3 ? etapaDeF.CHMAN_3 : '0';
+    const DC113 = etapaDeF.DC113 ? etapaDeF.DC113 : '0';
+    const CDC = etapaDeF.CDC ? etapaDeF.CDC : '0';
 
     //Devolvemos las variables
-    return { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3 };
+    return { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC };
 }
 
 /**

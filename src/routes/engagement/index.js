@@ -214,6 +214,16 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
             `;
             break;
 
+        //En caso de que sea "Descarga camión en muelle UM":
+        case 'Descarga camión en muelle UM':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, DC113, CDC, DS10, CDL)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+
         default:
             query = null;
     }
@@ -403,6 +413,19 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 'Colocacion carros manualmente', //Comentario
                 20, //CHMAN
                 10, //Máquina usada
+            );
+            break;
+
+        //En caso de que sea "Descarga camión en muelle UM"
+        case 'Descarga camión en muelle UM':
+            data.push(
+                null, //Linea 
+                10, //Máquina usada
+                10, //Velocidad
+                42, //DC113
+                6, //CDC
+                19, //DS10
+                6 //CDL
             );
             break;
 
