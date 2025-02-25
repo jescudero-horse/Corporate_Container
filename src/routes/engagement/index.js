@@ -168,9 +168,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'F12':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, comments, distancia, numero_bultos_por_pila, altura_embalaje, almacenamiento_emlabajes_mediante, machine_used, speed, en_la_tienda_pila, soporte_embalaje, PPD32, TC, CT10, PP1, CCPE, PDD34, TL)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, comments, distancia, numero_bultos_por_pila, altura_embalaje, almacenamiento_emlabajes_mediante, machine_used, speed, en_la_tienda_pila, soporte_embalaje, PPD32, TC, CT10, PP1, CCPE, PDD34, TL)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -178,9 +178,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'Coger UC/UM y dejar en stock altura media':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, comments, machine_used, speed, CHMAN)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, comments, machine_used, speed, CHMAN)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,. ?)
             `;
             break;
 
@@ -188,9 +188,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'Coger bac y colocar en carro/estanteria':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, comments, CHMAN, machine_used)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, comments, CHMAN, machine_used)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -198,9 +198,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'Carga cassette nacelle J 22 bacs':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, comments, CHMAN, CHMAN_2, CHMAN_3, machine_used, speed)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, comments, CHMAN, CHMAN_2, CHMAN_3, machine_used, speed)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -208,19 +208,19 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'Colocacion carros manualmente':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, comments, CHMAN, machine_used)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, comments, CHMAN, machine_used)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
-
-        //En caso de que sea "Descarga camión en muelle (UM)":
+        
+        //En caso de que sea "Descarga camión en muelle (UM)"
         case 'Descarga camión en muelle (UM)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, DC113, CDC, DS10, CDL)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, DC113, CDC, DS10, CDL)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -236,6 +236,7 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
 
         default:
             query = null;
+            break;
     }
 
     //Devolvemos la query
@@ -425,7 +426,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 10, //Máquina usada
             );
             break;
-
+        
         //En caso de que sea "Descarga camión en muelle (UM)"
         case 'Descarga camión en muelle (UM)':
             data.push(
@@ -471,14 +472,10 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
 /**
  * End point para añadir una nueva etapa a un puesto
  */
-router.post('/anyadirEtapa/:puesto_id/:referencia_embalaje/:operacion_seleccionada/:descripcion/:tipo_operacion', async (req, res) => {
-    console.log(">>>> DENTRO DEL END POINT DE AÑADIR ETAPA");
-
+router.post('/anyadirEtapa/:puesto_id/:referencia_embalaje/:operacion_seleccionada/:descripcion/:tipo_operacion/:numero_picadas', async (req, res) => {
     try {
         //Almacenamos los parámetros de la URL
-        const { puesto_id, operacion_seleccionada, descripcion, tipo_operacion } = req.params;
-
-        console.log("> PUESTO ID: ", puesto_id, "\tOperacion seleccionada: ", operacion_seleccionada, "\Descripcion: ", descripcion, "\tTipo operacion: ", tipo_operacion);
+        const { puesto_id, operacion_seleccionada, descripcion, tipo_operacion, numero_picadas } = req.params;
 
         //Decodificamos y parseamos el JSON de referencia_embalaje con manejo de errores
         let referencia_embalaje;
@@ -525,7 +522,8 @@ router.post('/anyadirEtapa/:puesto_id/:referencia_embalaje/:operacion_selecciona
                 valor,
                 operacion_seleccionada,
                 descripcion,
-                tipo_operacion
+                tipo_operacion,
+                numero_picadas
             ];
 
             console.log("Valor: ", valor);
