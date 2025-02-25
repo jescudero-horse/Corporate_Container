@@ -843,11 +843,12 @@ function generarTablasPorEtapa(etapas) {
         //Almacenamos en una variable las etapas del grupo "F"
         const etapasDeF = agrupadoPorF[FKey];
 
-        //ALmacenamos en variables la información básica de la etapa
+        //Almacenamos en variables la información básica de la etapa
         const id_etapa = etapasDeF[0].id;
         let linea = etapasDeF[0].linea;
         let speed = etapasDeF[0].speed;
         const f = etapasDeF[0].F;
+        const distancia_total = etapasDeF[0].distancia_total;
 
         //Creamos una solicitud para obtener los datos de las etapas
         fetch(`/film/api/obtenerEtapas/${encodeURIComponent(FKey)}`, {
@@ -892,14 +893,36 @@ function generarTablasPorEtapa(etapas) {
                         .then(totalPiecesData => {
                             let totalPieces = totalPiecesData[0].total_pieces || 1;
                             let timeAtUC = timeAtUM / totalPieces;
+                            let color_etapa;
+
+                            //Creamos un if para controlar la distancia total de la etapa y asi poder modificar el color de la misma... en caso de la distancia sea de 0 a 49
+                            if (distancia_total >= 0 && distancia_total <= 49) {
+                                //Asignamos el color verde
+                                color_etapa = 'bg-green-300';
+
+                                //En caso de que la distancia sea entre de 50 a 100
+                            } else if (distancia_total >= 50 && distancia_total <= 99) {
+                                //Asignamos el color naranja
+                                color_etapa = 'bg-orange-300';
+
+                                //En caso de que la distancia sea más de 100
+                            } else if (distancia_total >= 100) {
+                                //Asignamos el color rojo
+                                color_etapa = 'bg-red-300';
+
+                                //En cualquier otro caso
+                            } else {
+                                //Asignamos el color azul
+                                color_etapa = 'bg-blue-300';
+                            }
 
                             //Generamos el HTML de la tabla para la etapa
                             const tablaHTML = `
                                 <div class="mb-4">
                                     <h3 id="encabezadoEtapa-${FKey}-${referenciaComponente}"
-                                        class="text-lg font-semibold mb-2 flex justify-between items-center cursor-pointer 
-                                        ${f === 'X' ? 'bg-red-200 text-black' : 'bg-blue-200 text-black'} p-2 rounded-lg animate-fadeIn"
-                                        ${f === 'X' ? '' : 'cursor-pointer'} bg-blue-200 p-2 rounded-lg animate-fadeIn"
+                                        class="text-lg font-semibold mb-2 flex justify-between items-center 
+                                            p-2 rounded-lg animate-fadeIn 
+                                            ${f === 'X' ? 'bg-stone-200 text-black' : color_etapa} text-black"
                                         ${f !== 'X' ? `onclick="toggleVisibility('etapa-${FKey}-${referenciaComponente}')"` : ''}>
 
                                         <span>Etapa: <strong>${nombre_etapa}</strong></span>
@@ -908,27 +931,29 @@ function generarTablasPorEtapa(etapas) {
                                         ${f !== 'X' ? `<span>Línea: <strong>${linea}</strong></span>` : ''}
                                         <span><i class="bi bi-stopwatch-fill"></i> <strong>${actividad_en_minutos}</strong></span>
 
-                                        ${f !== 'X' ? `<button id="botonVisualizarEtapa" type="button" class="text-blue-500 ml-2" onclick="visualizarEtapa('${FKey}', '${referenciaComponente}', '${id_etapa}')">
-                                            <i class="bi bi-file-earmark-ruled"></i>
-                                        </button>` : ''}
+                                        ${f !== 'X' ? `
+                                            <button id="botonVisualizarEtapa" type="button" class="text-blue-500 ml-2" 
+                                                onclick="visualizarEtapa('${FKey}', '${referenciaComponente}', '${id_etapa}')">
+                                                <i class="bi bi-file-earmark-ruled"></i>
+                                            </button>`
+                                    : ''}
 
-                                        <!--
-                                        <button id="botonVisualizarEtapa" type="button" class="text-blue-500 ml-2" onclick="visualizarEtapa('${FKey}', '${referenciaComponente}', '${id_etapa}')">
-                                            <i class="bi bi-file-earmark-ruled"></i>
-                                        </button>
-                                        -->
-
-                                        <button id="botonEliminarEtapa" type="button" class="text-red-500 ml-2" onclick="eliminarRegistro('${id_etapa}', '${"EN_IFM_STANDARD"}')">
+                                        <button id="botonEliminarEtapa" type="button" class="text-red-500 ml-2" 
+                                            onclick="eliminarRegistro('${id_etapa}', 'EN_IFM_STANDARD')">
                                             <i class="bi bi-trash-fill"></i>
                                         </button>
 
-                                        <button id="botonActualizarEtapa" hidden type="button" class="text-red-500 ml-2" onclick="actualizarEtapa('${id_etapa}', '${"EN_IFM_STANDARD"}')">
+                                        <button id="botonActualizarEtapa" hidden type="button" class="text-red-500 ml-2" 
+                                            onclick="actualizarEtapa('${id_etapa}', 'EN_IFM_STANDARD')">
                                             <i class="bi bi-trash-fill"></i>
                                         </button>
 
-                                        ${f !== 'X' ? `<button id="botonGestionarEtapa" type="button" class="text-grey-500 ml-2" onclick="gestionarEtapa('${id_etapa}')">
-                                            <i class="bi bi-arrows-move"></i>
-                                        </button>` : ''}
+                                        ${f !== 'X' ? `
+                                            <button id="botonGestionarEtapa" type="button" class="text-gray-500 ml-2" 
+                                                onclick="gestionarEtapa('${id_etapa}')">
+                                                <i class="bi bi-arrows-move"></i>
+                                            </button>`
+                                    : ''}
                                     </h3>
 
                                     <div id="etapa-${FKey}-${referenciaComponente}" class="${f === 'X' ? 'hidden' : 'hidden animate-slideInUp'}">
@@ -943,129 +968,129 @@ function generarTablasPorEtapa(etapas) {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                            ${etapasData.map(etapa => {
-                                let distanceValue = etapa.distance || 0, tiempoCalculado = 0;
+                                ${etapasData.map(etapa => {
+                                        let distanceValue = etapa.distance || 0, tiempoCalculado = 0;
 
-                                if (etapa.symbol === 'TL' || etapa.symbol === 'TV' && f === 'F29') {
-                                    distanceValue = distancia_total;
-                                    tiempoCalculado = TL_TV;
-                                } else if (etapa.symbol === 'CDV' || etapa.symbol === 'CDL') {
-                                    tiempoCalculado = CDV_CDL;
-                                } else if (etapa.symbol === 'NC') {
-                                    distanceValue = numero_cruces;
-                                    tiempoCalculado = NC;
-                                } else if (etapa.symbol === 'NP') {
-                                    distanceValue = numero_puertas;
-                                    tiempoCalculado = NP;
-                                } else if (etapa.symbol === 'PS10') {
-                                    tiempoCalculado = PS10;
-                                } else if (etapa.symbol === 'PS14') {
-                                    tiempoCalculado === PS14;
-                                } else if (etapa.symbol === 'CC124') {
-                                    etapa.symbol = simbolo_especial;
-                                    distanceValue = valor_simbolo_especial;
-                                } else if (etapa.symbol === 'DC221') {
-                                    tiempoCalculado = DC221;
-                                } else if (etapa.symbol === 'TL' && f === "F29") {
-                                    distanceValue = distancia_total;
-                                    tiempoCalculado = TC_TL;
-                                } else if (etapa.symbol === 'DS10') {
-                                    tiempoCalculado = DS10;
-                                } else if (etapa.symbol === 'CDL') {
-                                    tiempoCalculado = CDL;
-                                } else if (etapa.symbol === 'CCPE') {
-                                    tiempoCalculado = CCPE;
-                                } else if (etapa.symbol === 'TC') {
-                                    distanceValue = distancia_total;
-                                    tiempoCalculado = TC;
-                                } else if (etapa.symbol === 'CT10') {
-                                    tiempoCalculado = CT10;
-                                } else if (etapa.symbol === 'PP1') {
-                                    tiempoCalculado = PP1;
-                                } else if (etapa.symbol === "TL" && f !== 'F29') {
-                                    tiempoCalculado = TL;
-                                } else if (etapa.symbol === 'M1') {
-                                    tiempoCalculado = M1;
-                                } else if (etapa.symbol === 'DL') {
-                                    tiempoCalculado = DL;
-                                } else if (etapa.symbol === 'PDU34') {
-                                    tiempoCalculado = PDU34;
-                                } else if (etapa.symbol === 'PPU34') {
-                                    tiempoCalculado = PPU34;
-                                } else if (etapa.symbol === 'TV') {
-                                    tiempoCalculado = TV;
-                                } else if (etapa.symbol === 'PPD32') {
-                                    tiempoCalculado = PPD32;
-                                } else if (etapa.symbol === 'PDD34') {
-                                    tiempoCalculado = PDD34;
-                                } else if (etapa.symbol === 'PPU43') {
-                                    tiempoCalculado = PPU43;
-                                } else if (etapa.symbol === "CHMAN" && f === 'Coger bac y colocar en carro/estanteria') {
-                                    distanceValue = CHMAN;
-                                    tiempoCalculado = etapaDeF.cantidad_a_mover * CHMAN;
+                                        if (etapa.symbol === 'TL' || etapa.symbol === 'TV' && f === 'F29') {
+                                            distanceValue = distancia_total;
+                                            tiempoCalculado = TL_TV;
+                                        } else if (etapa.symbol === 'CDV' || etapa.symbol === 'CDL') {
+                                            tiempoCalculado = CDV_CDL;
+                                        } else if (etapa.symbol === 'NC') {
+                                            distanceValue = numero_cruces;
+                                            tiempoCalculado = NC;
+                                        } else if (etapa.symbol === 'NP') {
+                                            distanceValue = numero_puertas;
+                                            tiempoCalculado = NP;
+                                        } else if (etapa.symbol === 'PS10') {
+                                            tiempoCalculado = PS10;
+                                        } else if (etapa.symbol === 'PS14') {
+                                            tiempoCalculado === PS14;
+                                        } else if (etapa.symbol === 'CC124') {
+                                            etapa.symbol = simbolo_especial;
+                                            distanceValue = valor_simbolo_especial;
+                                        } else if (etapa.symbol === 'DC221') {
+                                            tiempoCalculado = DC221;
+                                        } else if (etapa.symbol === 'TL' && f === "F29") {
+                                            distanceValue = distancia_total;
+                                            tiempoCalculado = TC_TL;
+                                        } else if (etapa.symbol === 'DS10') {
+                                            tiempoCalculado = DS10;
+                                        } else if (etapa.symbol === 'CDL') {
+                                            tiempoCalculado = CDL;
+                                        } else if (etapa.symbol === 'CCPE') {
+                                            tiempoCalculado = CCPE;
+                                        } else if (etapa.symbol === 'TC') {
+                                            distanceValue = distancia_total;
+                                            tiempoCalculado = TC;
+                                        } else if (etapa.symbol === 'CT10') {
+                                            tiempoCalculado = CT10;
+                                        } else if (etapa.symbol === 'PP1') {
+                                            tiempoCalculado = PP1;
+                                        } else if (etapa.symbol === "TL" && f !== 'F29') {
+                                            tiempoCalculado = TL;
+                                        } else if (etapa.symbol === 'M1') {
+                                            tiempoCalculado = M1;
+                                        } else if (etapa.symbol === 'DL') {
+                                            tiempoCalculado = DL;
+                                        } else if (etapa.symbol === 'PDU34') {
+                                            tiempoCalculado = PDU34;
+                                        } else if (etapa.symbol === 'PPU34') {
+                                            tiempoCalculado = PPU34;
+                                        } else if (etapa.symbol === 'TV') {
+                                            tiempoCalculado = TV;
+                                        } else if (etapa.symbol === 'PPD32') {
+                                            tiempoCalculado = PPD32;
+                                        } else if (etapa.symbol === 'PDD34') {
+                                            tiempoCalculado = PDD34;
+                                        } else if (etapa.symbol === 'PPU43') {
+                                            tiempoCalculado = PPU43;
+                                        } else if (etapa.symbol === "CHMAN" && f === 'Coger bac y colocar en carro/estanteria') {
+                                            distanceValue = CHMAN;
+                                            tiempoCalculado = etapaDeF.cantidad_a_mover * CHMAN;
 
-                                    actividad_en_minutos = ((CHMAN * 2) + distancia_total) / 100;
+                                            actividad_en_minutos = ((CHMAN * 2) + distancia_total) / 100;
 
-                                    timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
-                                    timeAtUC = timeAtUM / totalPieces;
-
-
-                                } else if (etapa.symbol === 'CHMAN' && f === 'Carga cassette nacelle J 22 bacs') {
-                                    distanceValue = CHMAN;
-                                    tiempoCalculado = etapaDeF.cantidad_a_mover * distanceValue;
-                                } else if (etapa.symbol === 'CHMAN_2' && f === 'Carga cassette nacelle J 22 bacs') {
-                                    distanceValue = 136;
-                                    tiempoCalculado = etapaDeF.cantidad_a_mover * distanceValue;
-                                } else if (etapa.symbol === "CHMAN_3" && f === 'Carga cassette nacelle J 22 bacs') {
-                                    distanceValue = CHMAN_3;
-                                    tiempoCalculado = etapaDeF.cantidad_a_mover * CHMAN_3;
-                                } else if (f === 'Carga cassette nacelle J 22 bacs') {
-                                    actividad_en_minutos = ((CHMAN + CHMAN_2 + CHMAN_3) + (distancia_total * 0.6)) / 100
-                                } else if (etapa.symbol === 'CHMAN' && f === 'Colocacion carros manualmente') {
-                                    distanceValue = CHMAN;
-                                    tiempoCalculado = etapaDeF.cantidad_a_mover * CHMAN;
-
-                                    actividad_en_minutos = ((CHMAN + distancia_total)) / 100;
-
-                                    timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
-                                    timeAtUC = timeAtUM / totalPieces;
+                                            timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
+                                            timeAtUC = timeAtUM / totalPieces;
 
 
-                                } else if (etapa.symbol === "CHMAN") {
-                                    distanceValue = CHMAN;
-                                    tiempoCalculado = etapaDeF.cantidad_a_mover * CHMAN;
+                                        } else if (etapa.symbol === 'CHMAN' && f === 'Carga cassette nacelle J 22 bacs') {
+                                            distanceValue = CHMAN;
+                                            tiempoCalculado = etapaDeF.cantidad_a_mover * distanceValue;
+                                        } else if (etapa.symbol === 'CHMAN_2' && f === 'Carga cassette nacelle J 22 bacs') {
+                                            distanceValue = 136;
+                                            tiempoCalculado = etapaDeF.cantidad_a_mover * distanceValue;
+                                        } else if (etapa.symbol === "CHMAN_3" && f === 'Carga cassette nacelle J 22 bacs') {
+                                            distanceValue = CHMAN_3;
+                                            tiempoCalculado = etapaDeF.cantidad_a_mover * CHMAN_3;
+                                        } else if (f === 'Carga cassette nacelle J 22 bacs') {
+                                            actividad_en_minutos = ((CHMAN + CHMAN_2 + CHMAN_3) + (distancia_total * 0.6)) / 100
+                                        } else if (etapa.symbol === 'CHMAN' && f === 'Colocacion carros manualmente') {
+                                            distanceValue = CHMAN;
+                                            tiempoCalculado = etapaDeF.cantidad_a_mover * CHMAN;
 
-                                    let valor;
+                                            actividad_en_minutos = ((CHMAN + distancia_total)) / 100;
 
-                                    if (speed === 10) {
-                                        valor = 0.6
-                                    } else if (speed === 12) {
-                                        valor = 0.5;
-                                    } else if (speed === 15) {
-                                        valor = 0.4;
-                                    } else if (speed === 20) {
-                                        valor = 0.3
-                                    }
+                                            timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
+                                            timeAtUC = timeAtUM / totalPieces;
 
-                                    actividad_en_minutos = ((CHMAN * 2) + (distancia_total * valor)) / 100;
 
-                                    timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
-                                    timeAtUC = timeAtUM / totalPieces;
-                                }
+                                        } else if (etapa.symbol === "CHMAN") {
+                                            distanceValue = CHMAN;
+                                            tiempoCalculado = etapaDeF.cantidad_a_mover * CHMAN;
 
-                                if (speed === 10) {
-                                    valor = 0.6
-                                } else if (speed === 12) {
-                                    valor = 0.5;
-                                } else if (speed === 15) {
-                                    valor = 0.4;
-                                } else if (speed === 20) {
-                                    valor = 0.3
-                                } else {
-                                    valor = 1;
-                                }
+                                            let valor;
 
-                                return `
+                                            if (speed === 10) {
+                                                valor = 0.6
+                                            } else if (speed === 12) {
+                                                valor = 0.5;
+                                            } else if (speed === 15) {
+                                                valor = 0.4;
+                                            } else if (speed === 20) {
+                                                valor = 0.3
+                                            }
+
+                                            actividad_en_minutos = ((CHMAN * 2) + (distancia_total * valor)) / 100;
+
+                                            timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
+                                            timeAtUC = timeAtUM / totalPieces;
+                                        }
+
+                                        if (speed === 10) {
+                                            valor = 0.6
+                                        } else if (speed === 12) {
+                                            valor = 0.5;
+                                        } else if (speed === 15) {
+                                            valor = 0.4;
+                                        } else if (speed === 20) {
+                                            valor = 0.3
+                                        } else {
+                                            valor = 1;
+                                        }
+
+                                        return `
                                     <tr>
                                         <td class="px-4 py-2 border">${etapa.method_operation}</td>
                                         <td class="px-4 py-2 border">${etapa.symbol}</td>
@@ -1074,7 +1099,7 @@ function generarTablasPorEtapa(etapas) {
                                         <td class="px-4 py-2 border">${tiempoCalculado}</td>
                                     </tr>
                                 `;
-                            }).join('')}
+                                    }).join('')}
                             
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" rowspan="2">Distancia</td>
@@ -1732,7 +1757,7 @@ function configurarModal_F10(data) {
     configurarFooterModal_Etapa(data[0].id, data[0].F);
 
     //Mostramos el modal
-    $('#modalLarge').modal('show');
+    $('#modal').modal('show');
 }
 
 /**
@@ -2833,6 +2858,8 @@ function mostrarModalEtapas() {
     //Cerramos el modal del informe
     $('#modalInformeFinal').modal('hide');
 
+    console.log("Dentro de la funcion")
+
     //Configuramos el título del modal del selector de etapas
     $('#modal .modal-title').text('Selecciona una etapa');
 
@@ -2906,9 +2933,9 @@ function mostrarModalEtapas() {
     });
 
     //Mostramos el modal
-    $('#modal').fadeIn();
+    $('#modal').modal('show');
 
-    //LLamamos a la función para añadir la etapa al puesto
+    //Llamamos a la función para añadir la etapa al puesto
     subirEtapa();
 }
 
@@ -4116,7 +4143,7 @@ function almacenarDatosManuales() {
     linea = linea;
 
     //Cerramos el modal principal
-    $('#modal').fadeOut();
+    $('#modal').modal('hide');
 
     //Asignamos la referencia introducida por el usuario en la variable global
     referencia_componente = referencia;

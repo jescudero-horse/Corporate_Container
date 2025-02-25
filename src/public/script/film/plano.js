@@ -345,7 +345,12 @@ function actualizarInformacionPlano() {
                 //En caso de que todo haya salido bien
                 if (response.status === 201) {
                     //Llamamos a la función para mostrar la alerta
-                    mostrarAlertaMapa('Éxito', 'La información del mapa se ha actualizado', 'success', 0);
+                    mostrarAlertaMapa('Éxito', 'La información del mapa se ha actualizado. Volviendo a la página de inicio...', 'success', 0);
+
+                    history.back();
+                    setTimeout(() => {
+                        window.close();
+                    }, 800);
 
                     //En caso de que haya salido mal
                 } else if (response.status === 501) {
