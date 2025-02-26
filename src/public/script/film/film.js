@@ -848,7 +848,7 @@ function generarTablasPorEtapa(etapas) {
         let linea = etapasDeF[0].linea;
         let speed = etapasDeF[0].speed;
         const f = etapasDeF[0].F;
-        const distancia_total = etapasDeF[0].distancia_total;
+        const numero_picadas = etapasDeF[0].numero_picadas
 
         //Creamos una solicitud para obtener los datos de las etapas
         fetch(`/film/api/obtenerEtapas/${encodeURIComponent(FKey)}`, {
@@ -902,8 +902,8 @@ function generarTablasPorEtapa(etapas) {
 
                                 //En caso de que la distancia sea entre de 50 a 100
                             } else if (distancia_total >= 50 && distancia_total <= 99) {
-                                //Asignamos el color naranja
-                                color_etapa = 'bg-orange-300';
+                                //Asignamos el color amarillo
+                                color_etapa = 'bg-yellow-300';
 
                                 //En caso de que la distancia sea más de 100
                             } else if (distancia_total >= 100) {
@@ -1179,7 +1179,7 @@ function generarTablasPorEtapa(etapas) {
                                                     <td class="px-4 py-2 border font-semibold">Metros<br>${distancia_total}</td>
                                                     <td class="px-4 py-2 border font-semibold">Velocidad<br>${valor}</td>
                                                     <td class="px-4 py-2 border font-semibold">${etapaDeF.cantidad_a_mover}</td>
-                                                    <td class="px-4 py-2 border">${tiempoDesplazamiento}</td>
+                                                    <td class="px-4 py-2 border">${tiempoDesplazamiento.toFixed(2)}</td>
                                                 </tr>
 
                                                 <tr>
@@ -1187,10 +1187,10 @@ function generarTablasPorEtapa(etapas) {
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos (según el número de picadas simultáneas)</td>
-                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final + tiempoDesplazamiento}</td>
+                                                    <td class="px-4 py-2 border">${(actividad_en_minutos_final + tiempoDesplazamiento) / numero_picadas}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos</td>
+                                                    <td class="px-4 py-2 border font-semibold" colspan="4">Actividad total en minutos</td>
                                                     <td class="px-4 py-2 border">${actividad_en_minutos_final + tiempoDesplazamiento}</td>
                                                 </tr>
                                             </tbody>
