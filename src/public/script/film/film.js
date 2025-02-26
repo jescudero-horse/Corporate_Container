@@ -850,6 +850,8 @@ function generarTablasPorEtapa(etapas) {
         const f = etapasDeF[0].F;
         const numero_picadas = etapasDeF[0].numero_picadas
         
+        console.log("ID1:", id_etapa1)
+
         //Creamos una solicitud para obtener los datos de las etapas
         fetch(`/film/api/obtenerEtapas/${encodeURIComponent(FKey)}`, {
             method: "GET"
@@ -864,6 +866,8 @@ function generarTablasPorEtapa(etapas) {
                 etapasDeF.forEach((etapaDeF, index) => {
                     /** Almacenamos las variable necesarias */
                     var { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2 } = inicializarVariablesEtapas(etapaDeF);
+
+                    console.log("ID:", id_etapa, "\fnombre:", nombre_etapa);
 
                     //En caso de que no haya una descripción para la etapa....
                     if (mote_etapa === null || mote_etapa === "null") {
@@ -918,7 +922,7 @@ function generarTablasPorEtapa(etapas) {
 
                             //Generamos el HTML de la tabla para la etapa
                             const tablaHTML = `
-                                <div id="contenedor-${FKey}-${referenciaComponente}" class="mb-4 draggable-container">
+                                <div id="contenedor-${FKey}-${referenciaComponente}" class="mb-4 draggable-container" data-id-etapa="${id_etapa}">
                                     <h3 id="encabezadoEtapa-${FKey}-${referenciaComponente}"
                                         class="text-lg font-semibold mb-2 flex justify-between items-center 
                                             p-2 rounded-lg animate-fadeIn 
@@ -1199,14 +1203,38 @@ function generarTablasPorEtapa(etapas) {
                                 </div>
                             `;
 
-                            // Inicializa SortableJS en el contenedor principal
+                            let orden = [];
+
+                            contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
+
+                            // Inicializa SortableJS en el contenedor de las tablas
                             new Sortable(contenedorTablas, {
                                 animation: 150,
                                 ghostClass: 'sortable-ghost',
-                                handle: '.draggable-container'
+                                handle: '.draggable-container',
+                                /*onEnd: function (evt) {
+                                    // Actualiza la variable 'orden'
+                                    orden = Array.from(contenedorTablas.children).map(child => child.id);
+                                    // Guarda el nuevo orden en localStorage
+                                    localStorage.setItem('ordenContenedores', JSON.stringify(orden));
+                                }*/
                             });
 
-                            contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
+                            // Función para ordenar los contenedores por id_etapa
+                            function ordenarPorIdEtapa() {
+                                const contenedores = Array.from(contenedorTablas.children);
+                                contenedores.sort((a, b) => {
+                                    const idA = parseInt(a.getAttribute('data-id-etapa'));
+                                    const idB = parseInt(b.getAttribute('data-id-etapa'));
+                                    return idA - idB;
+                                });
+                                contenedores.forEach(contenedor => contenedorTablas.appendChild(contenedor));
+                                // Actualiza la variable 'orden'
+                                orden = contenedores.map(contenedor => contenedor.id);
+                            }
+
+                            // Llama a la función para ordenar por id_etapa
+                            ordenarPorIdEtapa();
                         })
                         .catch(error => {
                             console.error('Error fetching total pieces:', error);
