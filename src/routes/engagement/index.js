@@ -288,9 +288,19 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'Plegar y apilar (UC)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, p2, l2, g1, p5)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, P2, L2, G1, P5)
                 VALUES
                     (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+
+        //En caso de que sea "De puesto inferior a carro (UC)":
+        case 'De puesto inferior a carro (UC)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, G1, W5, P2)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -587,11 +597,22 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 null, //Linea 
                 10, //Máquina usada
                 10, //Velocidad
-                1, //p2
-                1, //l2
-                1, //g1
-                2, //p5
-                1 //p2
+                1, //P2
+                1, //L2
+                1, //G1
+                2 //P5
+            );
+            break;
+
+        //En caso de que sea "De puesto inferior a carro (UC)"
+        case 'De puesto inferior a carro (UC)':
+            data.push(
+                null, //Linea 
+                10, //Máquina usada
+                10, //Velocidad
+                1, //G1
+                1, //W5
+                2 //P2
             );
             break;
 
