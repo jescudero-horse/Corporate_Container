@@ -863,7 +863,7 @@ function generarTablasPorEtapa(etapas) {
             .then(etapasData => {
                 etapasDeF.forEach((etapaDeF, index) => {
                     /** Almacenamos las variable necesarias */
-                    var { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, w5_2 } = inicializarVariablesEtapas(etapaDeF);
+                    var { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2 } = inicializarVariablesEtapas(etapaDeF);
 
                     //En caso de que no haya una descripción para la etapa....
                     if (mote_etapa === null || mote_etapa === "null") {
@@ -894,7 +894,7 @@ function generarTablasPorEtapa(etapas) {
                             let totalPieces = totalPiecesData[0].total_pieces || 1;
                             let timeAtUC = timeAtUM / totalPieces;
                             let color_etapa;
-                            let actividad_en_minutos_final;
+                            let actividad_en_minutos_final = 0;
 
                             //Creamos un if para controlar la distancia total de la etapa y asi poder modificar el color de la misma... en caso de la distancia sea de 0 a 49
                             if (distancia_total >= 0 && distancia_total <= 49) {
@@ -975,62 +975,86 @@ function generarTablasPorEtapa(etapas) {
                                         if (etapa.symbol === 'TL' || etapa.symbol === 'TV' && f === 'F29') {
                                             distanceValue = distancia_total;
                                             tiempoCalculado = TL_TV;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'CDV') {
                                             tiempoCalculado = CDV_CDL;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'NC') {
                                             distanceValue = numero_cruces;
                                             tiempoCalculado = NC;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'NP') {
                                             distanceValue = numero_puertas;
                                             tiempoCalculado = NP;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'PS10') {
                                             tiempoCalculado = PS10;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'PS14') {
                                             tiempoCalculado = (PS14 * etapaDeF.cantidad_a_mover) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'CC124') {
                                             etapa.symbol = simbolo_especial;
                                             distanceValue = valor_simbolo_especial;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DC221') {
                                             tiempoCalculado = DC221;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'TL' && f === "F29") {
                                             distanceValue = distancia_total;
                                             tiempoCalculado = TC_TL;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DS10') {
                                             tiempoCalculado = (DS10 * etapaDeF.cantidad_a_mover) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'CDL') {
                                             tiempoCalculado = (CDL * etapaDeF.cantidad_a_mover) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'CCPE') {
                                             tiempoCalculado = CCPE;
                                         } else if (etapa.symbol === 'TC') {
                                             distanceValue = distancia_total;
                                             tiempoCalculado = TC;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'CT10') {
                                             tiempoCalculado = CT10;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'PP1') {
                                             tiempoCalculado = PP1;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === "TL" && f !== 'F29') {
                                             tiempoCalculado = TL;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'M1') {
-                                            tiempoCalculado = M1;
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * M1) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DL') {
                                             tiempoCalculado = DL;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'PDU34') {
                                             tiempoCalculado = PDU34;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'PPU34') {
                                             tiempoCalculado = PPU34;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'TV') {
                                             tiempoCalculado = TV;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'PPD32') {
                                             tiempoCalculado = PPD32;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'PDD34') {
                                             tiempoCalculado = PDD34;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'PPU43') {
                                             tiempoCalculado = PPU43;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === "CHMAN" && f === 'Coger bac y colocar en carro/estanteria') {
                                             distanceValue = CHMAN;
                                             tiempoCalculado = etapaDeF.cantidad_a_mover * CHMAN;
 
                                             actividad_en_minutos = ((CHMAN * 2) + distancia_total) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
 
                                             timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
                                             timeAtUC = timeAtUM / totalPieces;
@@ -1039,12 +1063,15 @@ function generarTablasPorEtapa(etapas) {
                                         } else if (etapa.symbol === 'CHMAN' && f === 'Carga cassette nacelle J 22 bacs') {
                                             distanceValue = CHMAN;
                                             tiempoCalculado = etapaDeF.cantidad_a_mover * distanceValue;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'CHMAN_2' && f === 'Carga cassette nacelle J 22 bacs') {
                                             distanceValue = 136;
                                             tiempoCalculado = etapaDeF.cantidad_a_mover * distanceValue;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === "CHMAN_3" && f === 'Carga cassette nacelle J 22 bacs') {
                                             distanceValue = CHMAN_3;
                                             tiempoCalculado = etapaDeF.cantidad_a_mover * CHMAN_3;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (f === 'Carga cassette nacelle J 22 bacs') {
                                             actividad_en_minutos = ((CHMAN + CHMAN_2 + CHMAN_3) + (distancia_total * 0.6)) / 100
                                         } else if (etapa.symbol === 'CHMAN' && f === 'Colocacion carros manualmente') {
@@ -1052,6 +1079,7 @@ function generarTablasPorEtapa(etapas) {
                                             tiempoCalculado = etapaDeF.cantidad_a_mover * CHMAN;
 
                                             actividad_en_minutos = ((CHMAN + distancia_total)) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
 
                                             timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
                                             timeAtUC = timeAtUM / totalPieces;
@@ -1074,42 +1102,59 @@ function generarTablasPorEtapa(etapas) {
                                             }
 
                                             actividad_en_minutos = ((CHMAN * 2) + (distancia_total * valor)) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
 
                                             timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
                                             timeAtUC = timeAtUM / totalPieces;
 
                                         } else if (etapa.symbol === 'DC113') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * DC113) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'CDC') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * CDC) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'PS15') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * PS15) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DI21') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * DI21) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DS14') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * DS14) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DS15') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * DS15) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DC') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * DC) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'D1') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * D1) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'W5') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * W5) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'TT') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * TT) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'AL') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * AL) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'P2') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * P2) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'L2') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * L2) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'G1') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * G1) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'P5') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * P5) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'W5_2') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * W5_2) / 100;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         }
 
                                         if (speed === 10) {
@@ -1124,10 +1169,10 @@ function generarTablasPorEtapa(etapas) {
                                             valor = 1;
                                         }
 
-                                        if (f === 'Descarga camión en muelle (UM)') {
+                                        /*if (f === 'Descarga camión en muelle (UM)') {
                                             actividad_en_minutos_final = ((DC113 + CDC + DS10 + CDL) + (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100);
-                                        }
-
+                                        }*/
+                                        
                                         return `
                                     <tr>
                                         <td class="px-4 py-2 border">${etapa.method_operation}</td>
@@ -1152,15 +1197,7 @@ function generarTablasPorEtapa(etapas) {
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos</td>
-                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="px-4 py-2 border font-semibold" colspan="4">Tiempo UM</td>
-                                                    <td class="px-4 py-2 border">${timeAtUM.toFixed(2)}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td class="px-4 py-2 border font-semibold" colspan="4">Tiempo UC</td>
-                                                    <td class="px-4 py-2 border">${timeAtUC.toFixed(2)}</td>
+                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final.toFixed(2)}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -2462,10 +2499,10 @@ function inicializarVariablesEtapas(etapaDeF) {
     const L2 = etapaDeF.L2 ? etapaDeF.L2 : '0';
     const G1 = etapaDeF.G1 ? etapaDeF.G1 : '0';
     const P5 = etapaDeF.P5 ? etapaDeF.P5 : '0';
-    const w5_2 = etapaDeF.w5_2 ? etapaDeF.w5_2 : '0';
+    const W5_2 = etapaDeF.W5_2 ? etapaDeF.W5_2 : '0';
 
     //Devolvemos las variables
-    return { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, w5_2 };
+    return { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2 };
 }
 
 /**
