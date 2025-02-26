@@ -843,6 +843,8 @@ function generarTablasPorEtapa(etapas) {
         //Almacenamos en una variable las etapas del grupo "F"
         const etapasDeF = agrupadoPorF[FKey];
 
+        console.log("Etapas DEF: ", etapasDeF)
+
         //Almacenamos en variables la información básica de la etapa
         const id_etapa = etapasDeF[0].id;
         let linea = etapasDeF[0].linea;
@@ -1160,7 +1162,7 @@ function generarTablasPorEtapa(etapas) {
                                         /*if (f === 'Descarga camión en muelle (UM)') {
                                             actividad_en_minutos_final = ((DC113 + CDC + DS10 + CDL) + (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100);
                                         }*/
-                                        
+
                                         return `
                                     <tr>
                                         <td class="px-4 py-2 border">${etapa.method_operation}</td>
