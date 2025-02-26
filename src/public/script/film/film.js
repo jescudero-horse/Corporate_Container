@@ -844,12 +844,12 @@ function generarTablasPorEtapa(etapas) {
         const etapasDeF = agrupadoPorF[FKey];
 
         //Almacenamos en variables la información básica de la etapa
-        const id_etapa = etapasDeF[0].id;
+        const id_etapa1 = etapasDeF[0].id;
         let linea = etapasDeF[0].linea;
         let speed = etapasDeF[0].speed;
         const f = etapasDeF[0].F;
         const numero_picadas = etapasDeF[0].numero_picadas
-
+        
         //Creamos una solicitud para obtener los datos de las etapas
         fetch(`/film/api/obtenerEtapas/${encodeURIComponent(FKey)}`, {
             method: "GET"
@@ -918,7 +918,7 @@ function generarTablasPorEtapa(etapas) {
 
                             //Generamos el HTML de la tabla para la etapa
                             const tablaHTML = `
-                                <div class="mb-4">
+                                <div id="contenedor-${FKey}-${referenciaComponente}" class="mb-4 draggable-container">
                                     <h3 id="encabezadoEtapa-${FKey}-${referenciaComponente}"
                                         class="text-lg font-semibold mb-2 flex justify-between items-center 
                                             p-2 rounded-lg animate-fadeIn 
@@ -1198,6 +1198,13 @@ function generarTablasPorEtapa(etapas) {
                                     </div>
                                 </div>
                             `;
+
+                            // Inicializa SortableJS en el contenedor principal
+                            new Sortable(contenedorTablas, {
+                                animation: 150,
+                                ghostClass: 'sortable-ghost',
+                                handle: '.draggable-container'
+                            });
 
                             contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
                         })
