@@ -298,9 +298,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'De puesto inferior a carro (UC)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, G1, W5, P2)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, linea, machine_used, speed, G1, W5, P2, W5_2)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -612,7 +612,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 10, //Velocidad
                 1, //G1
                 1, //W5
-                2 //P2
+                1, //P2
+                2 //W5_2
             );
             break;
 

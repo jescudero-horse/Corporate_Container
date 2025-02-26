@@ -863,7 +863,7 @@ function generarTablasPorEtapa(etapas) {
             .then(etapasData => {
                 etapasDeF.forEach((etapaDeF, index) => {
                     /** Almacenamos las variable necesarias */
-                    var { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5 } = inicializarVariablesEtapas(etapaDeF);
+                    var { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, w5_2 } = inicializarVariablesEtapas(etapaDeF);
 
                     //En caso de que no haya una descripción para la etapa....
                     if (mote_etapa === null || mote_etapa === "null") {
@@ -1108,6 +1108,8 @@ function generarTablasPorEtapa(etapas) {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * G1) / 100;
                                         } else if (etapa.symbol === 'P5') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * P5) / 100;
+                                        } else if (etapa.symbol === 'W5_2') {
+                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * W5_2) / 100;
                                         }
 
                                         if (speed === 10) {
@@ -2460,9 +2462,10 @@ function inicializarVariablesEtapas(etapaDeF) {
     const L2 = etapaDeF.L2 ? etapaDeF.L2 : '0';
     const G1 = etapaDeF.G1 ? etapaDeF.G1 : '0';
     const P5 = etapaDeF.P5 ? etapaDeF.P5 : '0';
+    const w5_2 = etapaDeF.w5_2 ? etapaDeF.w5_2 : '0';
 
     //Devolvemos las variables
-    return { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5 };
+    return { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, w5_2 };
 }
 
 /**
