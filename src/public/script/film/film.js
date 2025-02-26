@@ -1184,8 +1184,12 @@ function generarTablasPorEtapa(etapas) {
                                                 </tr>
 
                                                 <tr>
+                                                    <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos (según el número de picadas simultáneas)</td>
+                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final}</td>
+                                                </tr>
+                                                <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos</td>
-                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final.toFixed(2)}</td>
+                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -2657,7 +2661,7 @@ function anyadirEtapa(id) {
                 </div>
 
                 <!-- Tipo de carga -->
-                <div class="relative inline-block w-64 mb-4">
+                <div class="relative inline-block w-64 mb-4" hidden>
                     <label for="tipoCarga" class="block text-sm font-medium text-white mb-2">Seleccione un tipo de carga</label>
                     <select id="tipoCarga" name="tipoCarga" class="block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white text-white">
                         <option value="UM">UM</option>
@@ -2846,7 +2850,8 @@ function obtenerValorCarga(item, cantidad_a_expedir, tipo_operacion) {
             referencia_embalaje[item] = numero_embalajes;
 
             //Llamamos al método para disponer la información en el modal
-            disponerInformacionModal2(item, cantidad_a_expedir, valor_carga, numero_embalajes);
+            //disponerInformacionModal2(item, cantidad_a_expedir, valor_carga, numero_embalajes);
+            mostrarModalEtapas();
         });
 }
 
@@ -2854,8 +2859,6 @@ function obtenerValorCarga(item, cantidad_a_expedir, tipo_operacion) {
  * Función para cerrar el modal principal y mostrar el modal de informe
  */
 function mostrarModalInforme() {
-    console.log("Dentro del modal");
-
     //Cerramos el modal principal
     $('#modal').modal('hide');
 
@@ -2968,8 +2971,6 @@ function disponerInformacionModal2(referencia, cantidad_a_expedir, valor_carga, 
 function mostrarModalEtapas() {
     //Cerramos el modal del informe
     $('#modalInformeFinal').modal('hide');
-
-    console.log("Dentro de la funcion")
 
     //Configuramos el título del modal del selector de etapas
     $('#modal .modal-title').text('Selecciona una etapa');
@@ -3102,207 +3103,6 @@ function controlarRespuesta(response) {
 }
 
 /**
- * Función para disponer la información dentro del modal
- * @param {*} packingData Argumento que contiene los datos de la referencia del componente
- * @param {*} componentsData Argumento que contiene los datos del componente por referencia
- * @param {String} referencia_componente Argumento que contiene la referencia del commponente
- * @param {int} linea Argumento que contiene la línea
- */
-function configurarModalResultados(packingData, componentsData, referencias_componentes, linea) {
-    //Cerrar el modal principal
-    $('#modal').modal('hide');
-
-    //Configuramos el título del modal
-    $('#modal .modal-title').text('Datos obtenidos');
-
-    //Inicializamos el cuerpo del modal
-    let modalBodyHTML = '';
-
-    //Generamos tablas para cada referencia
-    referencias_componentes.forEach((referencia, index) => {
-        modalBodyHTML += `
-            <h5 class="text-lg font-semibold mb-4">Información para la referencia del componente ${referencia}</h5>
-            <div id="table-component-${index}" class="overflow-x-auto">
-                <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
-                    <thead>
-                        <tr class="bg-gray-100">
-                            <!-- Encabezados de la tabla específica para esta referencia -->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Filas de la tabla específicas para esta referencia -->
-                    </tbody>
-                </table>
-            </div>
-            <hr class="my-4 border-gray-300">
-        `;
-    });
-
-    //Tabla de componentes de la línea
-    modalBodyHTML += `
-        <h5 class="text-lg font-semibold mb-4">Información para los componentes de la línea ${linea}</h5>
-        <div id="table-components" class="overflow-x-auto">
-            <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <!-- Encabezados de la tabla de la línea -->
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Filas de la tabla de la línea -->
-                </tbody>
-            </table>
-        </div>
-    `;
-
-    //Insertar todo el HTML en el modal
-    $('#modal .modal-body').html(modalBodyHTML);
-
-    //Iterar sobre cada referencia para generar y llenar las tablas individuales
-    referencias_componentes.forEach((referencia, index) => {
-        disponerInformacionModal(componentsData, referencia, index);
-    });
-
-    //Mostramos el modal con los resultados
-    $('#modal').modal('show');
-}
-
-/**
- * Función para disponer la información en el modal
- * @param {*} componentsData Argumento que contiene los datos de los componentes
- * @param {*} referencias_componentes Argumento que contiene las referencias
- */
-function disponerInformacionModal(componentsData, referencias_componentes) {
-    //Nos aseguramos de que referencias_componentes sea un array
-    if (!Array.isArray(referencias_componentes)) {
-        console.warn("Referencias componentes no es un array, lo convertimos en array.");
-        referencias_componentes = [referencias_componentes];
-    }
-
-    //Almacenamos la información para iteractuar con ellas
-    const components = componentsData.data_components;
-    const references = componentsData.data_reference;
-
-    //Tabla general "table-components"
-    let tableComponentsHTML = '<table class="table table-bordered"><thead><tr><th></th>';
-    const sums = Array(components.length).fill(0);
-    let promises = [];
-
-    //Encabezados de componentes
-    components.forEach(component => {
-        tableComponentsHTML += `<th>${component.reference_composant}</th>`;
-    });
-    tableComponentsHTML += '</tr></thead><tbody>';
-
-    //Generamos las promesas para obtener los datos de cada celda
-    references.forEach(reference => {
-        components.forEach((component, compIndex) => {
-            const promise = fetch(`/film/api/getCountComponents/${reference.reference_motor}/${component.reference_composant}`, {
-                method: 'GET'
-            })
-                .then(response => response.json())
-                .then(data => {
-                    //Sumamos los totales
-                    sums[compIndex] += data.count;
-                    return `<td>${data.count}</td>`;
-                })
-                .catch(error => {
-                    console.error('Error fetching count:', error);
-                    return '<td>Error</td>';
-                });
-
-            promises.push(promise);
-        });
-    });
-
-    //Resolución de promesas para llenar la tabla general
-    Promise.all(promises).then(cells => {
-        let rowIndex = 0;
-        let totalSum = 0;
-
-        //Finalizamos la tabla general
-        references.forEach((reference, refIndex) => {
-            let rowSum = 0;
-            tableComponentsHTML += `<tr><th>${reference.reference_motor}</th>`;
-            components.forEach((component, compIndex) => {
-                const cellValue = cells[rowIndex * components.length + compIndex];
-                tableComponentsHTML += cellValue;
-
-                //Convertir valor de celda a número
-                const valorNumerico = parseInt(cellValue.replace('<td>', '').replace('</td>', ''), 10) || 0;
-                rowSum += valorNumerico;
-            });
-            totalSum += rowSum;
-            tableComponentsHTML += `<td><strong>${rowSum}</strong></td></tr>`;
-            rowIndex++;
-        });
-
-        //Fila de totales
-        let totalRow = `<tr><th>TOTAL</th>`;
-        sums.forEach(sum => {
-            const percentage = totalSum ? ((sum / totalSum) * 100).toFixed(2) : 0;
-            totalRow += `<td>${sum} (${percentage}%)</td>`;
-        });
-        totalRow += `<td><strong>${totalSum}</strong></td></tr>`;
-        tableComponentsHTML += totalRow + '</tbody></table>';
-
-        //Insertamos la tabla general en el elemento "table-components"
-        document.getElementById('table-components').innerHTML = tableComponentsHTML;
-
-        //Generación de la tabla específica "table-component" para cada referencia
-        referencias_componentes.forEach((referenciaPieza) => {
-
-            let referencePiezaColumnIndex = components.findIndex(comp => comp.reference_composant.trim() === referenciaPieza.trim());
-
-            if (referencePiezaColumnIndex !== -1) {
-                //Creamos la tabla específica para referencePieza
-                let tableComponentHTML = `
-                    <table class="table table-bordered">
-                        <thead><tr><th>Referencia motor acabado</th><th>Cantidad a mover</th></tr></thead>
-                        <tbody>`;
-                let sumColumna = 0;
-
-                references.forEach((reference, refIndex) => {
-                    const columnValue = cells[refIndex * components.length + referencePiezaColumnIndex];
-                    const valorNumericoColumna = parseInt(columnValue.replace('<td>', '').replace('</td>', ''), 10) || 0;
-                    sumColumna += valorNumericoColumna;
-
-                    tableComponentHTML += `<tr><td>${reference.reference_motor}</td><td>${valorNumericoColumna}</td></tr>`;
-                });
-
-                //Añadimos la información de la cantidad que tiene que mover al array
-                cantidad_a_mover.push(sumColumna);
-
-                const percentage = totalSum ? ((sumColumna / totalSum) * 100).toFixed(2) : 0;
-                tableComponentHTML += `<tr><td><strong>TOTAL</strong></td><td><strong>${sumColumna} (${percentage}%)</strong></td></tr>`;
-                tableComponentHTML += '</tbody></table>';
-
-                //Insertamos la tabla específica en su respectivo contenedor
-                const containerId = `table-component-${contador}`;
-                const container = document.getElementById(containerId);
-
-                if (container) {
-                    container.innerHTML = tableComponentHTML; //Añadir el HTML de la tabla
-                } else {
-                    console.error(`No se encontró el contenedor con ID: ${containerId}`);
-                }
-
-                //Incrementamos el contador aquí para que se ejecute en cada iteración
-                contador++;
-            }
-        });
-
-        //Almacenamos las cantidades a mover en forma de cadena separada por ";"
-        cantidad_a_mover_cadena = cantidad_a_mover.join(";");
-    }).catch(error => {
-        console.error('Error en la resolución de promesas:', error);
-    });
-
-    //Reseteamos el contador
-    contador = 0;
-}
-
-/**
  * Función para mostrar la alerta
  * @param {String} titulo Argumento que contiene el titulo de la alerta
  * @param {String} mensaje Argumento que contiene el mensaje de la alerta
@@ -3376,250 +3176,9 @@ function visualizarEtapa(etapa, referencia_componente, id_etapa) {
 
         //Controlamos los datos obtenidos
         .then(data => {
-            console.log("Data etapa: ", data);
-
             //Llamamos a la función para configurar la visualización de la etapa dependiendo de cual sea
             gestionarEtapa_Visualizacion(data);
-
-            return;
-
-            //Iteramos por los datos obtenidos para almacenarlos en las variable gloables
-            data.forEach(item => {
-                /**Almacenamos la información obtenida dentro de las variables gloables */
-                id_etapa = item.id;
-                comment = item.comments;
-                distance_empty_zone = item.distance_empty_zone;
-                loading_type = item.loading_type;
-                engins = item.engins;
-                number_of_packages_loaded_at_once = item.number_of_packages_loaded_at_once;
-                code_mtm3 = item.code_MTM3;
-                correspondence = item.correspondance;
-                speed = item.speed;
-            });
-
-            console.log("Variables:");
-            console.log("id_etapa:", id_etapa);
-            // console.log("comment:", comment);
-            // console.log("distance_empty_zone:", distance_empty_zone);
-            // console.log("loading_type:", loading_type);
-            // console.log("engins:", engins);
-            // console.log("number_of_packages_loaded_at_once:", number_of_packages_loaded_at_once);
-            // console.log("engines:", engines);
-            // console.log("code_mtm3:", code_mtm3);
-            // console.log("correspondence:", correspondence);
-            // console.log("speed:", speed);
-
-            //Configuramos el cuerpo del modal
-            $('#modalLarge .modal-body').html(`
-                <div class="container mx-auto p-4">
-                    <h4 class="text-xl font-semibold mb-4">Comentario</h4>
-                    <div class="mb-6">
-                        <textarea id="comment_input" name="comment_input" class="w-full h-24 p-2 border border-gray-300 rounded-md" disabled></textarea>
-                    </div>
-                    
-                    <hr class="my-4">
-            
-                    <h4 class="text-xl font-semibold mb-4">Ajustes</h4>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-medium mb-2">Zona sin carga</label>
-                        <input type="number" id="distance_empty_zone_input" name="distance_empty_zone_input" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Distance empty zone">
-                    </div>
-            
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-medium mb-2">Cantidad de paquetes cargados a la vez (apilados)</label>
-                        <input type="number" id="number_packages_at_once_input" name="number_packages_at_once_input" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Number of packages loaded at once (stack)">
-                    </div>
-            
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-medium mb-2">Tipo de carga</label>
-                        <select class="w-full p-2 border border-gray-300 rounded-md" id="loading_type_input" name="loading_type_input">
-                            <option value="At the quay">At the quay</option>
-                            <option value="Air plane">Air plane</option>
-                        </select>
-                    </div>
-            
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-medium mb-2">Cantidad de UC por palé</label>
-                        <input type="number" id="number_of_uc_per_pallet" name="nunber_of_uc_per_pallet" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Number of UC per pallet" disabled>
-                    </div>
-            
-                    <hr class="my-4">
-            
-                    <h4 class="text-xl font-semibold mb-4">Condiciones de manipulación</h4>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-medium mb-2">Máquina usada</label>
-                        <select class="w-full p-2 border border-gray-300 rounded-md" id="machine_used_input" name="machine_used_input">
-                            <option value="Carretilla elevadora eléctrica acompañada">Carretilla elevadora eléctrica acompañada</option>
-                            <option value="Carretilla elevadora eléctrica con conductor sentado">Carretilla elevadora eléctrica con conductor sentado</option>
-                            <option value="Carretilla elevadora eléctrica con apilador acompañante">Carretilla elevadora eléctrica con apilador acompañante</option>
-                            <option value="Apilador eléctrico delantero">Apilador eléctrico delantero</option>
-                            <option value="Apilador eléctrico con mástil retráctil">Apilador eléctrico con mástil retráctil</option>
-                            <option value="Apilador térmico delantero">Apilador térmico delantero</option>
-                            <option value="Tractor eléctrico de 200 a 500 daN">Tractor eléctrico de 200 a 500 daN</option>
-                            <option value="Tractor eléctrico de 1500 daN">Tractor eléctrico de 1500 daN</option>
-                            <option value="Tractor térmico (agrícola)">Tractor térmico (agrícola)</option>
-                            <option value="Ninguno">Ninguno</option>
-                        </select>
-                    </div>
-            
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-medium mb-2">Código MTM3</label>
-                        <input type="text" id="mtm3_code_input" name="mtm3_code_input" class="w-full p-2 border border-gray-300 rounded-md" placeholder="MTM3 Code" disabled>
-                    </div>
-            
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-medium mb-2">Velocidad de la máquina usada</label>
-                        <input type="text" id="speed_machine_used_input" name="speed_machine_used_input" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Speed machine used" disabled>
-                    </div>
-            
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-medium mb-2">Correspondencia</label>
-                        <input type="text" id="correspondence_input" name="correspondence_input" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Correspondence" disabled>
-                    </div>
-            
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-medium mb-2">Número de paquetes</label>
-                        <input type="number" id="number_packages_input" name="number_packages_input" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Number of packages" disabled>
-                    </div>
-            
-                    <div class="mb-4">
-                        <label class="block text-gray-700 font-medium mb-2">Velocidad</label>
-                        <select class="w-full p-2 border border-gray-300 rounded-md" id="speed_input" name="speed_input">
-                            <option value="10" ${speed === "10" ? "selected" : ""}>10 km/h</option>
-                            <option value="12" ${speed === "12" ? "selected" : ""}>12 km/h</option>
-                            <option value="15" ${speed === "15" ? "selected" : ""}>15 km/h</option>
-                            <option value="20" ${speed === "20" ? "selected" : ""}>20 km/h</option>
-                        </select>
-                    </div>
-            
-                    <hr class="my-4">
-            
-                    <table id="modal-table" class="w-full text-left border border-gray-200" style="display: none;">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="p-2 border-b border-gray-200">OPERACIONES</th>
-                                <th class="p-2 border-b border-gray-200">SÍMBOLO</th>
-                                <th class="p-2 border-b border-gray-200">DISTANCIA</th>
-                                <th class="p-2 border-b border-gray-200">FRECUENCIA</th>
-                                <th class="p-2 border-b border-gray-200">TIEMPO</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Aquí se llenarán los datos de la tabla -->
-                        </tbody>
-                    </table>
-            
-                    <div class="mt-6 flex justify-center">
-                        <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${id_etapa}')">Visualizar plano</button>
-                    </div>
-                </div>
-            `);
-
-            /**
-             * Función manejador para el campo del speed-
-             * @param {String} value Argumento que contiene el valor de la velocidad 
-             */
-            function updateSpeedMachine(value) {
-                const speedMachineUsed = document.getElementById('speed_machine_used_input');
-                if (speedMachineUsed) {
-                    switch (value) {
-                        case "10":
-                            speedMachineUsed.value = "0.6";
-                            break;
-                        case "12":
-                            speedMachineUsed.value = "0.5";
-                            break;
-                        case "15":
-                            speedMachineUsed.value = "0.4";
-                            break;
-                        case "20":
-                            speedMachineUsed.value = "0.3";
-                            break;
-                        default:
-                            speedMachineUsed.value = "";
-                    }
-                }
-            }
-
-            //Creamos una instancia del input de la velocidad
-            const speedInput = document.getElementById('speed_input');
-
-            //En caso de que exista
-            if (speedInput) {
-                //Llamamos a la función para controlar el campo de la velocidad de la máquina
-                updateSpeedMachine(speedInput.value);
-
-                //Añadimos el listener al input de la velocidad
-                speedInput.addEventListener('change', function () {
-                    //Llamamos a la función para controlar el campo de la velocidad de la máquina donde le pasamos el valor
-                    updateSpeedMachine(this.value);
-                });
-            }
-
-            /**Aplicamos la información dentro de los campos del modal */
-            //Categoria del comentario
-            document.getElementById('comment_input').value = comment;
-
-            //Categoria de los ajustes
-            document.getElementById('distance_empty_zone_input').value = distance_empty_zone;
-            document.getElementById('number_packages_at_once_input').value = number_of_packages_loaded_at_once;
-            document.getElementById('loading_type_input').value = loading_type;
-
-            //Categoria de las condiciones
-            document.getElementById('machine_used_input').value = engins;
-            document.getElementById('mtm3_code_input').value = code_mtm3;
-            document.getElementById('correspondence_input').value = correspondence;
-            document.getElementById('number_packages_input').value = number_of_packages_loaded_at_once;
-            document.getElementById('speed_input').value = speed;
-
-            //Iniciamos la solucitud GET para obtener el número de UMs
-            fetch(`/film/api/conteoUM/${referencia_componente}`, {
-                method: "GET"
-            })
-                //Controlamos la respuesta
-                .then(response => {
-                    //En caso de que falle
-                    if (!response.ok) {
-                        throw new Error('Error fetching data');
-                    }
-
-                    //Devolvemos el dato obtenido
-                    return response.json();
-                })
-
-                //Controlamos los datos obtenidos
-                .then(data => {
-                    //Establecemos el valor en el campo Number of UC per pallet
-                    document.getElementById('number_of_uc_per_pallet').value = data[0].total_pieces;
-                });
-
-            //Llamamos a la función para disponer las operaciones dentro de la información de la etapa
-            disponerTablaOperaciones(id_etapa);
-
-            //Configuramos el footer del modal
-            $('#modalLarge .modal-footer').html(`
-                <div class="mt-4 flex justify-end modal-footer">
-                    <button id="botonActualizarEtapa" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Actualizar etapa</button>
-                    <button id="closeModalLarge"
-                        class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-500">Cerrar</button>
-                </div>
-            `);
-
-            //Añadimos la funcionalidad para cerrar el modal
-            $('#closeModalLarge').on('click', function () {
-                //Cerramos el modal
-                $('#modalLarge').fadeOut();
-            });
-
-            //Añadimos la funcionalidad para el botón de actualizar etapa
-            $('#botonActualizarEtapa').on('click', function () {
-                //Llamamos la función para actualizar la etapa
-                actualizarInformacionEtapa(id_etapa);
-            })
-
-            //Mostramos el modal
-            $('#modalLarge').fadeIn();
-        })
+        });
 }
 
 /**
