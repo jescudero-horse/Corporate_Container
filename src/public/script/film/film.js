@@ -1,5 +1,5 @@
 //Creamos las variable globales que hacen falta
-let cantidad_a_mover = [], referencia_componente, categoria_seleccionada, operacion_seleccionada, puestoID, linea, fs_totales, ultimoBotonPulsado, conteosPorPuesto = [], contador = 0, cantidadAMoverCadena, mote, planta, tipo_carga = "UM", tipo_operacion = "Programa_Expedicion_Forklift", primer_dia, numero_picadas;
+let cantidad_a_mover = [], referencia_componente, categoria_seleccionada, operacion_seleccionada, puestoID, linea, fs_totales, ultimoBotonPulsado, conteosPorPuesto = [], contador = 0, cantidadAMoverCadena, mote, planta, tipo_carga = "UM", tipo_operacion = "Programa_Expedicion_Forklift", primer_dia, numero_picadas, tiempoDesplazamiento;
 
 //Variable global donde almacenarems en un diccionario la referencia y el número de embalajes
 let referencia_embalaje = {};
@@ -1156,6 +1156,7 @@ function generarTablasPorEtapa(etapas) {
                                         } else {
                                             valor = 1;
                                         }
+                                        tiempoDesplazamiento = (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100
 
                                         /*if (f === 'Descarga camión en muelle (UM)') {
                                             actividad_en_minutos_final = ((DC113 + CDC + DS10 + CDL) + (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100);
@@ -1170,14 +1171,15 @@ function generarTablasPorEtapa(etapas) {
                                         <td class="px-4 py-2 border">${tiempoCalculado}</td>
                                     </tr>
                                 `;
-                                    }).join('')}
+                                    }).join('')}${console.log("Tiempo desplazamiento: ", tiempoDesplazamiento)}
+}
                             
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" rowspan="2">Distancia</td>
                                                     <td class="px-4 py-2 border font-semibold">Metros<br>${distancia_total}</td>
                                                     <td class="px-4 py-2 border font-semibold">Velocidad<br>${valor}</td>
-                                                    <td class="px-4 py-2 border font-semibold">${etapaDeF.cantidad_a_mover}
-                                                    <td class="px-4 py-2 border">${(distancia_total * valor * etapaDeF.cantidad_a_mover) / 100}</td>
+                                                    <td class="px-4 py-2 border font-semibold">${etapaDeF.cantidad_a_mover}</td>
+                                                    <td class="px-4 py-2 border">${tiempoDesplazamiento}</td>
                                                 </tr>
 
                                                 <tr>
@@ -1185,11 +1187,11 @@ function generarTablasPorEtapa(etapas) {
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos (según el número de picadas simultáneas)</td>
-                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final}</td>
+                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final + tiempoDesplazamiento}</td>
                                                 </tr>
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos</td>
-                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final}</td>
+                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final + tiempoDesplazamiento}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
