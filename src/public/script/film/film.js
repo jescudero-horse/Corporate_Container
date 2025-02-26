@@ -863,7 +863,7 @@ function generarTablasPorEtapa(etapas) {
             .then(etapasData => {
                 etapasDeF.forEach((etapaDeF, index) => {
                     /** Almacenamos las variable necesarias */
-                    var { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2 } = inicializarVariablesEtapas(etapaDeF);
+                    var { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2 } = inicializarVariablesEtapas(etapaDeF);
 
                     //En caso de que no haya una descripción para la etapa....
                     if (mote_etapa === null || mote_etapa === "null") {
@@ -892,7 +892,6 @@ function generarTablasPorEtapa(etapas) {
                         //Controlamos la respuesta
                         .then(totalPiecesData => {
                             let totalPieces = totalPiecesData[0].total_pieces || 1;
-                            let timeAtUC = timeAtUM / totalPieces;
                             let color_etapa;
                             let actividad_en_minutos_final = 0;
 
@@ -1056,10 +1055,6 @@ function generarTablasPorEtapa(etapas) {
                                             actividad_en_minutos = ((CHMAN * 2) + distancia_total) / 100;
                                             actividad_en_minutos_final += tiempoCalculado;
 
-                                            timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
-                                            timeAtUC = timeAtUM / totalPieces;
-
-
                                         } else if (etapa.symbol === 'CHMAN' && f === 'Carga cassette nacelle J 22 bacs') {
                                             distanceValue = CHMAN;
                                             tiempoCalculado = etapaDeF.cantidad_a_mover * distanceValue;
@@ -1081,10 +1076,6 @@ function generarTablasPorEtapa(etapas) {
                                             actividad_en_minutos = ((CHMAN + distancia_total)) / 100;
                                             actividad_en_minutos_final += tiempoCalculado;
 
-                                            timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
-                                            timeAtUC = timeAtUM / totalPieces;
-
-
                                         } else if (etapa.symbol === "CHMAN") {
                                             distanceValue = CHMAN;
                                             tiempoCalculado = etapaDeF.cantidad_a_mover * CHMAN;
@@ -1103,9 +1094,6 @@ function generarTablasPorEtapa(etapas) {
 
                                             actividad_en_minutos = ((CHMAN * 2) + (distancia_total * valor)) / 100;
                                             actividad_en_minutos_final += tiempoCalculado;
-
-                                            timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
-                                            timeAtUC = timeAtUM / totalPieces;
 
                                         } else if (etapa.symbol === 'DC113') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * DC113) / 100;
@@ -2455,7 +2443,6 @@ function inicializarVariablesEtapas(etapaDeF) {
     const TL_TV = etapaDeF.TL_TV ? etapaDeF.TL_TV.toFixed(2) : '0.00';
     const CDV_CDL = etapaDeF.CDVB_CDL ? etapaDeF.CDVB_CDL : '0';
     const actividad_en_minutos = etapaDeF.actividad_en_minutos ? etapaDeF.actividad_en_minutos.toFixed(2) : '0.00';
-    const timeAtUM = (actividad_en_minutos * 100) / numberOfPackagesLoadedAtOnce;
     const numero_cruces = etapaDeF.numero_cruces ? etapaDeF.numero_cruces : '0';
     const numero_puertas = etapaDeF.numero_puertas ? etapaDeF.numero_puertas : '0';
     const NC = etapaDeF.NC ? etapaDeF.NC : '0';
@@ -2502,7 +2489,7 @@ function inicializarVariablesEtapas(etapaDeF) {
     const W5_2 = etapaDeF.W5_2 ? etapaDeF.W5_2 : '0';
 
     //Devolvemos las variables
-    return { mote_etapa, referenciaComponente, timeAtUM, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2 };
+    return { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2 };
 }
 
 /**
