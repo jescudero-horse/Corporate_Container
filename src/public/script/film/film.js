@@ -1,5 +1,5 @@
 //Creamos las variable globales que hacen falta
-let cantidad_a_mover = [], referencia_componente, categoria_seleccionada, operacion_seleccionada, puestoID, linea, fs_totales, ultimoBotonPulsado, conteosPorPuesto = [], contador = 0, cantidadAMoverCadena, mote, planta, tipo_carga = "UM", tipo_operacion = "Programa_Expedicion_Forklift", primer_dia, numero_picadas;
+let cantidad_a_mover = [], referencia_componente, categoria_seleccionada, operacion_seleccionada, puestoID, linea, fs_totales, ultimoBotonPulsado, conteosPorPuesto = [], contador = 0, cantidadAMoverCadena, mote, planta, tipo_carga = "UM", tipo_operacion = "Programa_Expedicion_Forklift", primer_dia, numero_picadas, tiempoDesplazamiento;
 
 //Variable global donde almacenarems en un diccionario la referencia y el número de embalajes
 let referencia_embalaje = {};
@@ -89,6 +89,8 @@ async function fetchData() {
 function gestionarPuesto(data) {
     //Creamos una variable para almacenar el número de peticiones completadas
     let peticionesCompletadas = 0;
+
+    console.log("Data: ", data);
 
     //Almacenamos en una variable el número de puestos disponibles
     const totalPuestos = data.length;
@@ -247,6 +249,8 @@ function renderizarGrafico() {
         //Almacenamos la saturación del puesto
         const saturacion = (puesto.conteo / jornadaTotal) * 100;
 
+        console.log("Puesto conteo: ", puesto.conteo, "\nSaturacion: ", saturacion);
+
         //console.log("> Saturación: ", saturacion, "\nPuesto conteo: ", puesto.conteo);
 
         /** Inicializamos la gráfica de la saturación */
@@ -313,12 +317,15 @@ function renderizarGrafico() {
             // const porcentaje_estatico_VA = total > 0 ? ((estatico_VA / 60 / total) * 100).toFixed(2) : 0;
             // const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / 60 / total) * 100).toFixed(2) : 0;
 
-            // console.log(
-            //     "Porcentaje dinamico NO VA: ", porcentaje_NoVA,
-            //     "Porcentaje dinamico VA: ", porcentaje_VA,
-            //     "Porcentaje estatico VA: ", porcentaje_estatico_VA,
-            //     "Porcentaje estatico NO VA: ", estatico_NoVA
-            // )
+            console.log(
+                "Porcentaje dinamico NO VA: ", porcentaje_NoVA,
+                "Valor dinamico VA: ", dinamico_NoVA
+                // "Porcentaje dinamico VA: ", porcentaje_VA,
+                //"Porcentaje estatico VA: ", porcentaje_estatico_VA,
+
+                // // "Porcentaje estatico NO VA: ", porcentaje_estatico_NoVA,
+                // // "Estatico no valor: ", estatico_NoVA
+            )
 
             /** Inicializamos la gráfica de la actividad */
             new Chart(canvasChimenea, {
@@ -329,7 +336,8 @@ function renderizarGrafico() {
                         { label: 'Dinamico NoVA', data: [porcentaje_NoVA], backgroundColor: '#024d7e', borderColor: '#024d7e', borderWidth: 1, stack: 'Stack 0' },
                         { label: 'Dinamico VA', data: [porcentaje_VA], backgroundColor: '#0493f2', borderColor: '#0493f2', borderWidth: 1, stack: 'Stack 0' },
                         { label: 'Estático VA', data: [porcentaje_estatico_VA], backgroundColor: '#67adea', borderColor: '#67adea', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Estático NoVA', data: [porcentaje_estatico_NoVA], backgroundColor: '#ffffff', borderColor: '#ffffff', borderWidth: 1, stack: 'Stack 0' }
+                        { label: 'Estático NoVA', data: [porcentaje_estatico_NoVA], backgroundColor: '#ffffff', borderColor: '#ffffff', borderWidth: 1, stack: 'Stack 0' },
+                        { label: 'Tiempo desplazamiento', data: [1], backgroundColor: '#7374cc', borderColor: '#7374cc', borderWidth: 1, stack: 'Stack 0' }
                     ]
                 },
                 options: {
@@ -826,7 +834,7 @@ function configurarModalInformeDetallado(data) {
  */
 function generarTablasPorEtapa(etapas) {
     //Obtenemos el contenedor donde se agregarán las tablas
-    const contenedorTablas = document.getElementById('tablaEtapas');
+    let contenedorTablas = document.getElementById('tablaEtapas');
     contenedorTablas.innerHTML = '';
 
     //Creamos un mapa para agrupar las etapas por el valor "F"
@@ -843,12 +851,17 @@ function generarTablasPorEtapa(etapas) {
         //Almacenamos en una variable las etapas del grupo "F"
         const etapasDeF = agrupadoPorF[FKey];
 
+        console.log("Etapas DEF: ", etapasDeF)
+
         //Almacenamos en variables la información básica de la etapa
-        const id_etapa = etapasDeF[0].id;
+        const id_etapa1 = etapasDeF[0].id;
         let linea = etapasDeF[0].linea;
         let speed = etapasDeF[0].speed;
         const f = etapasDeF[0].F;
-        const distancia_total = etapasDeF[0].distancia_total;
+        const numero_picadas = etapasDeF[0].numero_picadas
+        const id_puesto = etapasDeF[0].id_puesto;
+
+        console.log("ID1:", id_etapa1)
 
         //Creamos una solicitud para obtener los datos de las etapas
         fetch(`/film/api/obtenerEtapas/${encodeURIComponent(FKey)}`, {
@@ -864,6 +877,8 @@ function generarTablasPorEtapa(etapas) {
                 etapasDeF.forEach((etapaDeF, index) => {
                     /** Almacenamos las variable necesarias */
                     var { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2 } = inicializarVariablesEtapas(etapaDeF);
+
+                    console.log("ID:", id_etapa, "\fnombre:", nombre_etapa);
 
                     //En caso de que no haya una descripción para la etapa....
                     if (mote_etapa === null || mote_etapa === "null") {
@@ -902,8 +917,8 @@ function generarTablasPorEtapa(etapas) {
 
                                 //En caso de que la distancia sea entre de 50 a 100
                             } else if (distancia_total >= 50 && distancia_total <= 99) {
-                                //Asignamos el color naranja
-                                color_etapa = 'bg-orange-300';
+                                //Asignamos el color amarillo
+                                color_etapa = 'bg-yellow-300';
 
                                 //En caso de que la distancia sea más de 100
                             } else if (distancia_total >= 100) {
@@ -918,7 +933,7 @@ function generarTablasPorEtapa(etapas) {
 
                             //Generamos el HTML de la tabla para la etapa
                             const tablaHTML = `
-                                <div class="mb-4">
+                                <div id="contenedor-${FKey}-${referenciaComponente}-${id_etapa1}-${id_puesto}" class="mb-4 draggable-container" data-id-etapa="${id_etapa}">
                                     <h3 id="encabezadoEtapa-${FKey}-${referenciaComponente}"
                                         class="text-lg font-semibold mb-2 flex justify-between items-center 
                                             p-2 rounded-lg animate-fadeIn 
@@ -1156,6 +1171,7 @@ function generarTablasPorEtapa(etapas) {
                                         } else {
                                             valor = 1;
                                         }
+                                        tiempoDesplazamiento = (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100
 
                                         /*if (f === 'Descarga camión en muelle (UM)') {
                                             actividad_en_minutos_final = ((DC113 + CDC + DS10 + CDL) + (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100);
@@ -1170,26 +1186,33 @@ function generarTablasPorEtapa(etapas) {
                                         <td class="px-4 py-2 border">${tiempoCalculado}</td>
                                     </tr>
                                 `;
-                                    }).join('')}
+                                    }).join('')}${console.log("Tiempo desplazamiento: ", tiempoDesplazamiento)}
+}
                             
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" rowspan="2">Distancia</td>
                                                     <td class="px-4 py-2 border font-semibold">Metros<br>${distancia_total}</td>
                                                     <td class="px-4 py-2 border font-semibold">Velocidad<br>${valor}</td>
-                                                    <td class="px-4 py-2 border font-semibold">${etapaDeF.cantidad_a_mover}
-                                                    <td class="px-4 py-2 border">${(distancia_total * valor * etapaDeF.cantidad_a_mover) / 100}</td>
+                                                    <td class="px-4 py-2 border font-semibold">${etapaDeF.cantidad_a_mover}</td>
+                                                    <td class="px-4 py-2 border">${tiempoDesplazamiento.toFixed(2)}</td>
                                                 </tr>
 
                                                 <tr>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="px-4 py-2 border font-semibold" colspan="4">Actividad total en minutos</td>
+                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final + tiempoDesplazamiento}</td>
                                                 </tr>
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos (según el número de picadas simultáneas)</td>
-                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final}</td>
+                                                    <td class="px-4 py-2 border">${(actividad_en_minutos_final + tiempoDesplazamiento) / numero_picadas}</td>
                                                 </tr>
+
                                                 <tr>
-                                                    <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos</td>
-                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final}</td>
+                                                    <td class="px-4 py-2 border font-semibold" colspan="4">Número de picadas</td>
+                                                    <td class="px-4 py-2 border">${numero_picadas}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -1197,7 +1220,28 @@ function generarTablasPorEtapa(etapas) {
                                 </div>
                             `;
 
+                            let orden = [];
+
                             contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
+
+                            //console.log("Contenedor tabla: ", contenedorTablas);
+
+                            // Inicializa SortableJS en el contenedor de las tablas
+                            new Sortable(contenedorTablas, {
+                                animation: 150,
+                                ghostClass: 'sortable-ghost',
+                                handle: '.draggable-container',
+                                onEnd: function (evt) {
+                                    // Actualiza la variable 'orden'
+                                    orden = Array.from(contenedorTablas.children).map(child => child.id);
+
+                                    console.log("Orden: ", orden)
+                                    // Guarda el nuevo orden en localStorage
+                                    //localStorage.setItem('ordenContenedores', JSON.stringify(orden));
+
+                                    console.log("Escuchador");
+                                }
+                            });
                         })
                         .catch(error => {
                             console.error('Error fetching total pieces:', error);
@@ -1206,8 +1250,25 @@ function generarTablasPorEtapa(etapas) {
             })
             .catch(error => {
                 console.error('Error fetching etapas:', error);
-            });
+            })
+            .finally(() => {
+                console.log("Dentro del finally")
+                ordenarPorIdEtapa(contenedorTablas);
+            })
     });
+}
+
+// Función para ordenar los contenedores por id_etapa
+function ordenarPorIdEtapa(contenedorTablas) {
+    const contenedores = Array.from(contenedorTablas.children);
+    contenedores.sort((a, b) => {
+        const idA = parseInt(a.getAttribute('data-id-etapa'));
+        const idB = parseInt(b.getAttribute('data-id-etapa'));
+        return idA - idB;
+    });
+    contenedores.forEach(contenedor => contenedorTablas.appendChild(contenedor));
+    // Actualiza la variable 'orden'
+    orden = contenedores.map(contenedor => contenedor.id);
 }
 
 /**
@@ -3954,6 +4015,14 @@ function setCookie(name, value, days) {
         expires = "; expires=" + date.toUTCString();
     }
     document.cookie = name + "=" + value + "; path=/" + expires;
+}
+
+/**
+ * Función para actualizar el orden de las etapas
+ * @param {Array} array Argumento que contiene las etapas ordenadas
+ */
+function ordernarEtapa(array) {
+
 }
 
 /**
