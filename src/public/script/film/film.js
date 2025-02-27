@@ -1005,7 +1005,7 @@ function generarTablasPorEtapa(etapas) {
                                             tiempoCalculado = PS10;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'PS14') {
-                                            tiempoCalculado = (PS14 * etapaDeF.cantidad_a_mover) / 100;
+                                            tiempoCalculado = PS14;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'CC124') {
                                             etapa.symbol = simbolo_especial;
@@ -1019,10 +1019,10 @@ function generarTablasPorEtapa(etapas) {
                                             tiempoCalculado = TC_TL;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DS10') {
-                                            tiempoCalculado = (DS10 * etapaDeF.cantidad_a_mover) / 100;
+                                            tiempoCalculado = DS10;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'CDL') {
-                                            tiempoCalculado = (CDL * etapaDeF.cantidad_a_mover) / 100;
+                                            tiempoCalculado = CDL;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'CCPE') {
                                             tiempoCalculado = CCPE;
@@ -1111,52 +1111,52 @@ function generarTablasPorEtapa(etapas) {
                                             actividad_en_minutos_final += tiempoCalculado;
 
                                         } else if (etapa.symbol === 'DC113') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * DC113) / 100;
+                                            tiempoCalculado = DC113;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'CDC') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * CDC) / 100;
+                                            tiempoCalculado = CDC;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'PS15') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * PS15) / 100;
+                                            tiempoCalculado = PS15;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DI21') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * DI21) / 100;
+                                            tiempoCalculado = DI21;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DS14') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * DS14) / 100;
+                                            tiempoCalculado = DS14;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DS15') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * DS15) / 100;
+                                            tiempoCalculado = DS15;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DC') {
-                                            tiempoCalculado = DC; //(etapaDeF.cantidad_a_mover * DC) / 100;
+                                            tiempoCalculado = DC;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'D1') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * D1) / 100;
+                                            tiempoCalculado = D1;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'W5') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * W5) / 100;
+                                            tiempoCalculado = W5;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'TT') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * TT) / 100;
+                                            tiempoCalculado = TT;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'AL') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * AL) / 100;
+                                            tiempoCalculado = AL;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'P2') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * P2) / 100;
+                                            tiempoCalculado = P2;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'L2') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * L2) / 100;
+                                            tiempoCalculado = L2;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'G1') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * G1) / 100;
+                                            tiempoCalculado = G1;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'P5') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * P5) / 100;
+                                            tiempoCalculado = P5
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'W5_2') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * W5_2) / 100;
+                                            tiempoCalculado = W5_2;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         }
 
