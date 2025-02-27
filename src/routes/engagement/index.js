@@ -503,10 +503,10 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 null, //Linea 
                 10, //Máquina usada
                 10, //Velocidad
-                42, //DC113
-                6, //CDC
-                19, //DS10
-                6 //CDL
+                (42 * cantidad_mover) / 100, //DC113
+                (6 * cantidad_mover) / 100, //CDC
+                (19 * cantidad_mover) / 100, //DS10
+                (6 * cantidad_mover) / 100 //CDL
             );
             break;
 
@@ -516,9 +516,9 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 null, //Linea 
                 10, //Máquina usada
                 10, //Velocidad
-                44, //PS15
-                30, //DI21
-                6 //CDL
+                (44 * cantidad_mover) / 100, //PS15
+                (30 * cantidad_mover) / 100, //DI21
+                (6 * cantidad_mover) / 100, //CDL
             );
             break;
 
@@ -528,10 +528,10 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 null, //Linea 
                 10, //Máquina usada
                 10, //Velocidad
-                38, //PS14
-                6, //CDC
-                38, //DS14
-                6 //CDL
+                (38 * cantidad_mover) / 100, //PS14
+                (6 * cantidad_mover) / 100, //CDC
+                (38 * cantidad_mover) / 100, //DS14
+                (6 * cantidad_mover) / 100 //CDL
             );
             break;
 
@@ -541,10 +541,10 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 null, //Linea 
                 10, //Máquina usada
                 10, //Velocidad
-                38, //PS14
-                6, //CDC
-                49, //DS15
-                6 //CDL
+                (38 * cantidad_mover) / 100, //PS14
+                (6 * cantidad_mover) / 100, //CDC
+                (49 * cantidad_mover) / 100, //DS15
+                (6 * cantidad_mover) / 100, //CDL
             );
             break;
 
@@ -554,10 +554,10 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 null, //Linea 
                 10, //Máquina usada
                 10, //Velocidad
-                38, //PS14
-                6, //CDC
-                49, //DS15
-                6 //CDL
+                (38 * cantidad_mover) / 100, //PS14
+                (6 * cantidad_mover) / 100, //CDC
+                (49 * cantidad_mover) / 100, //DS15
+                (6 * cantidad_mover) / 100 //CDL
             );
             break;
 
@@ -568,11 +568,11 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 10, //Máquina usada
                 10, //Velocidad
                 (4 * cantidad_mover) / 100, //DC
-                6, //D1
-                1, //W5
-                20, //TT
-                7, //M1
-                2 //AL
+                (6 * cantidad_mover) / 100, //D1
+                (1 * cantidad_mover) / 100, //W5
+                (20 * cantidad_mover) / 100, //TT
+                (7 * cantidad_mover) / 100, //M1
+                (2 * cantidad_mover) / 100 //AL
             );
             break;
 
@@ -582,12 +582,12 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 null, //Linea 
                 10, //Máquina usada
                 10, //Velocidad
-                4, //DC
-                6, //D1
-                1, //W5
-                35, //TT
-                7, //M1
-                2 //AL
+                (4 * cantidad_mover) / 100, //DC
+                (6 * cantidad_mover) / 100, //D1
+                (1 * cantidad_mover) / 100, //W5
+                (35 * cantidad_mover) / 100, //TT
+                (7 * cantidad_mover) / 100, //M1
+                (2 * cantidad_mover) / 100 //AL
             );
             break;
 
@@ -597,10 +597,10 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 null, //Linea 
                 10, //Máquina usada
                 10, //Velocidad
-                1, //P2
-                1, //L2
-                1, //G1
-                2 //P5
+                (1 * cantidad_mover) / 100, //P2
+                (1 * cantidad_mover) / 100, //L2
+                (1 * cantidad_mover) / 100, //G1
+                (2 * cantidad_mover) / 100 //P5
             );
             break;
 
@@ -610,10 +610,10 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 null, //Linea 
                 10, //Máquina usada
                 10, //Velocidad
-                1, //G1
-                1, //W5
-                1, //P2
-                2 //W5_2
+                (1 * cantidad_mover) / 100, //G1
+                (1 * cantidad_mover) / 100, //W5
+                (1 * cantidad_mover) / 100, //P2
+                (2 * cantidad_mover) / 100 //W5_2
             );
             break;
 
@@ -1358,10 +1358,10 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
         const query = `
             SELECT 
                 id_puesto,
-                SUM(TL_TV + CDVB_CDL + TL + CDL + CCPE + CT10 + TC + CDC + DC + D1 + W5 + AL) AS dinamico_NoVA,
-                SUM(TL_TV + CDVB_CDL + TC + CDV + TV + CDL + CCPE + CDV) AS dinamico_VA,
-                SUM(PS10 + PS14 + valor_simbolo_especial + DS10 + PPU43 + PDU44 + PP1 + PDU34 + PPU34 + PPD32) AS estatico_VA,
-                SUM(PP1 + M1 + DL) AS estatico_NoVA
+                SUM(TL_TV + CDVB_CDL + TL + CDL + CCPE + CT10 + TC + CDC + DC + D1 + W5 + M1 + AL + W5_2) AS dinamico_NoVA,
+                SUM(TL_TV + CDVB_CDL + TC + CDV + TV + CDL + CCPE + CDV + DC113 + DS10 + PS14 + DS14 + DS15 + PS15 + DI21) AS dinamico_VA,
+                SUM(PS10 + PS14 + valor_simbolo_especial + DS10 + PPU43 + PDU44 + PP1 + PDU34 + PPU34 + PPD32 + G1 + P2) AS estatico_VA,
+                SUM(PP1 + M1 + DL + P2 + L2 + G1 + P5) AS estatico_NoVA
             FROM 
                 EN_IFM_STANDARD 
             WHERE 
