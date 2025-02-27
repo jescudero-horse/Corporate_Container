@@ -1040,7 +1040,7 @@ function generarTablasPorEtapa(etapas) {
                                             tiempoCalculado = TL;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'M1') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * M1) / 100;
+                                            tiempoCalculado = M1;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DL') {
                                             tiempoCalculado = DL;
@@ -1194,7 +1194,7 @@ function generarTablasPorEtapa(etapas) {
                                                     <td class="px-4 py-2 border font-semibold">Metros<br>${distancia_total}</td>
                                                     <td class="px-4 py-2 border font-semibold">Velocidad<br>${valor}</td>
                                                     <td class="px-4 py-2 border font-semibold">${etapaDeF.cantidad_a_mover}</td>
-                                                    <td class="px-4 py-2 border">${tiempoDesplazamiento.toFixed(2)}</td>
+                                                    <td class="px-4 py-2 border">${tiempoDesplazamiento.toFixed()}</td>
                                                 </tr>
 
                                                 <tr>
@@ -1202,12 +1202,12 @@ function generarTablasPorEtapa(etapas) {
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad total en minutos</td>
-                                                    <td class="px-4 py-2 border">${actividad_en_minutos_final + tiempoDesplazamiento}</td>
+                                                    <td class="px-4 py-2 border">${(actividad_en_minutos_final + tiempoDesplazamiento).toFixed()}</td>
                                                 </tr>
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos (según el número de picadas simultáneas)</td>
-                                                    <td class="px-4 py-2 border">${(actividad_en_minutos_final + tiempoDesplazamiento) / numero_picadas}</td>
+                                                    <td class="px-4 py-2 border">${((actividad_en_minutos_final + tiempoDesplazamiento) / numero_picadas).toFixed()}</td>
                                                 </tr>
 
                                                 <tr>
