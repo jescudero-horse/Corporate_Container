@@ -318,12 +318,13 @@ function renderizarGrafico() {
             // const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / 60 / total) * 100).toFixed(2) : 0;
 
             console.log(
-                //"Porcentaje dinamico NO VA: ", porcentaje_NoVA,
+                "Porcentaje dinamico NO VA: ", porcentaje_NoVA,
+                "Valor dinamico VA: ", dinamico_NoVA
                 // "Porcentaje dinamico VA: ", porcentaje_VA,
                 //"Porcentaje estatico VA: ", porcentaje_estatico_VA,
 
-                "Porcentaje estatico NO VA: ", porcentaje_estatico_NoVA,
-                "Estatico no valor: ", estatico_NoVA
+                // // "Porcentaje estatico NO VA: ", porcentaje_estatico_NoVA,
+                // // "Estatico no valor: ", estatico_NoVA
             )
 
             /** Inicializamos la gráfica de la actividad */
@@ -1128,7 +1129,7 @@ function generarTablasPorEtapa(etapas) {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * DS15) / 100;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DC') {
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * DC) / 100;
+                                            tiempoCalculado = DC; //(etapaDeF.cantidad_a_mover * DC) / 100;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'D1') {
                                             tiempoCalculado = (etapaDeF.cantidad_a_mover * D1) / 100;

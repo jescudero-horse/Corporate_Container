@@ -213,7 +213,7 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
                     (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
-        
+
         //En caso de que sea "Descarga camión en muelle (UM)"
         case 'Descarga camión en muelle (UM)':
             query = `
@@ -243,7 +243,7 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
                     (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
-            
+
         //En caso de que sea "De stock a estantería (UM)":
         case 'De stock a estantería (UM)':
             query = `
@@ -253,7 +253,7 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
                     (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
-        
+
         //En caso de que sea "De imagen camión a estantería (UM)":
         case 'De imagen camión a estantería (UM)':
             query = `
@@ -496,7 +496,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 10, //Máquina usada
             );
             break;
-        
+
         //En caso de que sea "Descarga camión en muelle (UM)"
         case 'Descarga camión en muelle (UM)':
             data.push(
@@ -567,7 +567,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 null, //Linea 
                 10, //Máquina usada
                 10, //Velocidad
-                4, //DC
+                (4 * cantidad_mover) / 100, //DC
                 6, //D1
                 1, //W5
                 20, //TT
@@ -1358,7 +1358,7 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
         const query = `
             SELECT 
                 id_puesto,
-                SUM(TL_TV + CDVB_CDL + TL + CDL + CCPE + CT10 + TC) AS dinamico_NoVA,
+                SUM(TL_TV + CDVB_CDL + TL + CDL + CCPE + CT10 + TC + CDC + DC + D1 + W5 + AL) AS dinamico_NoVA,
                 SUM(TL_TV + CDVB_CDL + TC + CDV + TV + CDL + CCPE + CDV) AS dinamico_VA,
                 SUM(PS10 + PS14 + valor_simbolo_especial + DS10 + PPU43 + PDU44 + PP1 + PDU34 + PPU34 + PPD32) AS estatico_VA,
                 SUM(PP1 + M1 + DL) AS estatico_NoVA
