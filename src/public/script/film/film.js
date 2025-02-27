@@ -1114,11 +1114,7 @@ function generarTablasPorEtapa(etapas) {
                                             tiempoCalculado = DS15;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'DC') {
-<<<<<<< Updated upstream
-                                            tiempoCalculado = (etapaDeF.cantidad_a_mover * DC) / 100;
-=======
                                             tiempoCalculado = DC;
->>>>>>> Stashed changes
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'D1') {
                                             tiempoCalculado = D1;
@@ -1164,7 +1160,7 @@ function generarTablasPorEtapa(etapas) {
                                         /*if (f === 'Descarga camión en muelle (UM)') {
                                             actividad_en_minutos_final = ((DC113 + CDC + DS10 + CDL) + (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100);
                                         }*/
-                                        
+
                                         return `
                                     <tr>
                                         <td class="px-4 py-2 border">${etapa.method_operation}</td>
