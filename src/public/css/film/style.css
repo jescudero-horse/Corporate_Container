@@ -391,3 +391,17 @@ header:hover .navbar-logo {
         transform: translateY(0);
     }
 }
+
+/* Estilo para los ítems de la leyenda */
+.item_leyenda {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+/* Estilo para los cuadrados de colores de la leyenda */
+.color_leyenda {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
