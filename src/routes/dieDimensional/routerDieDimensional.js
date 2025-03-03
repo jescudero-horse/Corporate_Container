@@ -22,7 +22,7 @@ router.get("/viewReport_premachining", (req, res) => res.render("dieDimensional/
 router.use('/api', dieDimensionalBackendRoutes);
 
 /**RUMANIA */
-router.get("/rumania", (req, res) => res.render("dieDimensional/rumania/index"));
+router.get("/rumania", (req, res) => res.render("dieDimensional/rumania/index", { title: "Ejemplo" }));
 
 //Exportamos el enrutador
 export default router;
