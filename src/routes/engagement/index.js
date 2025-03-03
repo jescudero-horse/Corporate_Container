@@ -2805,8 +2805,8 @@ router.get('/obtenerDatosDetalladosReferencia-tipoOperacion/:puesto_id/:referenc
     //Almacenamos en una variable la consulta SQL para obtener la jornada de inicio y la jornada de finalización
     const query = `
         SELECT 
-        t.jornada_inicio,
-        t.jornada_fin 
+            t.jornada_inicio,
+            t.jornada_fin 
         FROM
             puestos p
         INNER JOIN
@@ -3305,6 +3305,97 @@ router.get(`/obtenerPrimerDia/:tipo_operacion`, (req, res) => {
             return res.json(result);
         });
     })
+});
+
+/**
+ * End point para obtener las referencias disponibles para disponerlas en el modal de buscador de referencias
+ */
+router.get('/obtener-referencias/:tipo_operacion/:id_puesto/:planta', (req, res) => {
+    //Almacenamos en variables los parámetros
+    const { tipo_operacion, id_puesto, planta } = req.params;
+
+    //Variables para almacenar la información básica
+    let jornada_inicio, jornada_fin, columna, columna_hora;
+
+    //Almacenamos en una variable la consulta SQL para obtener la jornada de inicio y fin
+    let query = `
+        SELECT
+            t.jornada_inicio,
+            t.jornada_fin
+        FROM
+            puestos p
+        INNER JOIN
+            turnos t
+        ON
+            p.id_turno = t.id
+        WHERE
+            p.id = ?
+    `;
+
+    //Creamos un switch para controlar a que columna tiene que mirar dependiendo del tipo de operación
+    switch (tipo_operacion) {
+        case 'Programa_Recepcion':
+            columna = "compte_client";
+            columna_hora = "heure_de_la_periode";
+            break;
+
+        case "Programa_Expedicion_Forklift":
+            columna = "compte_fournisseur";
+            columna_hora = "heure_expedition";
+            break;
+
+        default:
+            break;
+    }
+
+    //Creamos la conexión a la base de datos
+    getDBConnection((err, connection) => {
+        //En caso de que ocurra algun error en la conexión a la base de datos
+        if (err) {
+            //Enviamos el status
+            console.error("> Error en la conexión a la base de datos: ", err);
+            return res.status(501).send('Error en la conexión a la base de datos');
+        }
+
+        //Ejecutamos la consulta SQL para obtener los turnos del puesto
+        connection.query(query, [id_puesto], (erro1, result1) => {
+            //En caso de que ocurra algun error en la consulta SQL
+            if (erro1) {
+                //Enviamos el status
+                console.error("> Error en la ejecución de la consulta SQL: ", error1);
+                return res.status(501).send('Error en la consulta SQL');
+            }
+
+            //Almacenamos en variables las jornadas de los tiempos
+            jornada_inicio = result1[0].jornada_inicio;
+            jornada_fin = result1[0].jornada_fin; 7
+
+            //Almacenamos en una variable la nueva consulta SQL
+            query = `
+                SELECT
+                    DISTINCT(reference)
+                FROM
+                    ??
+                WHERE
+                    ?? = ? AND
+                    ?? >= ? AND
+                    ?? <= ?
+            `;
+
+            //Ejecutamos la segunda consula SQL
+            connection.query(query, [tipo_operacion, columna, planta, columna_hora, jornada_inicio, columna_hora, jornada_fin], (error, result) => {
+                //En caso de de que ocurra algun error
+                if (error) {
+                    //Enviamos el status
+                    console.error("> Error en la última consulta SQL: ", error);
+                    return res.status(501).send('Error en la consulta SQL');
+                }
+
+                //Enviamos la información
+                return res.json(result);
+            })
+        });
+    });
 });
 
 //Exportamos el enrutador

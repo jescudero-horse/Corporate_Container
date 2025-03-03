@@ -1173,10 +1173,6 @@ function generarTablasPorEtapa(etapas) {
                                         }
                                         tiempoDesplazamiento = (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100
 
-                                        /*if (f === 'Descarga camión en muelle (UM)') {
-                                            actividad_en_minutos_final = ((DC113 + CDC + DS10 + CDL) + (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100);
-                                        }*/
-
                                         return `
                                     <tr>
                                         <td class="px-4 py-2 border">${etapa.method_operation}</td>
@@ -1194,7 +1190,7 @@ function generarTablasPorEtapa(etapas) {
                                                     <td class="px-4 py-2 border font-semibold">Metros<br>${distancia_total}</td>
                                                     <td class="px-4 py-2 border font-semibold">Velocidad<br>${valor}</td>
                                                     <td class="px-4 py-2 border font-semibold">${etapaDeF.cantidad_a_mover}</td>
-                                                    <td class="px-4 py-2 border">${tiempoDesplazamiento.toFixed()}</td>
+                                                    <td class="px-4 py-2 border">${tiempoDesplazamiento}</td>
                                                 </tr>
 
                                                 <tr>
@@ -1202,12 +1198,12 @@ function generarTablasPorEtapa(etapas) {
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad total en minutos</td>
-                                                    <td class="px-4 py-2 border">${(actividad_en_minutos_final + tiempoDesplazamiento).toFixed()}</td>
+                                                    <td class="px-4 py-2 border">${(actividad_en_minutos_final + tiempoDesplazamiento)}</td>
                                                 </tr>
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos (según el número de picadas simultáneas)</td>
-                                                    <td class="px-4 py-2 border">${((actividad_en_minutos_final + tiempoDesplazamiento) / numero_picadas).toFixed()}</td>
+                                                    <td class="px-4 py-2 border">${((actividad_en_minutos_final + tiempoDesplazamiento) / numero_picadas)}</td>
                                                 </tr>
 
                                                 <tr>
@@ -1223,8 +1219,6 @@ function generarTablasPorEtapa(etapas) {
                             let orden = [];
 
                             contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
-
-                            //console.log("Contenedor tabla: ", contenedorTablas);
 
                             // Inicializa SortableJS en el contenedor de las tablas
                             new Sortable(contenedorTablas, {
@@ -2676,6 +2670,85 @@ function toggleVisibility(id) {
 }
 
 /**
+ * Función para obtener las referencias de los componentes
+ * @param {String} tipo_operacion Argumento que contiene el tipo de operación
+ * @param {int} puesto_id Argumento que contiene el ID del puesto
+ */
+function buscadorReferencias(puesto_id) {
+    const tipo_operacion = document.getElementById('bbdd').value;
+
+    console.log("Dentro de la función")
+
+    //Preparamos la petición GET para obtener las referencias y disponerlas en un modal dependiendo de la operación y del turno del puesto
+    fetch(`/film/api/obtener-referencias/${tipo_operacion}/${puesto_id}/${getCookie('planta')}`, {
+        method: "GET"
+    })
+        .then(response => {
+            //En caso de que haya salido mal
+            if (!response.ok) {
+                throw new Error('Error fetching data');
+            }
+
+            //Devolvemos los datos obtenidos
+            return response.json();
+        })
+
+        .then(data => {
+            //Llamamos a la función para disponer las referencias dentro de la tabla
+            disponerReferenciasBuscador(data)
+        });
+}
+
+/**
+ * Función para disponer las referencias dentro de la tabla con un buscador
+ * @param {Array} data 
+ */
+function disponerReferenciasBuscador(data) {
+    // Configuramos el título del modal
+    $('#modalInformeFinal .modal-title').text("Referencias obtenidas:");
+
+    // Añadimos la estructura del modal con la barra de búsqueda
+    $('#modalInformeFinal .modal-body').html(`
+        <div>
+            <input type="text" id="searchInput" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Buscar referencia...">
+        </div>
+        <div id="table-container" class="overflow-x-auto mt-4">
+            <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th>Referencias</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    `);
+
+    let tbody = $('#tableBody');
+    let fila_informacion = "";
+
+    // Iteramos por los datos obtenidos
+    data.forEach(item => {
+        fila_informacion += `<tr><td>${item.reference}</td></tr>`;
+    });
+
+    // Añadimos la fila a la tabla
+    tbody.html(fila_informacion);
+
+    // Funcionalidad del buscador
+    $('#searchInput').on('input', function () {
+        let searchText = $(this).val().toLowerCase();
+        $('#tableBody tr').each(function () {
+            let text = $(this).text().toLowerCase();
+            $(this).toggle(text.includes(searchText));
+        });
+    });
+
+    // Mostramos el modal
+    $('#modalInformeFinal').modal('show');
+}
+
+/**
  * Función para añadir una etapa a un puesto
  * @param {int} id Argumento que contiene el ID del puesto
  */
@@ -2693,10 +2766,27 @@ function anyadirEtapa(id) {
         //Configuramos el cuerpo del modal para que el usuario introduzca el referencia del componente y la línea
         $('#modal .modal-body').html(`
             <form id="consultarValores" method="GET">
+                <!-- Tipo de operación -->
+                <div class="relative inline-block w-64 mb-4">
+                    <label for="bbdd" class="block text-sm font-medium text-white mb-2">Seleccione perímetro de trabajo</label>
+                    <select id="bbdd" name="bbdd" class="block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white text-white" onclick="configurarLinea()">
+                        <option value="Programa_Expedicion_Forklift">Expedición</option>
+                        <option value="Programa_Fabricacion">Fabricación</option>
+                        <option value="Programa_Recepcion">Recepción</option>
+                    </select>
+                </div>
+
                 <!-- Referencia del componente -->
                 <div class="mb-4">
                     <label for="referencia_componente" class="block text-white font-bold mb-2">Referencia del componente:</label>
-                    <input type="text" id="referencia_componente" name="referencia_componente" class="w-full p-2 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-white" placeholder="Ingresa la referencia del componente" required>
+                    <div class="flex items-center border border-gray-600 rounded-lg bg-white">
+                        <input type="text" id="referencia_componente" name="referencia_componente" 
+                            class="w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black rounded-l-lg" 
+                            placeholder="Ingresa la referencia del componente" required>
+                        <button type="button" class="p-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600" onclick="buscadorReferencias(${id})">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Línea -->
@@ -2709,16 +2799,6 @@ function anyadirEtapa(id) {
                 <div class="mb-4">
                     <label for="mote" class="block text-white font-bold mb-2">Descripción:</label>
                     <input type="text" id="mote" name="mote" class="w-full p-2 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-white" placeholder="Ingrese una descripción">
-                </div>
-
-                <!-- Tipo de operación -->
-                <div class="relative inline-block w-64 mb-4">
-                    <label for="bbdd" class="block text-sm font-medium text-white mb-2">Seleccione perímetro de trabajo</label>
-                    <select id="bbdd" name="bbdd" class="block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white text-white" onclick="configurarLinea()">
-                        <option value="Programa_Expedicion_Forklift">Expedición</option>
-                        <option value="Programa_Fabricacion">Fabricación</option>
-                        <option value="Programa_Recepcion">Recepción</option>
-                    </select>
                 </div>
 
                 <!-- Tipo de carga -->
@@ -3989,7 +4069,6 @@ function restaurarPuestosOcultos() {
  * Función para configurar la funcionalidad de la cookie de la planta
  */
 function configurarPlanta() {
-    console.log("Informacion de la cookie: ", getCookie('planta'));
     //En caso de que no haya una cookie con la planta seleccionada
     if (!getCookie('planta')) {
         //Llamamos a la función para disponer el modal de selección de planta
@@ -4002,11 +4081,22 @@ function configurarPlanta() {
     }
 }
 
+/**
+ * Función para obtener el valor de la cookie usando el nombre de la misma
+ * @param {String} name Argumento que contiene el nombre de la cookie
+ * @returns Devuelve el valor de la cookie
+ */
 function getCookie(name) {
     let match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return match ? match[2] : null;
 }
 
+/**
+ * Función para establecer la información de la cookie
+ * @param {String} name Argumento que contiene el nombre de la cookie
+ * @param {String} value Argumento que contiene el valor de la cookie
+ * @param {Date} days Argumeto que contiene los días de duración de la cookie
+ */
 function setCookie(name, value, days) {
     let expires = "";
     if (days) {
@@ -4029,9 +4119,7 @@ function ordernarEtapa(array) {
  * Añadimos la configuación para cuando la página este cargada
  */
 window.addEventListener('DOMContentLoaded', function () {
-    //Llamamos a la función para disponer el modal para que le seleccione la planta por defecto
-    //mostrarModalSeleccionPlanta();
-
+    //Llamamos a la función para establecer la planta
     configurarPlanta();
 
     //Llamamos a la función para disponer las fechas de la toma de datos
@@ -4045,6 +4133,4 @@ window.addEventListener('DOMContentLoaded', function () {
 
     //Añadimos la funcionalidad al buscador de etapas
     document.getElementById('buscadorEtapa').addEventListener('input', buscarEtapas);
-
-    console.log("PLANTA GLOBAL: ", planta);
 });
