@@ -3,6 +3,9 @@ import express from "express";
 import morgan from "morgan";
 import mysql from "mysql";
 
+//Importamos los archivos JSON con los idiomas
+import rm from "./lang/rm.json" assert { type: "json" };
+
 //Creamos una instancia de router
 const router = express.Router();
 
@@ -33,6 +36,12 @@ function getDBConnection(callback) {
         }
     });
 }
+
+/**CONFIGURACIÓN DE IDIOMAS */
+router.get('/rumania-translation', (req, res) => {
+    //Enviamos el archivo de idiomas correspondiente
+    res.json(rm);
+});
 
 /**END POINT GENERALES */
 /**
@@ -171,7 +180,7 @@ router.get('/obtener-informacion-detallada-premecanizado/:id/:id_caracteristica'
                 console.error("> Error en la ejecución de la consulta: ", error);
                 return res.status(501).send('Error en la ejecución de la consulta');
             }
-            
+
             //Enviamos la información obtenida
             return res.json(result);
         });
@@ -210,7 +219,7 @@ router.get('/obtener-correspondencia-entre-taladros/:id/:tipo_caracteristica', (
         }
 
         //Ejecutamos la consulta SQL
-        connection.query(query, [id, tipo_caracteristica], (error, result)=> {
+        connection.query(query, [id, tipo_caracteristica], (error, result) => {
             //Liberamos la conexión
             connection.release();
 
@@ -289,6 +298,32 @@ router.get('/obtenerInformacionBasica-premecanizado-curitiba/:id', (req, res) =>
             }
 
             //Enviamos los datos obtenidos
+            return res.json(result);
+        });
+    });
+});
+
+/**END POINTS PARA RUMANIA */
+router.get('/rumania-no-conformidades', (req, res) => {
+    //Obtenemos la conexióna la base de datos
+    getDBConnection((err, connection) => {
+        //En caso de que ocurra algún error en la conexión a la base de datos...
+        if (err) {
+            //Enviamos el status
+            console.error("> Error en la conexión a la base de datos: ", err);
+            return res.status(501).send('Error en la conexión a la base de datos');
+        }
+
+        //Ejecutamos la consulta SQL
+        connection.query("SELECT ddrnc.id, ddrnc.fecha_registro, ddrnc.datamatrix, ddrnc.description, ddrnc.AX, ddrnc.mold_type FROM dieDimensional_Rumania_no_conformidades ddrnc", [], (error, result) => {
+            //En caso de que ocurra algun problema con la consulta SQL
+            if (error) {
+                //Enviamos el status
+                console.error("> Error en la ejecución de la consulta: ", error);
+                return res.status(501).send('Error en la ejecución de la consulta');
+            }
+
+            //Enviamos la información obtenida
             return res.json(result);
         });
     });

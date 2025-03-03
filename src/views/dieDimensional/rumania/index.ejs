@@ -1,27 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premachining</title>
     <script src="/script/dieDimensional/Rumania/rumania.js"></script>
     <!--INCLUIMOS LA CABECERA-->
-    <%- include('../../partials/head.ejs') %>
+    <%- include('../partials/head.ejs') %>
 </head>
+
 <body>
     <!--INCLUIMOS LA BARRA DE NAVEGACIÓN-->
-    <%- include('../../partials/nav.ejs') %>
+    <%- include('../partials/nav.ejs') %>
 
-    <div class="container">
-        <h1><%-title %></h1><hr>
+        <div class="container">
+            <!-- <h1><%-title %></h1> -->
+            <hr>
 
-        <!--INCLUIMOS EL DATA TABLE DEL PREMECANIZADO DE CURITIBA-->
-        <%- include('../../partials/rumania/dt.ejs') %>
-    </div>
+            <!--INCLUIMOS EL DATA TABLE DEL PREMECANIZADO DE CURITIBA-->
+            <%- include('../partials/rumania/dt.ejs') %>
+        </div>
 </body>
+
 </html>
 
 <script>
-    //Marcamos la pestaña de curitiba
-    document.getElementById('curitiba_nav').classList.add('active');
+    //Marcamos la pestaña de Rumania
+    document.getElementById('rumania_nav').classList.add('active');
+
+    //Escuchador para cuando termine de cargar la página
+    window.addEventListener("DOMContentLoaded", async () => {
+        try {
+            //Creamos una variabe con la respuesta a la llamada del end point
+            const response = await fetch('/dieDimensional/api/rumania-translation');
+
+            //En caso de que haya salido algo mal
+            if (!response.ok) {
+                //Mostramos un error
+                throw new Error("Error fetching data");
+            }
+
+            //Almacenamos en una variable el JSON con el idioma
+            const translation = await response.json();
+
+            //Llamamos a la función para disponer el idioma en rumano
+            establecerIdioma(translation)
+
+        } catch (error) {
+            console.error("Error: ", error);
+        }
+
+        //Llamamos a la función para obtener las no conformidades
+        fetchData();
+    });
 </script>
