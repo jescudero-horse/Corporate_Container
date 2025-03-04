@@ -1,5 +1,5 @@
 //Creamos las variable globales que hacen falta
-let cantidad_a_mover = [], referencia_componente, categoria_seleccionada, operacion_seleccionada, puestoID, linea, fs_totales, ultimoBotonPulsado, conteosPorPuesto = [], contador = 0, cantidadAMoverCadena, mote, planta, tipo_carga = "UM", tipo_operacion = "Programa_Expedicion_Forklift", primer_dia, numero_picadas, tiempoDesplazamiento;
+let cantidad_a_mover = [], referencia_componente = "", categoria_seleccionada, operacion_seleccionada, puestoID, linea, fs_totales, ultimoBotonPulsado, conteosPorPuesto = [], contador = 0, cantidadAMoverCadena, mote, planta, tipo_carga = "UM", tipo_operacion = "Programa_Expedicion_Forklift", primer_dia, numero_picadas, tiempoDesplazamiento;
 
 //Variable global donde almacenarems en un diccionario la referencia y el número de embalajes
 let referencia_embalaje = {};
@@ -117,7 +117,8 @@ function gestionarPuesto(data) {
                 conteosPorPuesto.push({
                     id: item.id,
                     nombre: item.nombre_puesto,
-                    conteo: sumaTotal_puesto
+                    conteo: sumaTotal_puesto,
+                    turno: item.turno
                 });
 
                 //Ordenamos los puestos por el ID del mismo
@@ -235,6 +236,12 @@ function renderizarGrafico() {
         graficoContainer.style.borderRadius = '8px';
         graficoContainer.style.backgroundColor = '#496183';
 
+        //Añadimos el ID del puesto al contenedor
+        graficoContainer.setAttribute('data-id', puesto.id);
+
+        //Añadimos el turno al contenedor
+        graficoContainer.setAttribute('data-turno', puesto.turno);
+
         //Añadimos el gráfico al contenedor de gráficos principales
         graficosContainer.appendChild(graficoContainer);
 
@@ -243,13 +250,13 @@ function renderizarGrafico() {
         canvasSaturacion.width = 200;
         graficoContainer.appendChild(canvasSaturacion);
 
-        //Almaenamos en una variabke la jornada laboral
+        //Almacenamos en una variable la jornada laboral
         const jornadaTotal = 455;
 
         //Almacenamos la saturación del puesto
         const saturacion = (puesto.conteo / jornadaTotal) * 100;
 
-        console.log("Puesto conteo: ", puesto.conteo, "\nSaturacion: ", saturacion);
+        console.log("Puesto conteo: ", puesto.conteo, "\nSaturacion: ", saturacion, "\tNombre del puesto: ", puesto.nombre);
 
         //console.log("> Saturación: ", saturacion, "\nPuesto conteo: ", puesto.conteo);
 
@@ -319,9 +326,9 @@ function renderizarGrafico() {
 
             console.log(
                 "Porcentaje dinamico NO VA: ", porcentaje_NoVA,
-                "Valor dinamico VA: ", dinamico_NoVA
-                // "Porcentaje dinamico VA: ", porcentaje_VA,
-                //"Porcentaje estatico VA: ", porcentaje_estatico_VA,
+                "Valor dinamico VA: ", dinamico_NoVA,
+                "Porcentaje dinamico VA: ", porcentaje_VA,
+                "Porcentaje estatico VA: ", porcentaje_estatico_VA,
 
                 // // "Porcentaje estatico NO VA: ", porcentaje_estatico_NoVA,
                 // // "Estatico no valor: ", estatico_NoVA
@@ -368,7 +375,6 @@ function renderizarGrafico() {
                     }
                 }
             });
-
         }
 
         /** Creamos el contenedor para los botones */
@@ -433,15 +439,6 @@ function renderizarGrafico() {
         botonOcultarPuesto.addEventListener('click', () => {
             //Creamos una instancia del LI
             const li_elemento = event.target.closest('li');
-
-            //En caso de que se haya encontrado
-            // if (li_elemento) {
-            //     //Ocultamos el elemento
-            //     li_elemento.style.display = 'none';
-
-            //     //Almacenamos el LI oculto para restaurarlo más tarde
-            //     puesto_ocultos.push(li_elemento);
-            // }
 
             //En caso de que se haya encontrado el elemento LI
             if (li_elemento) {
@@ -2695,7 +2692,7 @@ function buscadorReferencias(puesto_id) {
 
         .then(data => {
             //Llamamos a la función para disponer las referencias dentro de la tabla
-            disponerReferenciasBuscador(data)
+            disponerReferenciasBuscador(data, puesto_id)
         });
 }
 
@@ -2703,11 +2700,14 @@ function buscadorReferencias(puesto_id) {
  * Función para disponer las referencias dentro de la tabla con un buscador
  * @param {Array} data 
  */
-function disponerReferenciasBuscador(data) {
-    // Configuramos el título del modal
+function disponerReferenciasBuscador(data, puesto_id) {
+    //Ocultamos el modal principal
+    $('#modal').modal('hide');
+
+    //Configuramos el titulo del modal
     $('#modalInformeFinal .modal-title').text("Referencias obtenidas:");
 
-    // Añadimos la estructura del modal con la barra de búsqueda
+    //Configuramos el cuerpo del modal
     $('#modalInformeFinal .modal-body').html(`
         <div>
             <input type="text" id="searchInput" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Buscar referencia...">
@@ -2724,18 +2724,43 @@ function disponerReferenciasBuscador(data) {
         </div>
     `);
 
+    //Configuramos el footer del modal
+    $('#modalInformeFinal .modal-footer').html(`
+        <button id="saveSelected" type="button" class="btn btn-outline-light">Guardar selección</button>
+    `);
+
+    //Creamos una instancia del cuerpo de la tabla
     let tbody = $('#tableBody');
+
+    //Creamos una variable donde almacenará el contenido de la fila
     let fila_informacion = "";
 
-    // Iteramos por los datos obtenidos
+    //Iteramos por las referencias
     data.forEach(item => {
-        fila_informacion += `<tr><td>${item.reference}</td></tr>`;
+        //Asignamos el HTML por cada referencia
+        fila_informacion += `<tr class="cursor-pointer" data-ref="${item.reference}"><td>${item.reference}</td></tr>`;
     });
 
-    // Añadimos la fila a la tabla
+    //Añadimos el contenido de la tabla al cuerpo de la tabla
     tbody.html(fila_informacion);
 
-    // Funcionalidad del buscador
+
+    let selectedReferences = new Set();
+
+    //Manejador de selección/deselección
+    $('#tableBody tr').on('click', function () {
+        //Creamos una variable con la fila seleccionada
+        let ref = $(this).attr('data-ref');
+        if (selectedReferences.has(ref)) {
+            selectedReferences.delete(ref);
+            $(this).removeClass('bg-blue-200 text-white font-bold');
+        } else {
+            selectedReferences.add(ref);
+            $(this).addClass('bg-blue-200 text-white font-bold');
+        }
+    });
+
+    //Manejador para el buscador
     $('#searchInput').on('input', function () {
         let searchText = $(this).val().toLowerCase();
         $('#tableBody tr').each(function () {
@@ -2744,7 +2769,19 @@ function disponerReferenciasBuscador(data) {
         });
     });
 
-    // Mostramos el modal
+    //Funcionalidad del botón del guardado de referencias
+    $('#saveSelected').on('click', function () {
+        let selectedArray = Array.from(selectedReferences);
+        referencia_componente = selectedArray.join(" ");
+
+        //Ocultamos el modal
+        $('#modalInformeFinal').modal('hide');
+
+        //Llamamos a la función para disponer el modal para añadir unna etapa
+        anyadirEtapa(puesto_id);
+    });
+
+    //Mostramos el modal
     $('#modalInformeFinal').modal('show');
 }
 
@@ -2842,6 +2879,14 @@ function anyadirEtapa(id) {
 
         //Mostramos el modal
         $('#modal').modal('show');
+
+        console.log("Referencias: ", referencia_componente);
+
+        //En caso de que la variable ya tenga referencias...
+        if (referencia_componente !== null) {
+            //Las añadimos al campo de las referencias
+            document.getElementById('referencia_componente').value = referencia_componente;
+        }
 
         //Añadimos la funcionalidad para el formulario de consultar la información usando la referencia del componente y la linea
         $('#consultarValores').on('submit', async function (e) {

@@ -268,9 +268,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'Apertura (UM)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, DC, D1, W5, TT, M1, AL)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, DC, D1, W5, TT, M1, AL, actividad_en_minutos)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -572,7 +572,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (1 * cantidad_mover) / 100, //W5
                 (20 * cantidad_mover) / 100, //TT
                 (7 * cantidad_mover) / 100, //M1
-                (2 * cantidad_mover) / 100 //AL
+                (2 * cantidad_mover) / 100, //AL
+                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (20 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
             );
             break;
 
@@ -1272,8 +1273,15 @@ router.get('/obtenerPuestos', (req, res) => {
 
         //Almacenamos en una variable la consulta SQL para obtener los puestos disponibles
         const query = `
-            SELECT DISTINCT(id), numero_puesto, nombre_puesto, numero_operarios
-            FROM puestos
+            SELECT
+                DISTINCT(p.id), p.numero_puesto, p.numero_operarios, p.nombre_puesto,
+                t.turno
+            FROM
+                puestos p
+            INNER JOIN
+                turnos t
+            ON
+                p.id_turno = t.id
         `;
 
         //Ejecutamos la consulta
