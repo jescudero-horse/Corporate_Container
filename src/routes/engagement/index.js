@@ -509,7 +509,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (6 * cantidad_mover) / 100, //CDC
                 (19 * cantidad_mover) / 100, //DS10
                 (6 * cantidad_mover) / 100, //CDL
-                (42 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (19 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 //Actividad en minutos
+                (42 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (19 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100, //Actividad en minutos
+                ((42 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (19 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picada
             );
             break;
 
@@ -522,7 +523,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (44 * cantidad_mover) / 100, //PS15
                 (30 * cantidad_mover) / 100, //DI21
                 (6 * cantidad_mover) / 100, //CDL
-                (44 * cantidad_mover) / 100 + (30 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 //Actividad en minutos
+                (44 * cantidad_mover) / 100 + (30 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100, //Actividad en minutos
+                ((44 * cantidad_mover) / 100 + (30 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100) / numero_picadas, //Actividad en minuros X picada
             );
             break;
 
@@ -536,7 +538,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (6 * cantidad_mover) / 100, //CDC
                 (38 * cantidad_mover) / 100, //DS14
                 (6 * cantidad_mover) / 100, //CDL
-                (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 //Actividad en minutos
+                (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100, //Actividad en minutos
+                ((38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100) / numero_picadas // Actividad en minutos X picada
             );
             break;
 
@@ -550,7 +553,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (6 * cantidad_mover) / 100, //CDC
                 (49 * cantidad_mover) / 100, //DS15
                 (6 * cantidad_mover) / 100, //CDL
-                (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 //Actividad en minutos
+                (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100, //Actividad en minutos
+                ((38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picadas
             );
             console.log("actividad min: ", data[14])
             break;
@@ -565,7 +569,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (6 * cantidad_mover) / 100, //CDC
                 (49 * cantidad_mover) / 100, //DS15
                 (6 * cantidad_mover) / 100, //CDL
-                (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 //Actividad en minutos
+                (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100, //Actividad en minutos
+                ((38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100) / numero_picadas //Actividad en mintos X picada
             );
             break;
 
@@ -581,9 +586,9 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (20 * cantidad_mover) / 100, //TT
                 (7 * cantidad_mover) / 100, //M1
                 (2 * cantidad_mover) / 100, //AL
-                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (20 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
+                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (20 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100, //Actividad en minutos
+                ((4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (20 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picada
             );
-            console.log(">>>> Actividad en minutos: ", (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (20 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100)
             break;
 
         //En caso de que sea "Gestión de residuos (UM)"
@@ -598,7 +603,9 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (35 * cantidad_mover) / 100, //TT
                 (7 * cantidad_mover) / 100, //M1
                 (2 * cantidad_mover) / 100, //AL
-                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (35 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
+                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (35 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100, //Actividad en minutos
+                ((4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (35 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picada
+
             );
             break;
 
@@ -613,6 +620,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (1 * cantidad_mover) / 100, //G1
                 (2 * cantidad_mover) / 100, //P5
                 (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
+                    ((1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picada
             );
             break;
 
@@ -626,7 +634,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (1 * cantidad_mover) / 100, //W5
                 (1 * cantidad_mover) / 100, //P2
                 (2 * cantidad_mover) / 100, //W5_2
-                (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
+                (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100, //Actividad en minutos
+                ((1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas // Actividad en minuto X picada
             );
             break;
 

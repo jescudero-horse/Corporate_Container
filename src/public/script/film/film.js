@@ -932,16 +932,15 @@ function generarTablasPorEtapa(etapas) {
                             const tablaHTML = `
                                 <div id="contenedor-${FKey}-${referenciaComponente}-${id_etapa1}-${id_puesto}" class="mb-4 draggable-container" data-id-etapa="${id_etapa}">
                                     <h3 id="encabezadoEtapa-${FKey}-${referenciaComponente}"
-                                        class="text-lg font-semibold mb-2 flex justify-between items-center 
-                                            p-2 rounded-lg animate-fadeIn 
+                                        class="text-lg font-semibold mb-2 flex flex-wrap justify-between items-center p-2 rounded-lg animate-fadeIn 
                                             ${f === 'X' ? 'bg-stone-200 text-black' : color_etapa} text-black"
                                         ${f !== 'X' ? `onclick="toggleVisibility('etapa-${FKey}-${referenciaComponente}')"` : ''}>
 
-                                        <span>Etapa: <strong>${nombre_etapa}</strong></span>
-                                        <span>Descripción: <strong>${mote_etapa}</strong></span>
-                                        ${f !== 'X' ? `<span>Componente: <strong>${referenciaComponente}</strong></span>` : ''}
-                                        ${f !== 'X' ? `<span>Línea: <strong>${linea}</strong></span>` : ''}
-                                        <span><i class="bi bi-stopwatch-fill"></i> <strong>${actividad_en_minutos}</strong></span>
+                                        <span class="min-w-[150px]">Etapa: <strong>${nombre_etapa}</strong></span>
+                                        <span class="min-w-[150px]">Descripción: <strong>${mote_etapa}</strong></span>
+                                        ${f !== 'X' ? `<span class="min-w-[150px]">Componente: <strong>${referenciaComponente}</strong></span>` : ''}
+                                        ${f !== 'X' ? `<span class="min-w-[150px]">Línea: <strong>${linea}</strong></span>` : ''}
+                                        <span class="min-w-[150px]"><i class="bi bi-stopwatch-fill"></i> <strong>${actividad_en_minutos}</strong></span>
 
                                         ${f !== 'X' ? `
                                             <button id="botonVisualizarEtapa" type="button" class="text-blue-500 ml-2" 
