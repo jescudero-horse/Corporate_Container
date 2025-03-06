@@ -329,6 +329,7 @@ function renderizarGrafico() {
                 "Valor dinamico VA: ", dinamico_NoVA,
                 "Porcentaje dinamico VA: ", porcentaje_VA,
                 "Porcentaje estatico VA: ", porcentaje_estatico_VA,
+                "total: ", total,
 
                 // // "Porcentaje estatico NO VA: ", porcentaje_estatico_NoVA,
                 // // "Estatico no valor: ", estatico_NoVA
@@ -873,7 +874,7 @@ function generarTablasPorEtapa(etapas) {
             .then(etapasData => {
                 etapasDeF.forEach((etapaDeF, index) => {
                     /** Almacenamos las variable necesarias */
-                    var { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2 } = inicializarVariablesEtapas(etapaDeF);
+                    var { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2, nuevo } = inicializarVariablesEtapas(etapaDeF);
 
                     console.log("ID:", id_etapa, "\fnombre:", nombre_etapa);
 
@@ -1168,7 +1169,6 @@ function generarTablasPorEtapa(etapas) {
                                             valor = 1;
                                         }
                                         tiempoDesplazamiento = (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100
-                                        console.log("actividad minutos: ", etapaDeF.actividad_en_minutos)
 
 
                                         return `
@@ -1188,7 +1188,7 @@ function generarTablasPorEtapa(etapas) {
                                                     <td class="px-4 py-2 border font-semibold">Metros<br>${distancia_total}</td>
                                                     <td class="px-4 py-2 border font-semibold">Velocidad<br>${valor}</td>
                                                     <td class="px-4 py-2 border font-semibold">${etapaDeF.cantidad_a_mover}</td>
-                                                    <td class="px-4 py-2 border">${tiempoDesplazamiento}</td>
+                                                    <td class="px-4 py-2 border">${Math.round(tiempoDesplazamiento)}</td>
                                                 </tr>
 
                                                 <tr>
@@ -1196,12 +1196,12 @@ function generarTablasPorEtapa(etapas) {
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad total en minutos</td>
-                                                    <td class="px-4 py-2 border">${(actividad_en_minutos_final + tiempoDesplazamiento)}</td>
+                                                    <td class="px-4 py-2 border">${Math.round(nuevo + tiempoDesplazamiento)}</td>
                                                 </tr>
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos (según el número de picadas simultáneas)</td>
-                                                    <td class="px-4 py-2 border">${((actividad_en_minutos_final + tiempoDesplazamiento) / numero_picadas)}</td>
+                                                    <td class="px-4 py-2 border">${Math.round((nuevo + tiempoDesplazamiento) / numero_picadas)}</td>
                                                 </tr>
 
                                                 <tr>
@@ -2544,9 +2544,10 @@ function inicializarVariablesEtapas(etapaDeF) {
     const G1 = etapaDeF.G1 ? etapaDeF.G1 : '0';
     const P5 = etapaDeF.P5 ? etapaDeF.P5 : '0';
     const W5_2 = etapaDeF.W5_2 ? etapaDeF.W5_2 : '0';
+    const nuevo = etapaDeF.nuevo ? etapaDeF.nuevo : '0';
 
     //Devolvemos las variables
-    return { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2 };
+    return { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2, nuevo };
 }
 
 /**
