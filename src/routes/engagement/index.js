@@ -1379,9 +1379,9 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
             SELECT 
                 id_puesto,
                 SUM(TL_TV + CDVB_CDL + TL + CDL + CCPE + CT10 + TC + CDC + DC + D1 + W5 + M1 + AL + W5_2) AS dinamico_NoVA,
-                SUM(TL_TV + CDVB_CDL + TC + CDV + TV + CDL + CCPE + CDV + DC113 + DS10 + PS14 + DS14 + DS15 + PS15 + DI21) AS dinamico_VA,
+                SUM(TL_TV + CDVB_CDL + TC + CDV + TV + CDL + CCPE + DC113 + DS10 + PS14 + DS14 + DS15 + PS15 + DI21) AS dinamico_VA,
                 SUM(PS10 + PS14 + valor_simbolo_especial + DS10 + PPU43 + PDU44 + PP1 + PDU34 + PPU34 + PPD32 + G1 + P2) AS estatico_VA,
-                SUM(PP1 + M1 + DL + P2 + L2 + G1 + P5) AS estatico_NoVA
+                SUM(PP1 + TT + M1 + DL + P2 + L2 + G1 + P5) AS estatico_NoVA
             FROM 
                 EN_IFM_STANDARD 
             WHERE 

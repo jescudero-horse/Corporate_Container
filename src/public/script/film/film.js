@@ -329,6 +329,7 @@ function renderizarGrafico() {
                 "Valor dinamico VA: ", dinamico_NoVA,
                 "Porcentaje dinamico VA: ", porcentaje_VA,
                 "Porcentaje estatico VA: ", porcentaje_estatico_VA,
+                "total: ", total,
 
                 // // "Porcentaje estatico NO VA: ", porcentaje_estatico_NoVA,
                 // // "Estatico no valor: ", estatico_NoVA
