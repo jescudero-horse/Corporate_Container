@@ -1168,7 +1168,7 @@ function generarTablasPorEtapa(etapas) {
                                         } else {
                                             valor = 1;
                                         }
-                                        tiempoDesplazamiento = (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100
+                                        tiempoDesplazamiento = Math.round((distancia_total * valor * etapaDeF.cantidad_a_mover) / 100)
 
 
                                         return `
@@ -1188,7 +1188,7 @@ function generarTablasPorEtapa(etapas) {
                                                     <td class="px-4 py-2 border font-semibold">Metros<br>${distancia_total}</td>
                                                     <td class="px-4 py-2 border font-semibold">Velocidad<br>${valor}</td>
                                                     <td class="px-4 py-2 border font-semibold">${etapaDeF.cantidad_a_mover}</td>
-                                                    <td class="px-4 py-2 border">${Math.round(tiempoDesplazamiento)}</td>
+                                                    <td class="px-4 py-2 border">${tiempoDesplazamiento}</td>
                                                 </tr>
 
                                                 <tr>
@@ -1196,7 +1196,7 @@ function generarTablasPorEtapa(etapas) {
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad total en minutos</td>
-                                                    <td class="px-4 py-2 border">${Math.round(nuevo + tiempoDesplazamiento)}</td>
+                                                    <td class="px-4 py-2 border">${(nuevo + tiempoDesplazamiento)}</td>
                                                 </tr>
 
                                                 <tr>
