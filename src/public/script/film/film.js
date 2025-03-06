@@ -1169,6 +1169,8 @@ function generarTablasPorEtapa(etapas) {
                                             valor = 1;
                                         }
                                         tiempoDesplazamiento = (distancia_total * valor * etapaDeF.cantidad_a_mover) / 100
+                                        console.log("actividad minutos: ", etapaDeF.actividad_en_minutos)
+
 
                                         return `
                                     <tr>
