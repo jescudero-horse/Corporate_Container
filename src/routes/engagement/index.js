@@ -581,7 +581,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (20 * cantidad_mover) / 100, //TT
                 (7 * cantidad_mover) / 100, //M1
                 (2 * cantidad_mover) / 100, //AL
-                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (20 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
+                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + ((1 * cantidad_mover) / 100)*2 + (20 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
             );
             console.log(">>>> Actividad en minutos: ", (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (20 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100)
             break;
@@ -598,7 +598,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (35 * cantidad_mover) / 100, //TT
                 (7 * cantidad_mover) / 100, //M1
                 (2 * cantidad_mover) / 100, //AL
-                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (35 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
+                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + ((1 * cantidad_mover) / 100)*2 + (35 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
             );
             break;
 
@@ -612,7 +612,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (1 * cantidad_mover) / 100, //L2
                 (1 * cantidad_mover) / 100, //G1
                 (2 * cantidad_mover) / 100, //P5
-                (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
+                ((1 * cantidad_mover) / 100)*2 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
             );
             break;
 
