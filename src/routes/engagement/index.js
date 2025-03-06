@@ -506,7 +506,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (42 * cantidad_mover) / 100, //DC113
                 (6 * cantidad_mover) / 100, //CDC
                 (19 * cantidad_mover) / 100, //DS10
-                (6 * cantidad_mover) / 100 //CDL
+                (6 * cantidad_mover) / 100, //CDL
+                (42 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (19 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 //Actividad en minutos
             );
             break;
 
@@ -519,6 +520,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (44 * cantidad_mover) / 100, //PS15
                 (30 * cantidad_mover) / 100, //DI21
                 (6 * cantidad_mover) / 100, //CDL
+                (44 * cantidad_mover) / 100 + (30 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 //Actividad en minutos
             );
             break;
 
@@ -531,7 +533,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (38 * cantidad_mover) / 100, //PS14
                 (6 * cantidad_mover) / 100, //CDC
                 (38 * cantidad_mover) / 100, //DS14
-                (6 * cantidad_mover) / 100 //CDL
+                (6 * cantidad_mover) / 100, //CDL
+                (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 //Actividad en minutos
             );
             break;
 
@@ -545,6 +548,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (6 * cantidad_mover) / 100, //CDC
                 (49 * cantidad_mover) / 100, //DS15
                 (6 * cantidad_mover) / 100, //CDL
+                (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 //Actividad en minutos
             );
             break;
 
@@ -557,7 +561,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (38 * cantidad_mover) / 100, //PS14
                 (6 * cantidad_mover) / 100, //CDC
                 (49 * cantidad_mover) / 100, //DS15
-                (6 * cantidad_mover) / 100 //CDL
+                (6 * cantidad_mover) / 100, //CDL
+                (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 //Actividad en minutos
             );
             break;
 
@@ -588,7 +593,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (1 * cantidad_mover) / 100, //W5
                 (35 * cantidad_mover) / 100, //TT
                 (7 * cantidad_mover) / 100, //M1
-                (2 * cantidad_mover) / 100 //AL
+                (2 * cantidad_mover) / 100, //AL
+                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (35 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
             );
             break;
 
@@ -601,7 +607,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (1 * cantidad_mover) / 100, //P2
                 (1 * cantidad_mover) / 100, //L2
                 (1 * cantidad_mover) / 100, //G1
-                (2 * cantidad_mover) / 100 //P5
+                (2 * cantidad_mover) / 100, //P5
+                (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
             );
             break;
 
@@ -614,7 +621,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (1 * cantidad_mover) / 100, //G1
                 (1 * cantidad_mover) / 100, //W5
                 (1 * cantidad_mover) / 100, //P2
-                (2 * cantidad_mover) / 100 //W5_2
+                (2 * cantidad_mover) / 100, //W5_2
+                (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
             );
             break;
 
