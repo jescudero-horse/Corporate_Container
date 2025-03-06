@@ -322,7 +322,7 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
  */
 function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada) {
     //Creamos una variable 
-    let cantidad_mover = data[2];
+    let cantidad_mover = data[2], numero_picadas = data[6];
 
     //Controlamos el tipo de operación
     switch (operacion_seleccionada) {
