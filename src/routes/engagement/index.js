@@ -218,9 +218,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'Descarga camión en muelle (UM)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, DC113, CDC, DS10, CDL)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, DC113, CDC, DS10, CDL, actividad_en_minutos)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -228,9 +228,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'De estantería a puesto inferior (UM)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, PS15, DI21, CDL)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, PS15, DI21, CDL, actividad_en_minutos)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -238,9 +238,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'De imagen camión a stock (UM)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, PS14, CDC, DS14, CDL)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, PS14, CDC, DS14, CDL, actividad_en_minutos)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -248,9 +248,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'De stock a estantería (UM)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, PS14, CDC, DS15, CDL)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, PS14, CDC, DS15, CDL, actividad_en_minutos)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -258,9 +258,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'De imagen camión a estantería (UM)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, PS14, CDC, DS15, CDL)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, PS14, CDC, DS15, CDL, actividad_en_minutos)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -278,9 +278,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'Gestión de residuos (UM)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, DC, D1, W5, TT, M1, AL)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, DC, D1, W5, TT, M1, AL, actividad_en_minutos)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -288,9 +288,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'Plegar y apilar (UC)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, P2, L2, G1, P5)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, P2, L2, G1, P5, actividad_en_minutos)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -298,9 +298,9 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'De puesto inferior a carro (UC)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, G1, W5, P2, W5_2)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, G1, W5, P2, W5_2, actividad_en_minutos)
                 VALUES
-                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
             break;
 
@@ -550,6 +550,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (6 * cantidad_mover) / 100, //CDL
                 (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 //Actividad en minutos
             );
+            console.log("actividad min: ", data[14])
             break;
 
         //En caso de que sea "De imagen camión a estantería (UM)"
