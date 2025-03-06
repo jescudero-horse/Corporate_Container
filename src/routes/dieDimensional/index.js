@@ -5,6 +5,7 @@ import mysql from "mysql";
 
 //Importamos los archivos JSON con los idiomas
 import rm from "./lang/rm.json" assert { type: "json" };
+import pg from "./lang/pg.json" assert { type: "json" };
 
 //Creamos una instancia de router
 const router = express.Router();
@@ -38,10 +39,21 @@ function getDBConnection(callback) {
 }
 
 /**CONFIGURACIÓN DE IDIOMAS */
+/**
+ * Rumania
+ */
 router.get('/rumania-translation', (req, res) => {
-    //Enviamos el archivo de idiomas correspondiente
+    //Enviamos el archivo de idioma correspondiente
     res.json(rm);
 });
+
+/**
+ * Curitiba
+ */
+router.get('/curitiba-translation', (req, res) => {
+    //Enviamos el arcbivo de idioma correspondiente
+    res.json(pg);
+})
 
 /**END POINT GENERALES */
 /**

@@ -17,8 +17,6 @@ async function fetchData() {
         //Llamamos a la función para disponer la información dentro del DataTable
         renderTable(data);
 
-        console.log("Data: ", data);
-
     } catch (error) {
         console.error("Error fetching data");
     }
@@ -57,7 +55,7 @@ function renderTable(data) {
     data.forEach(item => {
         //Almacenamos en un array los datos necesarios
         const rowData = [
-            `<button type="button" class="btn btn-outline-primary"><i class="bi bi-search"></i></button>`, //Botón para ver el informe
+            `<button type="button" onclick="verInforme(${item.id}ass="btn btn-outline-primary"><i class="bi bi-search"></i></button>`, //Botón para ver el informe
             item.fecha_registro.split('T')[0], //Fecha
             item.datamatrix, //Referencia
             item.description, //Descripción
@@ -71,4 +69,12 @@ function renderTable(data) {
 
     //Dibujamos el DataTable
     table.draw();
+}
+
+/**
+ * Función para disponer el informe de la no conformidad
+ * @param {int} id Argumento que contiene el ID de la no conformidad
+ */
+function verInforme(id) {
+
 }

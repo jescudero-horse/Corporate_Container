@@ -1,7 +1,9 @@
+let translation;
+
 /**
  * Función asíncrona para obtener los datos del premecanizado de Curitiba
  */
-async function fetchData () {
+async function fetchData() {
     try {
         //Almacenamos en una variable la respuesta a la llamada del end point para obtener las no conformidades 
         const response = await fetch('/dieDimensional/api/no-conformidades-premecanizado_Curitiba');
@@ -20,6 +22,40 @@ async function fetchData () {
     } catch (error) {
         console.error("Error fetching data");
     }
+}
+
+/**
+ * Funbción para disponer el idioma
+ * @param {JSON} translation_arg Variable que contiene el idioma correspondiente
+ */
+function establecerIdioma(translation_arg) {
+    /**Página principal */
+    //Leave a comment
+    document.getElementById('leave_a_comment_nav').innerText = translation_arg.deja_comentario;
+
+    //Titulo
+    document.getElementById('titulo').innerText = translation_arg.heading;
+
+    /**DataTable */
+    //Date
+    document.getElementById('date_dt').innerText = translation_arg.fecha;
+    //Measured part
+    document.getElementById('measured_part_dt').innerText = translation_arg.tipo_pieza;
+    //Mold type
+    document.getElementById('mold_type_dt').innerText = translation_arg.tipo_molde;
+    //Mold
+    document.getElementById('mold_dt').innerText = translation_arg.molde;
+    //Injection machine
+    document.getElementById('injection_machine_dt').innerText = translation_arg.inyectora;
+    //3D machine
+    document.getElementById('3d_machine_dt').innerText = translation_arg.maquina_sala;
+    //Measured type
+    document.getElementById('measured_type_dt').innerText = translation_arg.tipo_medicion;
+    //Non-conformities
+    document.getElementById('non_conformities_dt').innerText = translation_arg.no_conformidades;
+
+    //Almacenamos en la variable global el contenido de la traduccion
+    translation = translation_arg;
 }
 
 /**
@@ -67,9 +103,3 @@ function verInforme(id) {
     //Redireccionamos la página para poder ver el informe y enviamos el ID de la no conformidad
     window.location.href = `/dieDimensional/viewReport_premachining?data=${id_json}`;
 }
-
-//Añadimos la funcionalidad para cuando haya terminado de cargar la página web
-window.addEventListener('DOMContentLoaded', function () {
-    //Llamamos a la función para obtener los datos y disponerlos en la tabla
-    fetchData();
-});

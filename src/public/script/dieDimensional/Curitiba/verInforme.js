@@ -44,6 +44,44 @@ async function fetchData() {
     } catch (error) {
         console.error("Error fetching data");
     }
+
+    /**IDIOMA */
+    try {
+        //Almacenamos en una variable la respuesta de la petición GET
+        const response = await fetch('/dieDimensional/api/curitiba-translation');
+
+        //En caso de que no haya salido bien
+        if (!response.ok) {
+            throw new Error('Error fetching data');
+        }
+
+        //Almacenamos en una variable los datos obtenidos
+        const translation = await response.json();
+
+        //Llamamos a la función para disponer el idioma
+        establecerIdioma(translation);
+
+    } catch (error) {
+        console.error("Error fetching data");
+    }
+}
+
+/**
+ * Función para disponer el idioma en la página web
+ * @param {JSON} translation Argumento quec contiene los datos del idioma
+ */
+function establecerIdioma(translation) {
+    /**Encabezado */
+    //Leeave a comment
+    document.getElementById('leave_a_comment_nav').innerText = translation.deja_comentario;
+
+    /**Información básica */
+    //Report creation date
+    document.getElementById('fecha_creacion_reporte').innerText = translation.fecha_creacion; ç
+    //Measured part
+    document.getElementById('pieza_medida').innerText = translation.pieza_medida;
+    //Mold type
+    document.getElementById('')
 }
 
 /**
@@ -129,14 +167,14 @@ function mostrarInforme(id, id_caracteristica) {
 function configurarModalCorrespondenciaEntreTaladros2(data) {
     console.log("Data: ", data);
     //Creamos una variable para el estado de la caracteristica
-    let clase, estado_caracteristica; 
+    let clase, estado_caracteristica;
 
     //Creamos un if para controlar el valor excecido... en caso de que sea 0
     if (data[0].valor_exceed === 0) {
         clase = 'text-field-bad'
         estado_caracteristica = '<span class="bg-danger font-weight-bold text-center"><i class="bi bi-exclamation-triangle-fill"></i> FUERA LÍMITES</span>';
 
-    //En cualquier otro caso
+        //En cualquier otro caso
     } else {
         clase = 'text-field-good';
         estado_caracteristica = '<span class="font-weight-bold text-center"><i class="bi bi-check-circle"></i> OK</span>';
@@ -236,7 +274,7 @@ function configurarModalCorrespondenciaEntreTaladros2(data) {
             </div>
         </div>
     `);
-    
+
 
     //Configuramos el footer del modal
     $('#modalInformation .modal-footer').html('');
@@ -283,7 +321,7 @@ function configurarModalPlanitud1(data) {
             </div>
         `);
     } else {
-         //Configuramos el cuerpo del modal
+        //Configuramos el cuerpo del modal
         $('#modalInformation .modal-body').html(`
             <div class="container">
                 <div class="row mb-3">
@@ -352,13 +390,13 @@ function obtenerCorrespondenciaEntreTaladros(data) {
 
 function configurarModalCorrespondenciaEntreTaladros(correspondencia_taladros, data) {
     //Creamos una variable para el estado de la caracteristica
-    let estado_caracteristica; 
+    let estado_caracteristica;
 
     //Creamos un if para controlar el valor excecido... en caso de que sea 0
     if (data[0].valor_exceed === 0) {
         estado_caracteristica = '<span class="bg-danger font-weight-bold text-center"><i class="bi bi-exclamation-triangle-fill"></i> FUERA LÍMITES</span>';
 
-    //En cualquier otro caso
+        //En cualquier otro caso
     } else {
         estado_caracteristica = '<span class="font-weight-bold text-center"><i class="bi bi-check-circle"></i> OK</span>';
     }

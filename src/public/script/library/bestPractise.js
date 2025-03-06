@@ -66,6 +66,8 @@ function renderCards(data) {
         //Aplicamos el estilo a la tarjeta
         card.className = 'new-card';
 
+        console.log("ID: ", item.id);
+
         //Añadimos el HTML al cuerpo a la tarjeta con la información de la buena práctica
         card.innerHTML = `
             <img src="${item.path}" alt="${item.title}" class="new-card-img">

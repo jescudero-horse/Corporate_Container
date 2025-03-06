@@ -307,7 +307,7 @@
                                 }
                             });
 
-                        //In other case...
+                            //In other case...
                         } else {
                             //Filter the dataTable using the IPN value and the column
                             $('#dataTable').DataTable().column(8).search(ipn).draw();
@@ -428,14 +428,7 @@
                 //Iterate throw the data
                 rowData_bestPractise.forEach(item => {
                     finalRowData = [
-                        item.idBestPractise,
-                        item.title,
-                        item.factory,
-                        item.metier,
-                        item.line,
-                        item.technology,
-                        item.category,
-                        item.keyword
+                        item.idBestPractise
                     ]
                 });
 
