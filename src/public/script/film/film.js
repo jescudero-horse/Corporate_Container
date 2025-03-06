@@ -111,7 +111,7 @@ function gestionarPuesto(data) {
             //Controlamos los datos
             .then(data => {
                 //Almacenamos en una variable los minutos totales de un puesto
-                const sumaTotal_puesto = (data.length > 0) ? data[0]["SUM(actividad_en_minutos)"] : 0;
+                const sumaTotal_puesto = (data.length > 0) ? data[0]["SUM(actividad_en_minutos + nuevo)"] : 0;
 
                 //Almacenamos en el array la información necesarias
                 conteosPorPuesto.push({

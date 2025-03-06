@@ -268,7 +268,7 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'Apertura (UM)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, DC, D1, W5, TT, M1, AL, actividad_en_minutos)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, DC, D1, W5, TT, M1, AL, nuevo)
                 VALUES
                     (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
@@ -323,6 +323,8 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
 function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada) {
     //Creamos una variable 
     let cantidad_mover = data[2], numero_picadas = data[6];
+
+    console.log("Numero picadas, ", numero_picadas);
 
     //Controlamos el tipo de operación
     switch (operacion_seleccionada) {
@@ -581,6 +583,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (2 * cantidad_mover) / 100, //AL
                 (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (20 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
             );
+            console.log(">>>> Actividad en minutos: ", (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (20 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100)
             break;
 
         //En caso de que sea "Gestión de residuos (UM)"
@@ -1330,7 +1333,7 @@ router.get('/tiempoTotal/:id_puesto', (req, res) => {
         //Almacenamos en una variable la consulta SQL
         const query = `
             SELECT
-                SUM(actividad_en_minutos)
+                SUM(actividad_en_minutos + nuevo)
             FROM 
                 EN_IFM_STANDARD
             WHERE
