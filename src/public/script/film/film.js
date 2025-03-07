@@ -942,11 +942,7 @@ function generarTablasPorEtapa(etapas) {
                                         <span class="min-w-[150px]">Descripción: <strong>${mote_etapa}</strong></span>
                                         ${f !== 'X' ? `<span class="min-w-[150px]">Componente: <strong>${referenciaComponente}</strong></span>` : ''}
                                         ${f !== 'X' ? `<span class="min-w-[150px]">Línea: <strong>${linea}</strong></span>` : ''}
-<<<<<<< HEAD
                                         <span class="min-w-[150px]"><i class="bi bi-stopwatch-fill"></i> <strong>${actividad_en_minutos_x_picada}</strong></span>
-=======
-                                        <span class="min-w-[150px]"><i class="bi bi-stopwatch-fill"></i> <strong>${nuevo_picadas}</strong></span>
->>>>>>> 1dd2d9d6c6148426548dd91aca5e312de223f0bb
 
                                         ${f !== 'X' ? `
                                             <button id="botonVisualizarEtapa" type="button" class="text-blue-500 ml-2" 
