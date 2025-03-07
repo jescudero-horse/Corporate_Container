@@ -858,6 +858,7 @@ function generarTablasPorEtapa(etapas) {
         const f = etapasDeF[0].F;
         const numero_picadas = etapasDeF[0].numero_picadas
         const id_puesto = etapasDeF[0].id_puesto;
+        const actividad_en_minutos_x_picada = etapasDeF[0].nuevo_picadas;
 
         console.log("ID1:", id_etapa1)
 
@@ -941,7 +942,7 @@ function generarTablasPorEtapa(etapas) {
                                         <span class="min-w-[150px]">Descripción: <strong>${mote_etapa}</strong></span>
                                         ${f !== 'X' ? `<span class="min-w-[150px]">Componente: <strong>${referenciaComponente}</strong></span>` : ''}
                                         ${f !== 'X' ? `<span class="min-w-[150px]">Línea: <strong>${linea}</strong></span>` : ''}
-                                        <span class="min-w-[150px]"><i class="bi bi-stopwatch-fill"></i> <strong>${actividad_en_minutos}</strong></span>
+                                        <span class="min-w-[150px]"><i class="bi bi-stopwatch-fill"></i> <strong>${actividad_en_minutos_x_picada}</strong></span>
 
                                         ${f !== 'X' ? `
                                             <button id="botonVisualizarEtapa" type="button" class="text-blue-500 ml-2" 
