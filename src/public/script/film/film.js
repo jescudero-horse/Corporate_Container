@@ -1201,12 +1201,12 @@ function generarTablasPorEtapa(etapas) {
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad total en minutos</td>
-                                                    <td class="px-4 py-2 border">${(nuevo + tiempoDesplazamiento)}</td>
+                                                    <td class="px-4 py-2 border">${nuevo}</td>
                                                 </tr>
 
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" colspan="4">Actividad en minutos (según el número de picadas simultáneas)</td>
-                                                    <td class="px-4 py-2 border">${Math.round((nuevo + tiempoDesplazamiento) / numero_picadas)}</td>
+                                                    <td class="px-4 py-2 border">${nuevo_picadas}</td>
                                                 </tr>
 
                                                 <tr>
