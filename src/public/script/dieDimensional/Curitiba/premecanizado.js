@@ -103,11 +103,68 @@ function obtenerNoConformidades(id) {
     })
         //Controlamos la respuesta
         .then(response => { response.json; })
-    
+
         //Controlamos los datos
         .then(data => {
-            //Llamamos a la función s
+            //Llamamos a la función para disponer la información dentro del modal
+            disponerNoConformidades(data);
         })
+}
+
+/**
+ * Función para disponer la no conformidades dentro del modal
+ * @param {Array} data Argumento que contiene los datos de las no conformidades
+ */
+function disponerNoConformidades(data) {
+    console.log("Data: ", data);
+
+    //Configuramos el título del modal
+    $('#modal .modal-title').text(translation.listado_de_caracteristicas_no_conformes);
+
+    //En caso de que no haya recuperado datos
+    if (data.length === 0) {
+        //Configuramos el cuerpo del modal
+        $('#modal .modal-body').text(translation.todas_las_caracteristicas_dentro_de_los_limites);
+
+        //En caso de que haya recuperado datos
+    } else if (data.length >= 1) {
+        //Configuramos el cuerpo del modal
+        $('#modal .modal-body').html(`
+            <div id="table-container" class="overflow-x-auto mt-4">
+                <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th>${translation.caracteristica_mayus}</th>
+                            <th>${translation.mayus}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        `);
+
+        //Creamos una instancia del cuerpo de la tabla
+        const tbody = $('#tableBody');
+
+        //Creamos una variable donde almacenerá el contenido de la fila
+        const fila_informacion = '';
+
+        //Iteramos por los datos obtenidos
+        data.forEach(item => {
+            //Añadimos la información dentro de la variable
+            fila_informacion += `
+                <tr class="cursor-pointer">
+                    <td>${item.reference}</td>
+                    <tr>${item.descripcion}</td>
+                </tr>`;
+        });
+
+        //Añadimos las filas al cuerpo de la tabla
+        tbody.html(fila_informacion);
+    }
+
+    //Mostramos el modal
+    $('#modal').modal('show');
 }
 
 /**

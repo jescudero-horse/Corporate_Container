@@ -2749,7 +2749,6 @@ function disponerReferenciasBuscador(data, puesto_id) {
     //Añadimos el contenido de la tabla al cuerpo de la tabla
     tbody.html(fila_informacion);
 
-
     let selectedReferences = new Set();
 
     //Manejador de selección/deselección
