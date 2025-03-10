@@ -5,15 +5,15 @@
 function controlarRespuestaComentario(response) {
     //En caso de que haya salido bien
     if (response.status === 201) {
-        mostrarAlerta("Comment added successfully", null, null, 1);
+        mostrarAlerta("Comentário adicionado com sucesso", null, null, 1);
 
         //En caso de que haya salido mal
     } else if (response.status === 501) {
-        mostrarAlerta("Error when adding the comment", "An error occurred while adding the comment", "error", 0);
+        mostrarAlerta("Erro ao adicionar o comentário", "Ocorreu um erro ao adicionar o comentário", "error", 0);
 
         //En cualquier otro caso...
     } else {
-        mostrarAlerta("Uncontrolled state", "It has not been possible to control the state", "question", null);
+        mostrarAlerta("Estado não controlado", "Não foi possível controlar o estado", "question", null);
     }
 }
 

@@ -15,10 +15,12 @@
     "fecha_creacion_informe": "Data de criação do relatório",
     "maquina": "MÁQUINA",
     "puesto": "PONTO",
+    "puesto_min": "Ponto",
     "comentarios_sobre_la_medida": "COMENTÁRIOS SOBRE A MEDIDA",
     "listado_caracteristicas_en_alerta_del_molde": "LISTA DE CARACTERÍSTICAS EM ALERTA DO MOLDE",
     "caracteristica": "CARACTERÍSTICA",
     "descripcion": "DESCRIÇÃO",
+    "descripcion_normal": "Descrição",
     "estado": "ESTADO",
     "fecha_archivo": "Data do arquivo",
     "numero_no_conformidades": "Nº não conformidades",
@@ -34,6 +36,7 @@
     "capturas_de_pantalla": "CAPTURAS DE TELA",
     "fuera_limites": "FORA DE LIMITES",
     "caracteristica_a_tratar": "CARACTERÍSTICA A TRATAR",
+    "caracteristica_a_tratar_normal": "Característica a tratar",
     "caracteristica_fuera_de_limites": "CARACTERÍSTICA FORA DE LIMITES",
     "avisar_a_mantenimiento": "AVISAR A MANUTENÇÃO",
     "caracteristica_dentro_de_limites": "CARACTERÍSTICAS DENTRO DE LIMITES",
@@ -106,5 +109,7 @@
     "desvio_mayus": "DESVIO",
     "tipo_pieza": "Tipo de peça",
     "comentario": "Comentários",
-    "deja_comentario": "Deixe um comentário"
+    "deja_comentario": "Deixe um comentário",
+    "informacion_x": "Informação do Eixo X",
+    "informacion_y": "Informação do Eixo Y"
 }

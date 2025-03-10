@@ -62,7 +62,7 @@ async function fetchData() {
         establecerIdioma(translation);
 
     } catch (error) {
-        console.error("Error fetching data");
+        console.error("Error fetching data: ", error);
     }
 }
 
@@ -77,11 +77,27 @@ function establecerIdioma(translation) {
 
     /**Información básica */
     //Report creation date
-    document.getElementById('fecha_creacion_reporte').innerText = translation.fecha_creacion; ç
+    document.getElementById('fecha_creacion_span').innerText = translation.fecha_creacion;
     //Measured part
-    document.getElementById('pieza_medida').innerText = translation.pieza_medida;
+    document.getElementById('pieza_medida_span').innerText = translation.pieza_medida;
     //Mold type
-    document.getElementById('')
+    document.getElementById('tipo_molde_span').innerText = translation.tipo_molde;
+    //Mold
+    document.getElementById('molde_span').innerText = translation.molde;
+    //Machine
+    document.getElementById('maquina_span').innerText = translation.inyectora;
+    //Position
+    document.getElementById('puesto_span').innerText = translation.puesto_min;
+    //Comments
+    document.getElementById('comentario_span').innerText = translation.comentario;
+
+    /**DataTable */
+    //CHARACTERISTIC
+    document.getElementById('characteristic_dt').innerText = translation.caracteristica;
+    //DESCRIPTION
+    document.getElementById('description_dt').innerText = translation.descripcion_mayus;
+    //STATUS
+    document.getElementById('status_dt').innerText = translation.estado;
 }
 
 /**
@@ -160,14 +176,33 @@ function mostrarInforme(id, id_caracteristica) {
                 default:
                     break;
             }
-        })
+        });
+}
+
+async function obtenerIdioma() {
+    try {
+        const response = await fetch('/dieDimensional/api/curitiba-translation', {
+            method: "GET"
+        });
+        if (!response.ok) {
+            throw new Error('Error fetching data');
+        }
+        return await response.json();
+    } catch (error) {
+        return console.error("Error fetching translation: ", error);
+    }
 }
 
 
-function configurarModalCorrespondenciaEntreTaladros2(data) {
-    console.log("Data: ", data);
+/**
+ * Función para disponer la información entre taladros 
+ * @param {Array} data Argumento que contiene los datos
+ */
+async function configurarModalCorrespondenciaEntreTaladros2(data) {
     //Creamos una variable para el estado de la caracteristica
-    let clase, estado_caracteristica;
+    let clase, estado_caracteristica, translation = await obtenerIdioma();
+
+    console.log("Dentro del taladros 2: ", translation);
 
     //Creamos un if para controlar el valor excecido... en caso de que sea 0
     if (data[0].valor_exceed === 0) {
@@ -190,13 +225,13 @@ function configurarModalCorrespondenciaEntreTaladros2(data) {
             <div class="row mb-3">
                 <div class="col-md-6">
                     <div class="input-group">
-                        <span class="input-group-text">Characteristic to treat</span>
+                        <span class="input-group-text">${translation.caracteristica_a_tratar_normal}</span>
                         <input type="text" id="caracteristica_a_tratar" name="caracteristica_a_tratar" class="form-control" disabled value="${data[0].paralelismo}">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="input-group">
-                        <span class="input-group-text">Description</span>
+                        <span class="input-group-text">${translation.descripcion_normal}</span>
                         <input type="text" id="descripcion" name="descripcion" class="form-control" disabled value="${data[0].descripcion}">
                     </div>
                 </div>
@@ -214,60 +249,60 @@ function configurarModalCorrespondenciaEntreTaladros2(data) {
             <hr>
     
             <!-- Datos en X -->
-            <h5 class="text-center">X Axis Information</h5>
+            <h5 class="text-center">${translation.informacion_x}</h5>
             <div class="row mb-3">
                 <div class="col-md-3">
                     <div class="input-group">
-                        <span class="input-group-text">Nominal X</span>
+                        <span class="input-group-text">${translation.pos_x_nominal}</span>
                         <input type="text" id="nominal_x" name="nominal_x" class="form-control" disabled value="${data[0].pos_x_nominal}">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="input-group">
-                        <span class="input-group-text">Actual X</span>
+                        <span class="input-group-text">${translation.pos_x_actual}</span>
                         <input type="text" id="actual_x" name="actual_x" class="form-control" disabled value="${data[0].pos_x_actual}">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="input-group">
-                        <span class="input-group-text">X Tolerance</span>
+                        <span class="input-group-text">${translation.tolerancia_x}</span>
                         <input type="text" id="tolerancia_x" name="tolerancia_x" class="form-control" disabled value="${data[0].pos_x_tolerancia_superior} - ${data[0].pos_x_tolerancia_inferior}">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="input-group">
-                        <span class="input-group-text">X Deviation</span>
+                        <span class="input-group-text">${translation.desviacion_x}</span>
                         <input type="text" id="desviacion_x" name="desviacion_x" class="form-control" disabled value="${data[0].desviacion_x}">
                     </div>
                 </div>
             </div>
     
-            <hr>
+            <hr><br>
     
             <!-- Datos en Y -->
-            <h5 class="text-center">Y Axis Information</h5>
+            <h5 class="text-center">${translation.informacion_y}</h5>
             <div class="row mb-3">
                 <div class="col-md-3">
                     <div class="input-group">
-                        <span class="input-group-text">Nominal Y</span>
+                        <span class="input-group-text">${translation.pos_y_nominal}</span>
                         <input type="text" id="nominal_y" name="nominal_y" class="form-control" disabled value="${data[0].pos_y_nominal}">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="input-group">
-                        <span class="input-group-text">Actual Y</span>
+                        <span class="input-group-text">${translation.pos_x_actual}</span>
                         <input type="text" id="actual_y" name="actual_y" class="form-control" disabled value="${data[0].pos_y_actual}">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="input-group">
-                        <span class="input-group-text">Y Tolerance</span>
+                        <span class="input-group-text">${translation.tolerancia_y}</span>
                         <input type="text" id="tolerancia_y" name="tolerancia_y" class="form-control" disabled value="${data[0].pos_y_tolerancia_superior} - ${data[0].pos_y_tolerancia_inferior}">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="input-group">
-                        <span class="input-group-text">Y Deviation</span>
+                        <span class="input-group-text">${translation.desviacion_y}</span>
                         <input type="text" id="desviacion_y" name="desviacion_y" class="form-control" disabled value="${data[0].desviacion_y}">
                     </div>
                 </div>
@@ -287,7 +322,10 @@ function configurarModalCorrespondenciaEntreTaladros2(data) {
  * Función para disponer la información dentro de un modal
  * @param {Array} data Array que contiene los datos para disponer la información de la alerta
  */
-function configurarModalPlanitud1(data) {
+async function configurarModalPlanitud1(data) {
+    //Creamos una variable para almacenar el idioma
+    let translation = await obtenerIdioma();
+
     //Configuramos el titulo del modal
     $('#modalInformation .modal-title').text('');
 
@@ -300,7 +338,7 @@ function configurarModalPlanitud1(data) {
                     <!-- CARACTERISTICA A TRATAR -->
                     <div class="col-md-6">
                         <div class="input-group">
-                            <span class="input-group-text">Characteristic to treat</span>
+                            <span class="input-group-text">${translation.caracteristica_a_tratar_normal}</span>
                             <input type="text" id="caracteristica_a_tratar" name="caracteristica_a_tratar" class="form-control" disabled value="${data[0].paralelismo}">
                         </div>
                     </div>
@@ -308,7 +346,7 @@ function configurarModalPlanitud1(data) {
                     <!-- DESCRIPCION -->
                     <div class="col-md-6">
                         <div class="input-group">
-                            <span class="input-group-text">Description</span>
+                            <span class="input-group-text">${translation.descripcion_normal}</span>
                             <input type="text" id="descripcion" name="descripcion" class="form-control" disabled value="${data[0].descripcion}">
                         </div>
                     </div>
@@ -316,7 +354,7 @@ function configurarModalPlanitud1(data) {
     
                 <!--MENSAJE FINAL-->
                 <div class="text-field-bad">
-                    <i class="bi bi-exclamation-diamond-fill"> CHARACTERISTIC OUT OF LIMITS <br> NOTIFY MAINTENANCE </i>
+                    <i class="bi bi-exclamation-diamond-fill"> ${translation.caracteristica_fuera_de_limites} <br> ${translation.avisar_a_mantenimiento} </i>
                 </div>
             </div>
         `);
@@ -361,8 +399,9 @@ function configurarModalPlanitud1(data) {
  * Funció para confifurar la petición GET para obtener lo datos de la correspondencia entre taladros
  * @param {Array} data Array que contiene los datos básicos de la no conformidad
  */
-function obtenerCorrespondenciaEntreTaladros(data) {
-    console.log("Data: ", data);
+async function obtenerCorrespondenciaEntreTaladros(data) {
+    //Creamos una variable para almacenar el idioma
+    let translation = await obtenerIdioma();
 
     //Preparamos la petición GET para obtener la correspondencia entre taladros
     fetch(`/dieDimensional/api/obtener-correspondencia-entre-taladros/${id}/${data[0].tipo_caracteristica}`, {
@@ -384,17 +423,23 @@ function obtenerCorrespondenciaEntreTaladros(data) {
             console.log("Correspondencia entre taladros: ", correspondencia_taladros);
 
             //Llamamos a la función para disponer la información en el modal
-            configurarModalCorrespondenciaEntreTaladros(correspondencia_taladros, data);
+            configurarModalCorrespondenciaEntreTaladros(correspondencia_taladros, data, translation);
         });
 }
 
-function configurarModalCorrespondenciaEntreTaladros(correspondencia_taladros, data) {
+/**
+ * Función para disponer la información de la correspondencia entre taladros
+ * @param {Array} correspondencia_taladros Array con la información básica
+ * @param {Array} data Array con la información de la correspondencia entre taladros
+ * @param {JSON} translation Argumento que contiene la información del idioma
+ */
+function configurarModalCorrespondenciaEntreTaladros(correspondencia_taladros, data, translation) {
     //Creamos una variable para el estado de la caracteristica
     let estado_caracteristica;
 
     //Creamos un if para controlar el valor excecido... en caso de que sea 0
     if (data[0].valor_exceed === 0) {
-        estado_caracteristica = '<span class="bg-danger font-weight-bold text-center"><i class="bi bi-exclamation-triangle-fill"></i> FUERA LÍMITES</span>';
+        estado_caracteristica = `<span class="bg-danger font-weight-bold text-center"><i class="bi bi-exclamation-triangle-fill"></i> ${translation.fuera_limites}</span>`;
 
         //En cualquier otro caso
     } else {
@@ -411,7 +456,7 @@ function configurarModalCorrespondenciaEntreTaladros(correspondencia_taladros, d
                 <!-- CARACTERISTICA A TRATAR -->
                 <div class="col-md-6">
                     <div class="input-group">
-                        <span class="input-group-text">Characteristic to treat</span>
+                        <span class="input-group-text">${translation.caracteristica_a_tratar_normal}</span>
                         <input type="text" id="caracteristica_a_tratar" name="caracteristica_a_tratar" class="form-control" disabled value="${data[0].caracteristica}">
                     </div>
                 </div>
@@ -419,7 +464,7 @@ function configurarModalCorrespondenciaEntreTaladros(correspondencia_taladros, d
                 <!-- DESCRIPCION -->
                 <div class="col-md-6">
                     <div class="input-group">
-                        <span class="input-group-text">Description</span>
+                        <span class="input-group-text">${translation.descripcion_normal}</span>
                         <input type="text" id="descripcion" name="descripcion" class="form-control" disabled value="${data[0].descripcion}">
                     </div>
                 </div>
@@ -446,7 +491,7 @@ function configurarModalCorrespondenciaEntreTaladros(correspondencia_taladros, d
  */
 function disponerInformacionCampos(data) {
     //Asignamos la información dentro de los campos
-    document.getElementById('fecha_creacion_reporte').value = data[0].fecha_registro;
+    document.getElementById('fecha_creacion_reporte').value = data[0].fecha_registro.split("T")[0];
     document.getElementById('pieza_medida').value = data[0].datamatrix;
     document.getElementById('tipo_molde').value = data[0].tipo_pieza;
     document.getElementById('molde').value = data[0].molde;

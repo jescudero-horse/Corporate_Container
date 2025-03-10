@@ -81,7 +81,7 @@ function renderizarTabla(data) {
             "INY" + item.inyectora, //Injection machine
             "pc_1", //3D machine
             "FRECUENCIAL", //Measured type
-            `<button type="button" class="btn btn-primary">${2}</button>`, //Non-conformities
+            `<button type="button" onclick="obtenerNoConformidades(${item.id})"  class="btn btn-primary">${2}</button>` //Non-conformities
         ];
 
         //Añadimos los datos a la fila del dt
@@ -90,6 +90,24 @@ function renderizarTabla(data) {
 
     //Dibujamos el dt
     table.draw();
+}
+
+/**
+ * Función para obtener los datos necesarios
+ * @param {int} id Argumento que contiene el ID de la conformidad
+ */
+function obtenerNoConformidades(id) {
+    //Preparamos la petición GET para obtener los datos necesarios
+    fetch(`/dieDimensional/api/obtenerno-conformidades/${{ id }}`, {
+        method: "GET"
+    })
+        //Controlamos la respuesta
+        .then(response => { response.json; })
+    
+        //Controlamos los datos
+        .then(data => {
+            //Llamamos a la función s
+        })
 }
 
 /**
