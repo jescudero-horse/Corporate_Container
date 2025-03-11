@@ -275,13 +275,57 @@ router.get('/no-conformidades-premecanizado_Curitiba', (req, res) => {
                 return res.status(501).send('Error en la ejecución de la consulta');
             }
 
-            console.log("")
-
             //Enviamos los datos
             return res.json(result);
         });
     });
 });
+
+/**
+ * End point para obtener las no conformidades para disponerlas en el modal
+ */
+router.get('/obtener-no-conformidades/:id', (req, res) => {
+    //Almacenamos el ID del parámetro
+    const id = req.params.id;
+
+    //Almacenamos en una variable la query
+    let query = `
+        SELECT
+            ancplnc.caracteristica,
+            ancplnc.descripcion
+        FROM
+            dieDimensional_Curitiba_no_conformidades ddcnc
+        INNER JOIN
+            aa_no_confomidades_premeca_listado_no_conformidades_curitiba ancplnc
+        ON
+            ddcnc.vista_sala3d = ancplnc.id
+        WHERE
+            ddcnc.vista_sala3d = ?
+    `;
+
+    //Obtener la conexión a la base de datos
+    getDBConnection((err, connection) => {
+        //En caso de que ocurra algun error en la conexión a la base de datos
+        if (err) {
+            //Enviamos el status
+            console.error("> Error en la conexión a la base de datos: ", err);
+            return res.status(501).send('Error en la conexión a la base de datos');
+        }
+
+        //Ejecutamos la sentencia
+        connection.query(query, [id], (error, result) => {
+            //En caso de que la consulta haya fallado
+            if (error) {
+                //Enviamos el status
+                console.error("> Error en la ejecución de la consulta: ", error);
+                return res.status(501).send('Error en la ejecución de la consulta');
+            }
+
+            //Enviamos los datos obtenidos
+            return res.json(result);
+        });
+    });
+})
 
 /**
  * End point para obtener la información básica de premecanizado
