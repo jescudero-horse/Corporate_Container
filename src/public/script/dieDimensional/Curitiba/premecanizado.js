@@ -81,7 +81,7 @@ function renderizarTabla(data) {
             "INY" + item.inyectora, //Injection machine
             "pc_1", //3D machine
             "FRECUENCIAL", //Measured type
-            `<button type="button" onclick="obtenerNoConformidades(${item.id})"  class="btn btn-primary">${2}</button>` //Non-conformities
+            `<button type="button" onclick="obtenerNoConformidades(${item.id})" class="btn btn-primary">${item.id}</button>` //Non-conformities
         ];
 
         //Añadimos los datos a la fila del dt
@@ -97,12 +97,21 @@ function renderizarTabla(data) {
  * @param {int} id Argumento que contiene el ID de la conformidad
  */
 function obtenerNoConformidades(id) {
+    console.log("ID: ", id)
     //Preparamos la petición GET para obtener los datos necesarios
-    fetch(`/dieDimensional/api/obtenerno-conformidades/${{ id }}`, {
+    fetch(`/dieDimensional/api/obtener-no-conformidades/${id}`, {
         method: "GET"
     })
         //Controlamos la respuesta
-        .then(response => { response.json; })
+        .then(response => {
+            //En caso de que la respuesta no sea válida
+            if (!response.ok) {
+                throw new Error('Error fetching data');
+            }
+
+            //Devolvemos los datos
+            return response.json();
+        })
 
         //Controlamos los datos
         .then(data => {
@@ -124,18 +133,21 @@ function disponerNoConformidades(data) {
     //En caso de que no haya recuperado datos
     if (data.length === 0) {
         //Configuramos el cuerpo del modal
-        $('#modal .modal-body').text(translation.todas_las_caracteristicas_dentro_de_los_limites);
+        $('#modal .modal-body').html(`
+            <div class="text-center py-4">
+                <p>${translation.todas_las_caracteristicas_dentro_de_los_limites}</p>
+            </div>
+        `);
 
-        //En caso de que haya recuperado datos
-    } else if (data.length >= 1) {
+    } else {  //En caso de que haya recuperado datos
         //Configuramos el cuerpo del modal
         $('#modal .modal-body').html(`
-            <div id="table-container" class="overflow-x-auto mt-4">
-                <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
-                    <thead>
-                        <tr class="bg-gray-100">
+            <div id="table-container" class="d-flex justify-content-center mt-4">
+                <table class="table table-bordered table-hover table-sm w-auto bg-white shadow rounded">
+                    <thead class="table-light text-center">
+                        <tr>
                             <th>${translation.caracteristica_mayus}</th>
-                            <th>${translation.mayus}</th>
+                            <th>${translation.descripcion_mayus}</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody"></tbody>
@@ -146,22 +158,25 @@ function disponerNoConformidades(data) {
         //Creamos una instancia del cuerpo de la tabla
         const tbody = $('#tableBody');
 
-        //Creamos una variable donde almacenerá el contenido de la fila
-        const fila_informacion = '';
+        //Creamos una variable donde se almacenará el contenido de las filas
+        let fila_informacion = '';
 
         //Iteramos por los datos obtenidos
         data.forEach(item => {
-            //Añadimos la información dentro de la variable
+            //Agregamos la información dentro de la variable, envolviendo celdas con <tr>
             fila_informacion += `
-                <tr class="cursor-pointer">
-                    <td>${item.reference}</td>
-                    <tr>${item.descripcion}</td>
+                <tr>
+                    <td class="text-center">${item.caracteristica}</td>
+                    <td>${item.descripcion}</td>
                 </tr>`;
         });
 
         //Añadimos las filas al cuerpo de la tabla
         tbody.html(fila_informacion);
     }
+
+    //Configuramos el footer del modal
+    $('#modal .modal-footer').html('');
 
     //Mostramos el modal
     $('#modal').modal('show');

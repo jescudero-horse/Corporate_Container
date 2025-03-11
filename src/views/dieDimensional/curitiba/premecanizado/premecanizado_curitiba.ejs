@@ -14,13 +14,16 @@
     <!--INCLUIMOS LA BARRA DE NAVEGACIÓN-->
     <%- include('../../partials/nav.ejs') %>
 
-        <div class="container">
-            <h1 id="titulo"><%-title %></h1>
-            <hr>
+        <!--INCLUIMOS EL MODAL-->
+        <%- include('../../partials/modal.ejs') %>
 
-            <!--INCLUIMOS EL DATA TABLE DEL PREMECANIZADO DE CURITIBA-->
-            <%- include('../../partials/curitiba/dt_premecanizado.ejs') %>
-        </div>
+            <div class="container">
+                <h1 id="titulo"><%-title %></h1>
+                <hr>
+
+                <!--INCLUIMOS EL DATA TABLE DEL PREMECANIZADO DE CURITIBA-->
+                <%- include('../../partials/curitiba/dt_premecanizado.ejs') %>
+            </div>
 </body>
 
 </html>
