@@ -934,7 +934,7 @@ function generarTablasPorEtapa(etapas) {
 
                             //Generamos el HTML de la tabla para la etapa
                             const tablaHTML = `
-                                <div id="contenedor-${FKey}-${referenciaComponente}-${id_etapa1}-${id_puesto}" class="mb-4 draggable-container" data-id-etapa="${id_etapa}">
+                                <div id="${id_etapa1}-${id_puesto}" class="mb-4 draggable-container" data-id-etapa="${id_etapa}">
                                     <h3 id="encabezadoEtapa-${FKey}-${referenciaComponente}"
                                         class="text-lg font-semibold mb-2 flex flex-wrap justify-between items-center p-2 rounded-lg animate-fadeIn 
                                             ${f === 'X' ? 'bg-stone-200 text-black' : color_etapa} text-black"

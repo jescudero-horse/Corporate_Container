@@ -289,7 +289,7 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'Plegar y apilar (UC)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, P2, L2, G1, P5, nuevo, , nuevo_picadas)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, P2, L2, G1, P5, nuevo, nuevo_picadas)
                 VALUES
                     (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
@@ -620,8 +620,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (1 * cantidad_mover) / 100, //L2
                 (1 * cantidad_mover) / 100, //G1
                 (2 * cantidad_mover) / 100, //P5
-                (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
-                    ((1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picada
+                (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100, //Actividad en minutos
+                ((1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picada
             );
             break;
 
@@ -818,7 +818,7 @@ router.get('/obtenerEtapas_Puesto/:id_puesto', (req, res) => {
                 EN.F = FS.FStandard
             WHERE EN.id_puesto = ?
             ORDER BY
-                id ASC
+                EN.id ASC
         `;
 
         //Ejecutamos la consulta
@@ -1232,11 +1232,11 @@ router.post('/actualizarInformacionMapa/:id_etapa/:totalDistanceMeters/:curveCou
     }
 
     /** Convertimos los valores a NULL en caso de que esten vacios */
-    totalDistanceMeters = totalDistanceMeters === 'null' ? null : totalDistanceMeters;
-    curveCount = curveCount === 'null' ? null : curveCount;
-    puntosJSON = puntosJSON === 'null' ? null : puntosJSON;
-    numero_cruces = numero_cruces === 'null' ? null : numero_cruces;
-    numero_puertas = numero_puertas === 'null' ? null : numero_puertas;
+    totalDistanceMeters = totalDistanceMeters === 'null' ? 0 : totalDistanceMeters;
+    curveCount = curveCount === 'null' ? 0 : curveCount;
+    puntosJSON = puntosJSON === 'null' ? 0 : puntosJSON;
+    numero_cruces = numero_cruces === 'null' ? 0 : numero_cruces;
+    numero_puertas = numero_puertas === 'null' ? 0 : numero_puertas;
 
     //Creamos la conexión a la base de datos
     getDBConnection((err, connection) => {
