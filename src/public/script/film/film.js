@@ -656,10 +656,12 @@ function disponerTurno(turno, jornadaInicio, jornadaFin) {
         document.getElementById('jornadaLaboralTitle').innerHTML = `Jornada Laboral: ${turno_final} ${icono}`;
 
         //Establecemos el inicio de la jornada
-        document.getElementById('jornadaInicio').innerText = jornadaInicio;
+        document.getElementById('jornadaInicio').innerText = jornadaInicio.split('T')[1].split('.')[0];
 
         //Establecemos el final de la jornada
-        document.getElementById('jornadaFinal').innerText = jornadaFin;
+        document.getElementById('jornadaFinal').innerText = jornadaFin.split('T')[1].split('.')[0];
+
+        console.log("Jornada inicio: ", jornadaInicio, "\tJornada final: ", jornadaFin)
 
         //Mostramos el contenedor de la jornada
         document.getElementById('visualizarTurno').classList.remove('hidden');
@@ -2971,7 +2973,7 @@ function anyadirEtapa(id) {
 /**
  * Función para obtener la cantidad a expedir por cada referencia
  * @param {Array} referencias_validas Argumento que contiene las referencias válidas
- * @param {String} columna Argumento que contiene el nombre de la columna a la que hora el conteo
+ * @param {String} columna Argumento que contiene el nombre de la columna a la que hora del conteo
  */
 function obtenerCantidadExpedir(referencias_validas, columna, puesto_id) {
     //Iteramos por cada referencia
