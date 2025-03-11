@@ -2563,9 +2563,24 @@ function visualizarInformeStaturacionUAT() {
         const graficoContainer = document.getElementById('modal-grafico-container');
         graficoContainer.innerHTML = '';
 
+        let fecha = new Date()
+
+        let fecha_actual = document.createElement("h4");
+        fecha_actual.append(`Fecha de toma de datos:`);
+        fecha_actual.append(document.createElement("br"));
+        fecha_actual.append(`${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`);
+        graficoContainer.append(fecha_actual);
+
         //Creamos el lienzo para el gráfico
         const canvas = document.createElement('canvas');
         graficoContainer.appendChild(canvas);
+
+        fecha.setDate(fecha.getDate() + 3 * 7);
+        let fecha_3_semanas = document.createElement("h4");
+        fecha_3_semanas.append(`Fecha a tres semanas:`);
+        fecha_3_semanas.append(document.createElement("br"));
+        fecha_3_semanas.append(`${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`);
+        graficoContainer.append(fecha_3_semanas);
 
         //Calculamos la saturación total
         const saturacionTotal = calcularSaturacionTotal(conteosPorPuesto);
