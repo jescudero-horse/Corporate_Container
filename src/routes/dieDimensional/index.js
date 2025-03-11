@@ -275,6 +275,8 @@ router.get('/no-conformidades-premecanizado_Curitiba', (req, res) => {
                 return res.status(501).send('Error en la ejecución de la consulta');
             }
 
+            console.log("")
+
             //Enviamos los datos
             return res.json(result);
         });
