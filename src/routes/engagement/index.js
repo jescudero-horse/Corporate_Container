@@ -16,7 +16,8 @@ const pool = mysql.createPool({
     password: '1GJYbSrM_Oxv@PSF',
     database: 'corporate_central_re7',
     port: 31009,
-    multipleStatements: true
+    multipleStatements: true,
+    timezone: 'z'
 });
 
 /**
@@ -3058,6 +3059,8 @@ router.get('/obtenerTurno/:puesto_id', (req, res) => {
     //Almacenamos la variable de los parámetros
     const puesto_id = req.params.puesto_id;
 
+    console.log("> Puesto ID: ", puesto_id);
+
     //Almacenamos en una variable la consulta SQL
     const query = `
         SELECT 
@@ -3065,7 +3068,7 @@ router.get('/obtenerTurno/:puesto_id', (req, res) => {
         FROM
             puestos p
         INNER JOIN
-            turnos t 
+            turnos t
         ON
             p.id_turno = t.id
         WHERE 
