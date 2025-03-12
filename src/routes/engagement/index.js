@@ -817,8 +817,6 @@ router.get('/obtenerEtapas_Puesto/:id_puesto', (req, res) => {
             ON 
                 EN.F = FS.FStandard
             WHERE EN.id_puesto = ?
-            ORDER BY
-                EN.id ASC
         `;
 
         //Ejecutamos la consulta
@@ -3427,6 +3425,69 @@ router.get('/obtener-referencias/:tipo_operacion/:id_puesto/:planta', (req, res)
                 return res.json(result);
             })
         });
+    });
+});
+
+
+/**
+ * End point para actualizar el orden de las etapas
+ */
+router.put('/actualizarOrden/:array_ordenado', (req, res) => {
+    //Almacenamos la variable de los parámetros
+    let array_ordenado = decodeURIComponent(req.params.array_ordenado);
+
+    console.log("Array recibido en el backend:", array_ordenado); // Verificar el array recibido
+
+    // Convertir el string en un array separando por "-"
+    let array = array_ordenado.split(',');
+
+    console.log("Array separado:", array); // Verificar que la separación es correcta
+
+    //Almacenamos en una variable la query
+    let query = `
+        UPDATE
+            EN_IFM_STANDARD
+        SET
+            orden = ?
+        WHERE
+            id = ? AND
+            id_puesto = ?
+    `;
+
+    //let array = array_ordenado.split('-');
+
+    //Obtenemos la conexión
+    getDBConnection((err, connection) => {
+        //En caso de que se produzaca un error...
+        if (err) {
+            return res.status(400).send('Error al conectar con la base de datos');
+        }
+
+        // Usamos un índice para manejar el orden
+        for (let index = 0; index < array.length; index++) {
+            let item = array[index];
+            let [id, id_puesto] = item.split('-'); // Separar id e id_puesto
+            let orden = index + 1; // Asignar el orden basado en el índice
+
+            console.log(`Actualizando: ID=${id}, ID_Puesto=${id_puesto}, Orden=${orden}`); // Verificar los valores a actualizar
+
+            // Ejecutamos la consulta para cada etapa
+            connection.query(query, [orden, id, id_puesto], (error, result) => {
+                if (error) {
+                    console.error("> Error: ", error);
+                    connection.release();
+                    return res.status(500).send('Error en la consulta');
+                }
+
+                console.log(`Consulta exitosa para ID=${id} y ID_Puesto=${id_puesto}, resultado:`, result);
+
+                // Liberamos la conexión después de la última consulta
+                if (index === array.length - 1) {
+                    connection.release();
+                    res.status(200).send('Orden actualizado correctamente');
+                }
+            });
+        }
     });
 });
 

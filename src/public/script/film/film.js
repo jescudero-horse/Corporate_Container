@@ -722,6 +722,7 @@ function obtenerEtapas(puestoID) {
 
         //Controlamos los datos
         .then(data => {
+            data.sort((a, b) => a.orden - b.orden); // Asegurar orden correcto
             //Llammos al método para mostrar las etapas de un puesto
             generarTablasPorEtapa(data);
         });
@@ -850,6 +851,8 @@ function generarTablasPorEtapa(etapas) {
     Object.keys(agrupadoPorF).forEach(FKey => {
         //Almacenamos en una variable las etapas del grupo "F"
         const etapasDeF = agrupadoPorF[FKey];
+        console.log(`ETAPA: ${etapasDeF[0].F} -> ${etapasDeF[0].orden}`)
+
 
         console.log("Etapas DEF: ", etapasDeF)
 
@@ -1220,21 +1223,27 @@ function generarTablasPorEtapa(etapas) {
                             let orden = [];
 
                             contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
+                            
 
                             // Inicializa SortableJS en el contenedor de las tablas
                             new Sortable(contenedorTablas, {
                                 animation: 150,
                                 ghostClass: 'sortable-ghost',
                                 handle: '.draggable-container',
-                                onEnd: function (evt) {
-                                    // Actualiza la variable 'orden'
+                                onStart: function(evt) {
+                                    // Llenar el array 'orden' antes de que comience el cambio
                                     orden = Array.from(contenedorTablas.children).map(child => child.id);
-
-                                    console.log("Orden: ", orden)
-                                    // Guarda el nuevo orden en localStorage
-                                    //localStorage.setItem('ordenContenedores', JSON.stringify(orden));
-
-                                    console.log("Escuchador");
+                                    console.log("Orden inicial: ", orden);
+                                },
+                                onEnd: function(evt) {
+                                    console.log("Orden antes de enviarlo al servidor:", orden);
+                                    
+                                    // Actualiza el array 'orden' con los nuevos valores
+                                    orden = Array.from(contenedorTablas.children).map(child => child.id);
+                                    console.log("Orden actualizado: ", orden);
+                                    
+                                    // Enviar el orden al backend
+                                    ordernarEtapa(orden);
                                 }
                             });
                         })
@@ -1246,24 +1255,32 @@ function generarTablasPorEtapa(etapas) {
             .catch(error => {
                 console.error('Error fetching etapas:', error);
             })
-            .finally(() => {
-                console.log("Dentro del finally")
-                ordenarPorIdEtapa(contenedorTablas);
-            })
     });
 }
 
-// Función para ordenar los contenedores por id_etapa
-function ordenarPorIdEtapa(contenedorTablas) {
-    const contenedores = Array.from(contenedorTablas.children);
-    contenedores.sort((a, b) => {
-        const idA = parseInt(a.getAttribute('data-id-etapa'));
-        const idB = parseInt(b.getAttribute('data-id-etapa'));
-        return idA - idB;
+/**
+ * Función para actualizar el orden de las etapas
+ * @param {Array} array Argumento que contiene las etapas ordenadas
+ */
+function ordernarEtapa(array) {
+    console.log("Array enviado al servidor:", array);
+    let arrayString = array.join(','); // Unir con "," para enviarlo correctamente
+    console.log("ArrayString enviado al servidor:", arrayString);
+
+    // Enviar la solicitud al servidor
+    fetch(`/film/api/actualizarOrden/${encodeURIComponent(arrayString)}`, {
+        method: "PUT",
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log('Orden actualizado correctamente');
+        } else {
+            console.error('Error al actualizar el orden');
+        }
+    })
+    .catch(error => {
+        console.error('Error en la solicitud:', error);
     });
-    contenedores.forEach(contenedor => contenedorTablas.appendChild(contenedor));
-    // Actualiza la variable 'orden'
-    orden = contenedores.map(contenedor => contenedor.id);
 }
 
 /**
@@ -4171,14 +4188,6 @@ function setCookie(name, value, days) {
         expires = "; expires=" + date.toUTCString();
     }
     document.cookie = name + "=" + value + "; path=/" + expires;
-}
-
-/**
- * Función para actualizar el orden de las etapas
- * @param {Array} array Argumento que contiene las etapas ordenadas
- */
-function ordernarEtapa(array) {
-
 }
 
 /**
