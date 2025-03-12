@@ -880,7 +880,7 @@ function generarTablasPorEtapa(etapas) {
             .then(etapasData => {
                 etapasDeF.forEach((etapaDeF, index) => {
                     /** Almacenamos las variable necesarias */
-                    var { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total } = inicializarVariablesEtapas(etapaDeF);
+                    var { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, G1_1, P2_1, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total } = inicializarVariablesEtapas(etapaDeF);
 
                     console.log("ID:", id_etapa, "\fnombre:", nombre_etapa);
 
@@ -1157,6 +1157,12 @@ function generarTablasPorEtapa(etapas) {
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'P5') {
                                             tiempoCalculado = P5
+                                            actividad_en_minutos_final += tiempoCalculado;
+                                        } else if (etapa.symbol === 'G1_1') {
+                                            tiempoCalculado = G1_1;
+                                            actividad_en_minutos_final += tiempoCalculado;
+                                        } else if (etapa.symbol === 'P2_1') {
+                                            tiempoCalculado = P2_1;
                                             actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'W5_2') {
                                             tiempoCalculado = W5_2;
@@ -2563,13 +2569,15 @@ function inicializarVariablesEtapas(etapaDeF) {
     const L2 = etapaDeF.L2 ? etapaDeF.L2 : '0';
     const G1 = etapaDeF.G1 ? etapaDeF.G1 : '0';
     const P5 = etapaDeF.P5 ? etapaDeF.P5 : '0';
+    const G1_1 = etapaDeF.G1_1 ? etapaDeF.G1_1 : '0';
+    const P2_1 = etapaDeF.P2_1 ? etapaDeF.P2_1 : '0';
     const W5_2 = etapaDeF.W5_2 ? etapaDeF.W5_2 : '0';
     const nuevo = etapaDeF.nuevo ? etapaDeF.nuevo : '0';
     const nuevo_picadas = etapaDeF.nuevo_picadas ? etapaDeF.nuevo_picadas : '0';
     const tiempo_distancia_total = etapaDeF.tiempo_distancia_total ? etapaDeF.tiempo_distancia_total : '0';
 
     //Devolvemos las variables
-    return { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total };
+    return { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, G1_1, P2_1, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total };
 }
 
 /**

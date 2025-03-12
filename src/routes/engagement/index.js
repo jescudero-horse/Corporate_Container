@@ -299,7 +299,7 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'De puesto inferior a carro (UC)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, G1, W5, P2, W5_2, nuevo, nuevo_picadas)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, G1_1, W5, P2_1, W5_2, nuevo, nuevo_picadas)
                 VALUES
                     (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
@@ -631,9 +631,9 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 null, //Linea 
                 10, //Máquina usada
                 10, //Velocidad
-                (1 * cantidad_mover) / 100, //G1
+                (1 * cantidad_mover) / 100, //G1_1
                 (1 * cantidad_mover) / 100, //W5
-                (1 * cantidad_mover) / 100, //P2
+                (1 * cantidad_mover) / 100, //P2_1
                 (2 * cantidad_mover) / 100, //W5_2
                 (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100, //Actividad en minutos
                 ((1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas // Actividad en minuto X picada
@@ -1388,7 +1388,7 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
                 id_puesto,
                 SUM(TL_TV + CDVB_CDL + TL + CDL + CCPE + CT10 + TC + CDC + DC + D1 + W5 + M1 + AL + W5_2) AS dinamico_NoVA,
                 SUM(TL_TV + CDVB_CDL + TC + CDV + TV + CDL + CCPE + DC113 + DS10 + PS14 + DS14 + DS15 + PS15 + DI21) AS dinamico_VA,
-                SUM(PS10 + PS14 + valor_simbolo_especial + DS10 + PPU43 + PDU44 + PP1 + PDU34 + PPU34 + PPD32 + G1 + P2) AS estatico_VA,
+                SUM(PS10 + PS14 + valor_simbolo_especial + DS10 + PPU43 + PDU44 + PP1 + PDU34 + PPU34 + PPD32 + G1_1 + P2_1) AS estatico_VA,
                 SUM(PP1 + TT + M1 + DL + P2 + L2 + G1 + P5) AS estatico_NoVA
             FROM 
                 EN_IFM_STANDARD 
