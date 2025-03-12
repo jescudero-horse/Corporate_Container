@@ -33,17 +33,16 @@ function getDBConnection(callback) {
         }
     });
 }
-
 /**
  * End point para añadir un nuevo puesto
  */
 router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:mapa/:turno/:planta', (req, res) => {
     //Almacenamos los valores del formulario
     const { numero_puesto, nombre_puesto, numero_operarios, mapa, turno, planta } = req.params;
-
+ 
     //Creamos una variable para almacenar el path del mapa
     const ruta_mapa = `/assets/film/${mapa}`;
-
+ 
     //Controlamos los valores de los campos necesarios
     if (!numero_puesto || !nombre_puesto || !numero_operarios) {
         return res.status(400).send('Faltan campos en la solicitud');
@@ -56,47 +55,55 @@ router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:map
             console.error('> Error al conectar a la base de datos: ', err);
             return res.status(500).send('Error al conectar a la base de datos');
         }
-
+ 
         //Almacenamos en una variable la consulta SQL para obtener el ID del turno usando el turno y la planta
         const queryTurno = `
             SELECT
-                id
+                pt.turno_id
             FROM
-                turnos
+                plantas_turnos pt
+            JOIN
+                plantas p
+            ON
+                pt.planta_id = p.id
+            JOIN
+                turnos t
+            ON
+                pt.turno_id = t.id
             WHERE
-                planta = ?
-                AND turno = ?
+                p.codigo = ? AND
+                t.turno = ?
         `;
-
+ 
         //Ejecutamos la consulta para obtener el ID del turno
         connection.query(queryTurno, [planta, turno], (errorTurno, resultTurno) => {
             if (errorTurno) {
                 console.error('> Error a la hora de obtener el ID del turno: ', errorTurno);
                 return res.status(500).send('Error al obtener el ID del turno');
             }
-
+ 
             if (resultTurno.length === 0) {
                 return res.status(404).send('No se encontró el turno especificado');
             }
-
+ 
             //Almacenamos en la variable el ID del turno
-            const id_turno = resultTurno[0].id;
-
+            const id_turno = resultTurno[0].turno_id;
+ 
             //Almacenamos en una nueva variable la consulta SQL para añadir el puesto
             const queryPuesto = `
-                INSERT INTO 
+                INSERT INTO
                     puestos(numero_puesto, nombre_puesto, numero_operarios, mapa, id_turno)
                 VALUES
                     (?, ?, ?, ?, ?)
             `;
-
+ 
             //Ejecutamos la consulta para añadir el puesto
             connection.query(queryPuesto, [numero_puesto, nombre_puesto, numero_operarios, ruta_mapa, id_turno], (errorPuesto, resultPuesto) => {
                 if (errorPuesto) {
                     console.error('> Error a la hora de añadir el puesto: ', errorPuesto);
                     return res.status(500).send('Error a la hora de añadir el puesto');
                 }
-
+ 
                 //Enviamos el status
                 res.status(201).send('Puesto añadido');
             });
@@ -1385,15 +1392,15 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
         //Almacenamos en una variable la consulta SQL
         const query = `
             SELECT 
-                id_puesto,
-                SUM(TL_TV + CDVB_CDL + TL + CDL + CCPE + CT10 + TC + CDC + DC + D1 + W5 + M1 + AL + W5_2) AS dinamico_NoVA,
-                SUM(TL_TV + CDVB_CDL + TC + CDV + TV + CDL + CCPE + DC113 + DS10 + PS14 + DS14 + DS15 + PS15 + DI21) AS dinamico_VA,
-                SUM(PS10 + PS14 + valor_simbolo_especial + DS10 + PPU43 + PDU44 + PP1 + PDU34 + PPU34 + PPD32 + G1_1 + P2_1) AS estatico_VA,
-                SUM(PP1 + TT + M1 + DL + P2 + L2 + G1 + P5) AS estatico_NoVA
-            FROM 
-                EN_IFM_STANDARD 
-            WHERE 
-                id_puesto = ?
+                c.id_puesto,
+                SUM(c.dinamico_VA) AS dinamico_VA,
+                SUM(c.dinamico_NoVA) AS dinamico_NoVA,
+                SUM(c.estatico_VA) AS estatico_VA,
+                SUM(c.estatico_NoVA) AS estatico_NoVA,
+                (SELECT SUM(nuevo_picadas) FROM EN_IFM_STANDARD WHERE id_puesto = c.id_puesto) AS nuevo_picadas
+            FROM chimenea c
+            WHERE c.id_puesto = ?
+            GROUP BY c.id_puesto;
         `;
 
         //Ejecutamos la consulta
@@ -1409,7 +1416,7 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
                 return res.status(501).send("Error en la consulta");
             }
 
-            console.log("> Resultados: ", results);
+            console.log("> Resultadossss: ", results);
 
             //Enviamos la información
             return res.json(results);

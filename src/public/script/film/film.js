@@ -145,11 +145,11 @@ function gestionarPuesto(data) {
 /**
  * Función para verificar que tenemos todos los datos para renderizar los gráficos
  */
-function verificarFinalizacionDeDatos() {
+function verificarFinalizacionDeDatos(data2) {
     //En caso de que tengamos todos los datos necesarios...
     if (peticionesFinalizadas.puestos && peticionesFinalizadas.graficoChimenea) {
         //Llamamos a la función para renderizar el gráfico
-        renderizarGrafico();
+        renderizarGrafico(data2);
     }
 }
 
@@ -164,6 +164,8 @@ function gestionarGraficoChimenea(data) {
     //Almacenamos en una variable el número de puestos disponibles
     const totalPuestos = data.length;
 
+    console.log("Data antes forEach: ", data)
+
     //Iteramos por los datos del puesto
     data.forEach(item => {
         //Preparamos la petición GET para obtener los tiempos para generar el gráfico de chimenea
@@ -176,18 +178,24 @@ function gestionarGraficoChimenea(data) {
                 return response.json();
             })
             //Controlamos los datos
-            .then(data => {
+            .then(data2 => {
+
+                let id, dinamico_NoVA, dinamico_VA, estatico_VA, estatico_NoVA, nuevo_picadas;
                 //Iteramos por los datos obtenidos
-                data.forEach(itemChimenea => {
+                data2.forEach(itemChimenea => {
                     //Almacenamos en el array los datos que necesitamos para generar el gráfico de chimenea
                     conteoGraficoChimenea.push({
                         id: item.id,
                         dinamico_NoVA: itemChimenea.dinamico_NoVA,
                         dinamico_VA: itemChimenea.dinamico_VA,
                         estatico_VA: itemChimenea.estatico_VA,
-                        estatico_NoVA: itemChimenea.estatico_NoVA
+                        estatico_NoVA: itemChimenea.estatico_NoVA,
+                        nuevo_picadas: itemChimenea.nuevo_picadas
                     });
                 });
+
+                console.log("Data FINAL: ", data2)
+                console.log("dinamico_VA DATA: ", conteoGraficoChimenea[2]);
 
                 //Almacenamos el array por el ID del puesto
                 conteoGraficoChimenea.sort((a, b) => a.id - b.id);
@@ -201,7 +209,7 @@ function gestionarGraficoChimenea(data) {
                     peticionesFinalizadas.graficoChimenea = true;
 
                     //Llamamos al método para controlar los datos para generar los gráficos
-                    verificarFinalizacionDeDatos();
+                    verificarFinalizacionDeDatos(data2);
                 }
             })
 
@@ -213,7 +221,7 @@ function gestionarGraficoChimenea(data) {
 /**
  * Función para representar los gráficos
  */
-function renderizarGrafico() {
+function renderizarGrafico(data2) {
     //Almacenamos la instancia del contenedor de gráficos
     const graficosContainer = document.getElementById('graficos-container');
     graficosContainer.innerHTML = '';
@@ -312,12 +320,14 @@ function renderizarGrafico() {
             const dinamico_VA = datosChimenea.dinamico_VA || 0;
             const estatico_VA = datosChimenea.estatico_VA || 0;
             const estatico_NoVA = datosChimenea.estatico_NoVA || 0;
-            const total = (dinamico_NoVA + dinamico_VA + estatico_VA + estatico_NoVA).toFixed(2);
+            const nuevo_picadas = datosChimenea.nuevo_picadas || 0;
+            const total = 455;
             //const total = 480;
             const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / total) * 100).toFixed(2) : 0;
             const porcentaje_VA = total > 0 ? ((dinamico_VA / total) * 100).toFixed(2) : 0;
             const porcentaje_estatico_VA = total > 0 ? ((estatico_VA / total) * 100).toFixed(2) : 0;
             const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / total) * 100).toFixed(2) : 0;
+            const porcentaje_nuevo_picadas = total > 0 ? ((nuevo_picadas / total) * 100).toFixed(2) : 0;
 
             // const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / 60 / total) * 100).toFixed(2) : 0;
             // const porcentaje_VA = total > 0 ? ((dinamico_VA / 60 / total) * 100).toFixed(2) : 0;
@@ -325,10 +335,10 @@ function renderizarGrafico() {
             // const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / 60 / total) * 100).toFixed(2) : 0;
 
             console.log(
-                "Porcentaje dinamico NO VA: ", porcentaje_NoVA,
-                "Valor dinamico VA: ", dinamico_NoVA,
-                "Porcentaje dinamico VA: ", porcentaje_VA,
-                "Porcentaje estatico VA: ", porcentaje_estatico_VA,
+                //"Porcentaje dinamico NO VA: ", porcentaje_NoVA,
+                "dinamico_VA: ", dinamico_VA,
+                //"Porcentaje dinamico VA: ", porcentaje_VA,
+                //"Porcentaje estatico VA: ", porcentaje_estatico_VA,
                 "total: ", total,
 
                 // // "Porcentaje estatico NO VA: ", porcentaje_estatico_NoVA,
@@ -345,7 +355,7 @@ function renderizarGrafico() {
                         { label: 'Dinamico VA', data: [porcentaje_VA], backgroundColor: '#0493f2', borderColor: '#0493f2', borderWidth: 1, stack: 'Stack 0' },
                         { label: 'Estático VA', data: [porcentaje_estatico_VA], backgroundColor: '#67adea', borderColor: '#67adea', borderWidth: 1, stack: 'Stack 0' },
                         { label: 'Estático NoVA', data: [porcentaje_estatico_NoVA], backgroundColor: '#ffffff', borderColor: '#ffffff', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Tiempo desplazamiento', data: [1], backgroundColor: '#7374cc', borderColor: '#7374cc', borderWidth: 1, stack: 'Stack 0' }
+                        { label: 'Tiempo desplazamiento', data: [porcentaje_nuevo_picadas], backgroundColor: '#7374cc', borderColor: '#7374cc', borderWidth: 1, stack: 'Stack 0' }
                     ]
                 },
                 options: {
