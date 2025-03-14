@@ -60,12 +60,20 @@ router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:map
         //Almacenamos en una variable la consulta SQL para obtener el ID del turno usando el turno y la planta
         const queryTurno = `
             SELECT
-                id
+                pt.turno_id
             FROM
-                turnos
+                plantas_turnos pt
+            JOIN
+                plantas p
+            ON
+                pt.planta_id = p.id
+            JOIN
+                turnos t
+            ON
+                pt.turno_id = t.id
             WHERE
-                planta = ?
-                AND turno = ?
+                p.codigo = ? AND
+                t.turno = ?
         `;
 
         //Ejecutamos la consulta para obtener el ID del turno
@@ -80,7 +88,7 @@ router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:map
             }
 
             //Almacenamos en la variable el ID del turno
-            const id_turno = resultTurno[0].id;
+            const id_turno = resultTurno[0].turno_id;
 
             //Almacenamos en una nueva variable la consulta SQL para añadir el puesto
             const queryPuesto = `
@@ -289,7 +297,7 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'Plegar y apilar (UC)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, P2, L2, G1, P5, nuevo, , nuevo_picadas)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, P2, L2, G1, P5, nuevo, nuevo_picadas)
                 VALUES
                     (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
@@ -620,8 +628,8 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 (1 * cantidad_mover) / 100, //L2
                 (1 * cantidad_mover) / 100, //G1
                 (2 * cantidad_mover) / 100, //P5
-                (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 //Actividad en minutos
-                    ((1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picada
+                (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100, //Actividad en minutos
+                ((1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picada
             );
             break;
 
@@ -788,6 +796,51 @@ router.post('/anyadirEtapa-viejo/:puesto_id/:referencia_embalaje/:operacion_sele
 
         //Enviamos el estados
         return res.status(201).send("End point procesado");
+    });
+});
+
+/**
+ * 
+ */
+router.put('/actualizarOrden/:array_ordenado', (req, res) => {
+    let array_ordenado = decodeURIComponent(req.params.array_ordenado);
+
+    let query = `
+        UPDATE
+            EN_IFM_STANDARD
+        SET
+            orden = ?
+        WHERE
+            id = ? AND
+            id_puesto = ?
+    `;
+
+    let array = array_ordenado.split('-')
+
+    getDBConnection((err, connection) => {
+        //En caso de que se produzaca un error...
+        if (err) {
+            return res.status(400).send('Error al conectar con la base de datos');
+        }
+
+        array.forEach((item, index) => {
+            connection.query(query, [array_ordenado[index], item[0], item[1]], (error, result) => {
+                //Liberamos la conexión
+                connection.release();
+
+                //En caso de que se produzca un error...
+                if (error) {
+                    console.error("> Error: ", error);
+
+                    //Enviamos el status
+                    return res.status(500).send('Error en la consulta');
+
+                    //En otro caso...
+                } else {
+                    return res.status(201);
+                }
+            })
+        })
     });
 });
 
@@ -1232,11 +1285,11 @@ router.post('/actualizarInformacionMapa/:id_etapa/:totalDistanceMeters/:curveCou
     }
 
     /** Convertimos los valores a NULL en caso de que esten vacios */
-    totalDistanceMeters = totalDistanceMeters === 'null' ? null : totalDistanceMeters;
-    curveCount = curveCount === 'null' ? null : curveCount;
-    puntosJSON = puntosJSON === 'null' ? null : puntosJSON;
-    numero_cruces = numero_cruces === 'null' ? null : numero_cruces;
-    numero_puertas = numero_puertas === 'null' ? null : numero_puertas;
+    totalDistanceMeters = totalDistanceMeters === 'null' ? 0 : totalDistanceMeters;
+    curveCount = curveCount === 'null' ? 0 : curveCount;
+    puntosJSON = puntosJSON === 'null' ? 0 : puntosJSON;
+    numero_cruces = numero_cruces === 'null' ? 0 : numero_cruces;
+    numero_puertas = numero_puertas === 'null' ? 0 : numero_puertas;
 
     //Creamos la conexión a la base de datos
     getDBConnection((err, connection) => {

@@ -364,6 +364,15 @@ router.get('/training_Admin', (req, res) => {
     }
 });
 
+//Router for the view the control matrix - admin mode
+router.get('/viewControlMatrix', (req, res) => {
+    if (req.session.loggedIn) {
+        res.render('library/bestPractise/viewControlMatrix', { title: 'View the training list admin mode' });
+    } else {
+        res.render('library/adminPanel.ejs', { title: 'Admin Panel' });
+    }
+});
+
 //Router for the video station
 router.get('/videoStation', (req, res) => res.render('library/videoStation', { title: "Video Station" }));
 

@@ -1,5 +1,5 @@
 //Creamos las variable globales que hacen falta
-let cantidad_a_mover = [], referencia_componente = "", categoria_seleccionada, operacion_seleccionada, puestoID, linea, fs_totales, ultimoBotonPulsado, conteosPorPuesto = [], contador = 0, cantidadAMoverCadena, mote, planta, tipo_carga = "UM", tipo_operacion = "Programa_Expedicion_Forklift", primer_dia, numero_picadas, tiempoDesplazamiento;
+let cantidad_a_mover = [], referencia_componente = "", categoria_seleccionada, operacion_seleccionada, puestoID, linea, fs_totales, ultimoBotonPulsado, conteosPorPuesto = [], contador = 0, cantidadAMoverCadena, mote, planta, tipo_carga, tipo_operacion = "Programa_Expedicion_Forklift", primer_dia, numero_picadas, tiempoDesplazamiento, cantidad_a_expedir;
 
 //Variable global donde almacenarems en un diccionario la referencia y el número de embalajes
 let referencia_embalaje = {};
@@ -661,8 +661,6 @@ function disponerTurno(turno, jornadaInicio, jornadaFin) {
         //Establecemos el final de la jornada
         document.getElementById('jornadaFinal').innerText = jornadaFin.split('T')[1].split('.')[0];
 
-        console.log("Jornada inicio: ", jornadaInicio, "\tJornada final: ", jornadaFin)
-
         //Mostramos el contenedor de la jornada
         document.getElementById('visualizarTurno').classList.remove('hidden');
         document.getElementById('visualizarTurno').classList.add('block');
@@ -728,107 +726,6 @@ function obtenerEtapas(puestoID) {
 }
 
 /**
- * Función para calcular el número de la semana actual
- */
-function obtenerNumeroSemana(fecha = new Date()) {
-    //Creamos una copia del argumento
-    const fecha_copia = new Date(fecha.getTime());
-
-    //Establecemos el primero día como lunea
-    const diaSemana = fecha_copia.getUTCDay() || 7;
-    fecha_copia.setUTCDate(fecha_copia.getUTCDate() + 4 - diaSemana);
-
-    //Creamos una variable con el primer día del año
-    const inicioAño = new Date(Date.UTC(fecha_copia.getUTCFullYear(), 0, 1));
-
-    //Calculamos el número de la semana
-    const numeroSemana = Math.ceil(((fecha_copia - inicioAño) / 86400000 + 1) / 7);
-
-    //Devolvemos el día de la semana
-    return numeroSemana;
-}
-
-/**
- * Función para disponer la información detalla del puesto
- */
-function modalPuestoDetallado(puesto_id, nombre_puesto) {
-    //Eliminamos el contenido del cuerpo del modal
-    $('#modalDetalle .modal-body').html(``);
-
-    //Configuramos el título del modal
-    $('#modalDetalle .modal-title').text("Detalles del puesto: ", nombre_puesto);
-
-    //Almacenamos en auna variable la semana actual
-    const semana_actual = obtenerNumeroSemana();
-
-    //Preparamos la petición GET para obtener las referencias asociadas al puesto
-    fetch(`/film/api/obtenerReferencias-puesto/${puesto_id}`, {
-        method: "GET"
-    })
-        //Controlamos la respuesta
-        .then(response => {
-            //En caso de que no sea válida
-            if (!response.ok) {
-                throw new Error('Error fetching data');
-            }
-
-            //Devolvemos los datos
-            return response.json();
-        })
-
-        //Controlamos los datos
-        .then(data => {
-            //Llamamos a la función para obtener las fechas de las referencias
-            obtenerFechas_Referencias(puesto_id, data);
-        });
-}
-
-/**
- * Función para obtener las fechas de cada referencia
- * @param {int} puesto_id Argumento que contiene el ID del puesto
- * @param {Array} data Array que contiene las referencias de un puesto junto al tipo de operación
- */
-function obtenerFechas_Referencias(puesto_id, data) {
-    //Iteramos por las referencias obtenidas
-    data.forEach(item => {
-        //Preparamos la peticón GET para obtener las fechas
-        //fetch(`/film/api/obtenerFechas-Programa-Recepcion/${item.referencia_componente}/${item.tipo_operacion}`, {
-        fetch(`/film/api/obtenerCantidad-grafico/${item.referencia_componente}/${'2025-04-30'}/${puesto_id}`, {
-            method: "GET"
-        })
-            //Controlamos la respuesta
-            .then(response => {
-                //En caso de que no haya salido bien
-                if (!response.ok) {
-                    throw new Error('Error fetching data');
-                }
-
-                //Devolvemos los los fechas obtenidas
-                return response.json();
-            })
-
-            //Controlamos las fechas
-            .then(data => {
-                //Llamamos a la función para disponer el el modal del informe detallado
-                configurarModalInformeDetallado(data);
-            });
-    })
-}
-
-/**
- * Función para configurar el modal para mostrar el informe detallado
- * @param {Array} data Array que contiene las fechas de las referencias
- */
-function configurarModalInformeDetallado(data) {
-    //Almacenamos en una variable las fechas formateadas de forma correcta
-    // const fechas_formateadas = data.map(item => {
-    //     return item.fecha.split('T')[0];
-    // });
-
-    $('#informe-detallado').fadeIn();
-}
-
-/**
  * Función para representar las etapas por puesto
  * @param {*} etapas Argumento que contiene la información de las etapas
  */
@@ -845,6 +742,11 @@ function generarTablasPorEtapa(etapas) {
         acc[etapa.F].push(etapa);
         return acc;
     }, {});
+
+    // Ordenar cada grupo al final
+    Object.keys(agrupadoPorF).forEach(key => {
+        agrupadoPorF[key].sort((a, b) => a.id - b.id);
+    });
 
     //Iteramos sobre cada grupo de "F" para crear una tabla por cada uno
     Object.keys(agrupadoPorF).forEach(FKey => {
@@ -878,8 +780,6 @@ function generarTablasPorEtapa(etapas) {
                 etapasDeF.forEach((etapaDeF, index) => {
                     /** Almacenamos las variable necesarias */
                     var { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total } = inicializarVariablesEtapas(etapaDeF);
-
-                    console.log("ID:", id_etapa, "\fnombre:", nombre_etapa);
 
                     //En caso de que no haya una descripción para la etapa....
                     if (mote_etapa === null || mote_etapa === "null") {
@@ -1271,6 +1171,7 @@ function ordenarPorIdEtapa(contenedorTablas) {
  * @param {Array} data Argumento que contiene los datos de la etapa 
  */
 function gestionarEtapa_Visualizacion(data) {
+
     //Creamos un stwich para controlar el tipo de F
     switch (data[0].F) {
         //F5
@@ -1339,6 +1240,10 @@ function gestionarEtapa_Visualizacion(data) {
     }
 }
 
+/**
+ * Función para disponer el modal general
+ * @param {Array} data Argumento que contiene los datos
+ */
 function confifurarModal_general(data) {
     //Configuramos el cuerpo del modal
     $('#modal .modal-body').html(`
@@ -1433,9 +1338,6 @@ function configurarModal_Coger_UC_UM_dejar_stock_altura_media(data) {
             </div>
         </div>
     `);
-
-    //Llamamos a la función para establecer la información de la etapa dentro del cuerpo del modal
-    //configurarEtapaF12(data);
 
     //Llamamos a la función para configurar el footer del modal
     configurarFooterModal_Etapa(data[0].id, data[0].F);
@@ -2855,7 +2757,7 @@ function anyadirEtapa(id) {
 
                 <!--Numero picadas -->
                 <div class="relative inline-block w-64 mb-4">
-                    <label for="numeroPicadas" class="block text-sm font-medium text-white mb-2">Número de picadas</label>
+                    <label for="numeroPicadas" class="block text-sm font-medium text-white mb-2">Coger UC/UM y dejar en stock altura media</label>
                     <select id="numeroPicadas" name="numeroPicadas" class="block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white text-white">
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -2959,7 +2861,8 @@ function anyadirEtapa(id) {
 
                         case "Programa_Recepcion":
                             //Llamamos a la función para obtener la cantidad a expedir por cada referencia
-                            obtenerCantidadExpedir(referencias_validas, "quantite_de_forcage", id);
+                            //obtenerCantidadExpedir(referencias_validas, "quantite_de_forcage", id);
+                            mostrarModalEtapas();
                             break;
 
                         default:
@@ -2995,16 +2898,18 @@ function obtenerCantidadExpedir(referencias_validas, columna, puesto_id) {
 
             //Controlamos los datos
             .then(data => {
-                //Almacenamos en una variable la cantidad a expedir
-                const cantidad_a_expedir = data[0].cantidad_expedir;
+                //Almacenamos la cantidad a expedir
+                cantidad_a_expedir = data[0].cantidad_expedir;
 
                 //Llamamos a la función para obrener el valor de la carga
-                obtenerValorCarga(referencia, cantidad_a_expedir, tipo_operacion);
+                //obtenerValorCarga(referencia, cantidad_a_expedir, tipo_operacion);
             });
     });
 
     //Llamamos al método para cerrar el modal principal y disponer el modal del informe
-    mostrarModalInforme();
+    //mostrarModalInforme();
+
+    mostrarModalEtapas();
 }
 
 /**
@@ -3012,8 +2917,11 @@ function obtenerCantidadExpedir(referencias_validas, columna, puesto_id) {
  * @param {String} item Argumento que contiene la referencia
  * @param {int} cantidad_a_expedir Argumento que contiene la cantidad a expedir de dicha referencia
  * @param {String} tipo_operacion Argumento que contiene el tipo de la operación
+ * @param {String} tipo_carga Argumento que contiene el tipo de carga
  */
-function obtenerValorCarga(item, cantidad_a_expedir, tipo_operacion) {
+function obtenerValorCarga(item, cantidad_a_expedir, tipo_operacion, tipo_carga) {
+    console.log("Referencia: ", item)
+
     //Preparamos la petición GET
     fetch(`/film/api/obtenerValorCarga/${tipo_carga}/${planta}/${item}/${tipo_operacion}`, {
         method: "GET"
@@ -3038,13 +2946,27 @@ function obtenerValorCarga(item, cantidad_a_expedir, tipo_operacion) {
             //Almacenamos en una variable el número de embalajes redondeado a la alta
             const numero_embalajes = Math.ceil((cantidad_a_expedir / valor_carga) / 8);
 
+            console.log("Numero de embalajes: ", numero_embalajes, "\tValor de carga: ", valor_carga, "\tCantidad a expedir: ", cantidad_a_expedir)
+
             //Añadimos las referencias junto a sus numeros de embalajes en el diccionario
             referencia_embalaje[item] = numero_embalajes;
 
-            //Llamamos al método para disponer la información en el modal
-            //disponerInformacionModal2(item, cantidad_a_expedir, valor_carga, numero_embalajes);
-            mostrarModalEtapas();
+            //Llamamos a la función para añdir la etapa
+            anyadirEtapaFinal();
         });
+}
+
+/**
+ * Función para añadir la etapa
+ */
+function anyadirEtapaFinal() {
+    //Serializamos el diccionario con las referencias y el número de embalahjes
+    referencia_embalaje = encodeURIComponent(JSON.stringify(referencia_embalaje));
+
+    //Iniciamos la solicitud GET para añadir la etapa al puesto
+    fetch(`/film/api/anyadirEtapa/${puestoID}/${referencia_embalaje}/${encodeURIComponent(operacion_seleccionada)}/${mote}/${tipo_operacion}/${numero_picadas}`, {
+        method: "POST"
+    })
 }
 
 /**
@@ -3258,20 +3180,52 @@ function subirEtapa() {
             mote = null;
         }
 
-        //mote = "DESCRIPCION";
+        let tipo_carga = "";
 
-        //Serializamos el diccionario con las referencias y el número de embalahjes
-        referencia_embalaje = encodeURIComponent(JSON.stringify(referencia_embalaje));
+        //Verificamos que referencia_componente no sea nulo o indefinido
+        if (operacion_seleccionada && operacion_seleccionada.includes("UM")) {
+            tipo_carga = "UM";
+        } else if (operacion_seleccionada && operacion_seleccionada.includes("UC")) {
+            tipo_carga = "UC";
+        }
 
-        //Iniciamos la solicitud GET para añadir la etapa al puesto
-        fetch(`/film/api/anyadirEtapa/${puestoID}/${referencia_embalaje}/${encodeURIComponent(operacion_seleccionada)}/${mote}/${tipo_operacion}/${numero_picadas}`, {
-            method: "POST"
+        console.log("Tipo de carga: ", tipo_carga, "\tTipo de operacion: ", operacion_seleccionada);
+
+        //Separamos las referencias finales
+        let referencias_finales = Array.isArray(referencia_componente)
+            ? referencia_componente
+            : referencia_componente.split(',');
+
+        //Iteramos por las referencias finales
+        referencias_finales.forEach(referencia => {
+            //Preparamos la petición GET para obtener la cantidad a expedir
+            fetch(`/film/api/cantidadExpedirHoras/${referencia}/${tipo_operacion}/${planta}/${"quantite_de_forcage"}/${puestoID}`, {
+                method: "GET"
+            })
+                //Controlamos la respuesta
+                .then(response => {
+                    //En caso de que no sea correcta
+                    if (!response.ok) {
+                        throw new Error('Error fetching data');
+                    }
+
+                    //Devolvemos la información
+                    return response.json();
+                })
+
+                //Controlamos los datos
+                .then(data => {
+                    //Almacenamos la cantidad a expedir
+                    cantidad_a_expedir = data[0].cantidad_expedir;
+
+                    //Llamamos a la función para obtener el valor de la carga
+                    obtenerValorCarga(referencia, cantidad_a_expedir, tipo_operacion, tipo_carga);
+                })
+
+                .finally({
+
+                })
         })
-            //Controlamos la respuesta
-            .then(response => {
-                //Llamamos a la función para controlar la respuesta
-                controlarRespuesta(response);
-            });
     });
 }
 
@@ -3346,6 +3300,8 @@ function mostrarAlerta(titulo, mensaje, icono, opcion) {
 /**
  * Función para visualizar la información de una etapa
  * @param {String} etapa Argumento que contiene el nombre de la etapa
+ * @param {String} referencia_componente Argumento que contiene la referencia del componenten
+ * @param {int} id_etapa Argumento que contiene el ID de la etapa
  */
 function visualizarEtapa(etapa, referencia_componente, id_etapa) {
     //Configuramos el título de la etapa
@@ -4156,14 +4112,6 @@ function setCookie(name, value, days) {
         expires = "; expires=" + date.toUTCString();
     }
     document.cookie = name + "=" + value + "; path=/" + expires;
-}
-
-/**
- * Función para actualizar el orden de las etapas
- * @param {Array} array Argumento que contiene las etapas ordenadas
- */
-function ordernarEtapa(array) {
-
 }
 
 /**

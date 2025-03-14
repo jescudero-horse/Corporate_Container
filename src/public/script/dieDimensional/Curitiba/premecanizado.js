@@ -1,3 +1,4 @@
+//Declaramos las variables globales
 let translation;
 
 /**
