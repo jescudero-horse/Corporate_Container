@@ -190,7 +190,7 @@ function gestionarGraficoChimenea(data) {
                         dinamico_VA: itemChimenea.dinamico_VA,
                         estatico_VA: itemChimenea.estatico_VA,
                         estatico_NoVA: itemChimenea.estatico_NoVA,
-                        nuevo_picadas: itemChimenea.nuevo_picadas
+                        tiempo_distancia_total: itemChimenea.tiempo_distancia_total
                     });
                 });
 
@@ -320,14 +320,14 @@ function renderizarGrafico(data2) {
             const dinamico_VA = datosChimenea.dinamico_VA || 0;
             const estatico_VA = datosChimenea.estatico_VA || 0;
             const estatico_NoVA = datosChimenea.estatico_NoVA || 0;
-            const nuevo_picadas = datosChimenea.nuevo_picadas || 0;
+            const tiempo_distancia_total = datosChimenea.tiempo_distancia_total || 0;
             const total = 455;
             //const total = 480;
             const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / total) * 100).toFixed(2) : 0;
             const porcentaje_VA = total > 0 ? ((dinamico_VA / total) * 100).toFixed(2) : 0;
             const porcentaje_estatico_VA = total > 0 ? ((estatico_VA / total) * 100).toFixed(2) : 0;
             const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / total) * 100).toFixed(2) : 0;
-            const porcentaje_nuevo_picadas = total > 0 ? ((nuevo_picadas / total) * 100).toFixed(2) : 0;
+            const porcentaje_tiempo_distancia_total = total > 0 ? ((tiempo_distancia_total / total) * 100).toFixed(2) : 0;
 
             // const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / 60 / total) * 100).toFixed(2) : 0;
             // const porcentaje_VA = total > 0 ? ((dinamico_VA / 60 / total) * 100).toFixed(2) : 0;
@@ -355,7 +355,7 @@ function renderizarGrafico(data2) {
                         { label: 'Dinamico VA', data: [porcentaje_VA], backgroundColor: '#0493f2', borderColor: '#0493f2', borderWidth: 1, stack: 'Stack 0' },
                         { label: 'Estático VA', data: [porcentaje_estatico_VA], backgroundColor: '#67adea', borderColor: '#67adea', borderWidth: 1, stack: 'Stack 0' },
                         { label: 'Estático NoVA', data: [porcentaje_estatico_NoVA], backgroundColor: '#ffffff', borderColor: '#ffffff', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Tiempo desplazamiento', data: [porcentaje_nuevo_picadas], backgroundColor: '#7374cc', borderColor: '#7374cc', borderWidth: 1, stack: 'Stack 0' }
+                        { label: 'Tiempo desplazamiento', data: [porcentaje_tiempo_distancia_total], backgroundColor: '#7374cc', borderColor: '#7374cc', borderWidth: 1, stack: 'Stack 0' }
                     ]
                 },
                 options: {
@@ -1367,27 +1367,12 @@ function gestionarEtapa_Visualizacion(data) {
             break;
 
         default:
-            confifurarModal_general(data);
+            visualizarPlano(puestoID, data[0].id);
+            //confifurarModal_general(data);
             break;
     }
 }
 
-function confifurarModal_general(data) {
-    //Configuramos el cuerpo del modal
-    $('#modal .modal-body').html(`
-        <div class="container mx-auto p-4">
-            <div class="mt-6 flex justify-center">
-                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
-            </div>
-        </div>
-    `);
-
-    //Llamamos a la función para configurar el footer del modal
-    configurarFooterModal_Etapa(data[0].id, data[0].F);
-
-    //Mostramos el modal
-    $('#modal').modal('show');
-}
 
 /**
  * Función para condfigurar los datos de la etapa Colocacion carros manualmente

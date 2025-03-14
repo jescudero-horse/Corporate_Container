@@ -1397,7 +1397,7 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
                 SUM(c.dinamico_NoVA) AS dinamico_NoVA,
                 SUM(c.estatico_VA) AS estatico_VA,
                 SUM(c.estatico_NoVA) AS estatico_NoVA,
-                (SELECT SUM(nuevo_picadas) FROM EN_IFM_STANDARD WHERE id_puesto = c.id_puesto) AS nuevo_picadas
+                (SELECT (SUM(tiempo_distancia_total))/numero_picadas FROM EN_IFM_STANDARD WHERE id_puesto = c.id_puesto) AS tiempo_distancia_total
             FROM chimenea c
             WHERE c.id_puesto = ?
             GROUP BY c.id_puesto;
@@ -3405,7 +3405,7 @@ router.get('/obtener-referencias/:tipo_operacion/:id_puesto/:planta', (req, res)
 
             //Almacenamos en variables las jornadas de los tiempos
             jornada_inicio = result1[0].jornada_inicio;
-            jornada_fin = result1[0].jornada_fin; 7
+            jornada_fin = result1[0].jornada_fin;
 
             //Almacenamos en una variable la nueva consulta SQL
             query = `
