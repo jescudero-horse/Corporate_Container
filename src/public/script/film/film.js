@@ -942,7 +942,7 @@ function generarTablasPorEtapa(etapas) {
                                         ${f !== 'X' ? `
                                             <button id="botonVisualizarEtapa" type="button" class="text-blue-500 ml-2" 
                                                 onclick="visualizarEtapa('${FKey}', '${referenciaComponente}', '${id_etapa}')">
-                                                <i class="bi bi-file-earmark-ruled"></i>
+                                                <i class="bi bi-compass-fill"></i>
                                             </button>`
                                     : ''}
 
@@ -1219,25 +1219,25 @@ function generarTablasPorEtapa(etapas) {
                             let orden = [];
 
                             contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
-                            
+
 
                             // Inicializa SortableJS en el contenedor de las tablas
                             new Sortable(contenedorTablas, {
                                 animation: 150,
                                 ghostClass: 'sortable-ghost',
                                 handle: '.draggable-container',
-                                onStart: function(evt) {
+                                onStart: function (evt) {
                                     // Llenar el array 'orden' antes de que comience el cambio
                                     orden = Array.from(contenedorTablas.children).map(child => child.id);
                                     console.log("Orden inicial: ", orden);
                                 },
-                                onEnd: function(evt) {
+                                onEnd: function (evt) {
                                     console.log("Orden antes de enviarlo al servidor:", orden);
-                                    
+
                                     // Actualiza el array 'orden' con los nuevos valores
                                     orden = Array.from(contenedorTablas.children).map(child => child.id);
                                     console.log("Orden actualizado: ", orden);
-                                    
+
                                     // Enviar el orden al backend
                                     ordernarEtapa(orden);
                                 }
@@ -1260,22 +1260,22 @@ function generarTablasPorEtapa(etapas) {
  */
 function ordernarEtapa(array) {
     // Unimos el array con "," para enviarlo correctamente
-    let arrayString = array.join(','); 
+    let arrayString = array.join(',');
 
     // Enviar la solicitud al servidor
     fetch(`/film/api/actualizarOrden/${encodeURIComponent(arrayString)}`, {
         method: "PUT",
     })
-    .then(response => {
-        if (response.ok) {
-            mostrarAlerta('Orden actualizado correctamente', null, null, 1)
-        } else {
-            mostrarAlerta('Error', 'Ha fallado', 'error', 0)
-        }
-    })
-    .catch(error => {
-        console.error('Error en la solicitud:', error);
-    });
+        .then(response => {
+            if (response.ok) {
+                mostrarAlerta('Orden actualizado correctamente', null, null, 1)
+            } else {
+                mostrarAlerta('Error', 'Ha fallado', 'error', 0)
+            }
+        })
+        .catch(error => {
+            console.error('Error en la solicitud:', error);
+        });
 }
 
 /**
@@ -2587,7 +2587,7 @@ function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
         let fecha_actual = document.createElement("h4");
         fecha_actual.append(`Fecha de toma de datos:`);
         fecha_actual.append(document.createElement("br"));
-        fecha_actual.append(`${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`);
+        fecha_actual.append(`${fecha.getDate()}/${fecha.getMonth() + 1}/${fecha.getFullYear()}`);
         graficoContainer.append(fecha_actual);
 
         //Creamos el lienzo para el gráfico
@@ -2598,7 +2598,7 @@ function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
         let fecha_3_semanas = document.createElement("h4");
         fecha_3_semanas.append(`Fecha a tres semanas:`);
         fecha_3_semanas.append(document.createElement("br"));
-        fecha_3_semanas.append(`${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`);
+        fecha_3_semanas.append(`${fecha.getDate()}/${fecha.getMonth() + 1}/${fecha.getFullYear()}`);
         graficoContainer.append(fecha_3_semanas);
 
         //Calculamos la saturación total
@@ -2981,7 +2981,8 @@ function anyadirEtapa(id) {
                     switch (tipo_operacion) {
                         case "Programa_Expedicion_Forklift":
                             //Llamamos a la función para obtener la cantidad a expedir por cada referencia
-                            obtenerCantidadExpedir(referencias_validas, "quantitea_a_expedir", id);
+                            //obtenerCantidadExpedir(referencias_validas, "quantitea_a_expedir", id);
+                            mostrarModalEtapas();
                             break;
 
                         case "Programa_Recepcion":
@@ -3032,9 +3033,7 @@ function obtenerCantidadExpedir(referencias_validas, columna, puesto_id) {
             });
     });
 
-    //Llamamos al método para cerrar el modal principal y disponer el modal del informe
-    //mostrarModalInforme();
-
+    //Llamamos a la función para mostrar el modal de etapas
     mostrarModalEtapas();
 }
 
@@ -3074,11 +3073,23 @@ function obtenerValorCarga(item, cantidad_a_expedir, tipo_operacion, tipo_carga)
 
             console.log("Numero de embalajes: ", numero_embalajes, "\tValor de carga: ", valor_carga, "\tCantidad a expedir: ", cantidad_a_expedir)
 
+            console.log("\n>>>>>> Item: ", item, "\tNumero embalaje: ", numero_embalajes)
+
+            const referencia_embalaje_datos = {}
+
             //Añadimos las referencias junto a sus numeros de embalajes en el diccionario
-            referencia_embalaje[item] = numero_embalajes;
+            referencia_embalaje_datos[item] = numero_embalajes;
+
+            //Almacenamos en la variable global el diccionario de las referencias junto al numero de embalajes
+            referencia_embalaje = referencia_embalaje_datos;
 
             //Llamamos a la función para añdir la etapa
             anyadirEtapaFinal();
+        })
+
+        .finally(() => {
+            //Llamamos a la función para recargar la página
+            mostrarAlerta("Etapa/s creada/s", null, null, 1);
         });
 }
 
@@ -3305,7 +3316,7 @@ function subirEtapa() {
             //Le asignamos NULL
             mote = null;
         }
-      
+
         //Almacenamos en una variable el tipo de carga
         let tipo_carga = "";
 
@@ -3322,9 +3333,6 @@ function subirEtapa() {
         let referencias_finales = Array.isArray(referencia_componente)
             ? referencia_componente
             : referencia_componente.split(',');
-      
-        //Serializamos el diccionario con las referencias y el número de embalahjes
-        referencia_embalaje = encodeURIComponent(JSON.stringify(referencia_embalaje));
 
         //Iteramos por las referencias finales
         referencias_finales.forEach(referencia => {
@@ -3350,10 +3358,6 @@ function subirEtapa() {
 
                     //Llamamos a la función para obtener el valor de la carga
                     obtenerValorCarga(referencia, cantidad_a_expedir, tipo_operacion, tipo_carga);
-                })
-
-                .finally({
-
                 })
         })
     });
