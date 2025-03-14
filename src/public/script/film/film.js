@@ -155,7 +155,7 @@ function verificarFinalizacionDeDatos() {
 
 /**
  * Función para obtener la información de los puestos para rellenar los graficos de chimenes
- * @param {*} data Argumento que contiene los datos de cada puesto
+ * @param {*} data Argumento que contiene los datos de cada gráfico chimenea
  */
 function gestionarGraficoChimenea(data) {
     //Creamos una variable para almacenar el número de peticiones completadas
@@ -176,16 +176,18 @@ function gestionarGraficoChimenea(data) {
                 return response.json();
             })
             //Controlamos los datos
-            .then(data => {
+            .then(data2 => {
+
                 //Iteramos por los datos obtenidos
-                data.forEach(itemChimenea => {
+                data2.forEach(itemChimenea => {
                     //Almacenamos en el array los datos que necesitamos para generar el gráfico de chimenea
                     conteoGraficoChimenea.push({
                         id: item.id,
                         dinamico_NoVA: itemChimenea.dinamico_NoVA,
                         dinamico_VA: itemChimenea.dinamico_VA,
                         estatico_VA: itemChimenea.estatico_VA,
-                        estatico_NoVA: itemChimenea.estatico_NoVA
+                        estatico_NoVA: itemChimenea.estatico_NoVA,
+                        tiempo_distancia_total: itemChimenea.tiempo_distancia_total
                     });
                 });
 
@@ -201,7 +203,7 @@ function gestionarGraficoChimenea(data) {
                     peticionesFinalizadas.graficoChimenea = true;
 
                     //Llamamos al método para controlar los datos para generar los gráficos
-                    verificarFinalizacionDeDatos();
+                    verificarFinalizacionDeDatos(data2);
                 }
             })
 
@@ -258,8 +260,6 @@ function renderizarGrafico() {
 
         console.log("Puesto conteo: ", puesto.conteo, "\nSaturacion: ", saturacion, "\tNombre del puesto: ", puesto.nombre);
 
-        //console.log("> Saturación: ", saturacion, "\nPuesto conteo: ", puesto.conteo);
-
         /** Inicializamos la gráfica de la saturación */
         new Chart(canvasSaturacion, {
             type: 'doughnut',
@@ -312,28 +312,14 @@ function renderizarGrafico() {
             const dinamico_VA = datosChimenea.dinamico_VA || 0;
             const estatico_VA = datosChimenea.estatico_VA || 0;
             const estatico_NoVA = datosChimenea.estatico_NoVA || 0;
-            const total = (dinamico_NoVA + dinamico_VA + estatico_VA + estatico_NoVA).toFixed(2);
-            //const total = 480;
+            const tiempo_distancia_total = datosChimenea.tiempo_distancia_total || 0;
+            const total = 455;
             const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / total) * 100).toFixed(2) : 0;
             const porcentaje_VA = total > 0 ? ((dinamico_VA / total) * 100).toFixed(2) : 0;
             const porcentaje_estatico_VA = total > 0 ? ((estatico_VA / total) * 100).toFixed(2) : 0;
             const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / total) * 100).toFixed(2) : 0;
+            const porcentaje_tiempo_distancia_total = total > 0 ? ((tiempo_distancia_total / total) * 100).toFixed(2) : 0;
 
-            // const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / 60 / total) * 100).toFixed(2) : 0;
-            // const porcentaje_VA = total > 0 ? ((dinamico_VA / 60 / total) * 100).toFixed(2) : 0;
-            // const porcentaje_estatico_VA = total > 0 ? ((estatico_VA / 60 / total) * 100).toFixed(2) : 0;
-            // const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / 60 / total) * 100).toFixed(2) : 0;
-
-            console.log(
-                "Porcentaje dinamico NO VA: ", porcentaje_NoVA,
-                "Valor dinamico VA: ", dinamico_NoVA,
-                "Porcentaje dinamico VA: ", porcentaje_VA,
-                "Porcentaje estatico VA: ", porcentaje_estatico_VA,
-                "total: ", total,
-
-                // // "Porcentaje estatico NO VA: ", porcentaje_estatico_NoVA,
-                // // "Estatico no valor: ", estatico_NoVA
-            )
 
             /** Inicializamos la gráfica de la actividad */
             new Chart(canvasChimenea, {
@@ -345,7 +331,7 @@ function renderizarGrafico() {
                         { label: 'Dinamico VA', data: [porcentaje_VA], backgroundColor: '#0493f2', borderColor: '#0493f2', borderWidth: 1, stack: 'Stack 0' },
                         { label: 'Estático VA', data: [porcentaje_estatico_VA], backgroundColor: '#67adea', borderColor: '#67adea', borderWidth: 1, stack: 'Stack 0' },
                         { label: 'Estático NoVA', data: [porcentaje_estatico_NoVA], backgroundColor: '#ffffff', borderColor: '#ffffff', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Tiempo desplazamiento', data: [1], backgroundColor: '#7374cc', borderColor: '#7374cc', borderWidth: 1, stack: 'Stack 0' }
+                        { label: 'Tiempo desplazamiento', data: [porcentaje_tiempo_distancia_total], backgroundColor: '#7374cc', borderColor: '#7374cc', borderWidth: 1, stack: 'Stack 0' }
                     ]
                 },
                 options: {
@@ -720,14 +706,119 @@ function obtenerEtapas(puestoID) {
 
         //Controlamos los datos
         .then(data => {
+            data.sort((a, b) => a.orden - b.orden); // Asegurar orden correcto
             //Llammos al método para mostrar las etapas de un puesto
             generarTablasPorEtapa(data);
         });
 }
 
 /**
+ * Función para calcular el número de la semana actual
+ * @param {*} [fecha=new Date()] Argumento que contiene la fecha actual
+ */
+function obtenerNumeroSemana(fecha = new Date()) {
+    //Creamos una copia del argumento
+    const fecha_copia = new Date(fecha.getTime());
+
+    //Establecemos el primero día como lunea
+    const diaSemana = fecha_copia.getUTCDay() || 7;
+    fecha_copia.setUTCDate(fecha_copia.getUTCDate() + 4 - diaSemana);
+
+    //Creamos una variable con el primer día del año
+    const inicioAño = new Date(Date.UTC(fecha_copia.getUTCFullYear(), 0, 1));
+
+    //Calculamos el número de la semana
+    const numeroSemana = Math.ceil(((fecha_copia - inicioAño) / 86400000 + 1) / 7);
+
+    //Devolvemos el día de la semana
+    return numeroSemana;
+}
+
+/**
+ * Función para disponer la información detalla del puesto
+ * @param {*} puesto_id Argumento que contiene el ID del puesto
+ * @param {*} nombre_puesto Argumento que contiene el nombre del puesto
+ */
+function modalPuestoDetallado(puesto_id, nombre_puesto) {
+    //Eliminamos el contenido del cuerpo del modal
+    $('#modalDetalle .modal-body').html(``);
+
+    //Configuramos el título del modal
+    $('#modalDetalle .modal-title').text("Detalles del puesto: ", nombre_puesto);
+
+    //Almacenamos en auna variable la semana actual
+    const semana_actual = obtenerNumeroSemana();
+
+    //Preparamos la petición GET para obtener las referencias asociadas al puesto
+    fetch(`/film/api/obtenerReferencias-puesto/${puesto_id}`, {
+        method: "GET"
+    })
+        //Controlamos la respuesta
+        .then(response => {
+            //En caso de que no sea válida
+            if (!response.ok) {
+                throw new Error('Error fetching data');
+            }
+
+            //Devolvemos los datos
+            return response.json();
+        })
+
+        //Controlamos los datos
+        .then(data => {
+            //Llamamos a la función para obtener las fechas de las referencias
+            obtenerFechas_Referencias(puesto_id, data);
+        });
+}
+
+/**
+ * Función para obtener las fechas de cada referencia
+ * @param {int} puesto_id Argumento que contiene el ID del puesto
+ * @param {Array} data Array que contiene las referencias de un puesto junto al tipo de operación
+ */
+function obtenerFechas_Referencias(puesto_id, data) {
+    //Iteramos por las referencias obtenidas
+    data.forEach(item => {
+        //Preparamos la peticón GET para obtener las fechas
+        //fetch(`/film/api/obtenerFechas-Programa-Recepcion/${item.referencia_componente}/${item.tipo_operacion}`, {
+        fetch(`/film/api/obtenerCantidad-grafico/${item.referencia_componente}/${'2025-04-30'}/${puesto_id}`, {
+            method: "GET"
+        })
+            //Controlamos la respuesta
+            .then(response => {
+                //En caso de que no haya salido bien
+                if (!response.ok) {
+                    throw new Error('Error fetching data');
+                }
+
+                //Devolvemos los los fechas obtenidas
+                return response.json();
+            })
+
+            //Controlamos las fechas
+            .then(data => {
+                //Llamamos a la función para disponer el el modal del informe detallado
+                configurarModalInformeDetallado(data);
+            });
+    })
+}
+
+/**
+ * Función para configurar el modal para mostrar el informe detallado
+ * @param {Array} data Array que contiene las fechas de las referencias
+ */
+function configurarModalInformeDetallado(data) {
+    //Almacenamos en una variable las fechas formateadas de forma correcta
+    // const fechas_formateadas = data.map(item => {
+    //     return item.fecha.split('T')[0];
+    // });
+
+    $('#informe-detallado').fadeIn();
+}
+
+/**
  * Función para representar las etapas por puesto
- * @param {*} etapas Argumento que contiene la información de las etapas
+ * @param {Array} etapas Argumento que contiene la información de las etapas
  */
 function generarTablasPorEtapa(etapas) {
     //Obtenemos el contenedor donde se agregarán las tablas
@@ -752,6 +843,8 @@ function generarTablasPorEtapa(etapas) {
     Object.keys(agrupadoPorF).forEach(FKey => {
         //Almacenamos en una variable las etapas del grupo "F"
         const etapasDeF = agrupadoPorF[FKey];
+        console.log(`ETAPA: ${etapasDeF[0].F} -> ${etapasDeF[0].orden}`)
+
 
         console.log("Etapas DEF: ", etapasDeF)
 
@@ -779,7 +872,7 @@ function generarTablasPorEtapa(etapas) {
             .then(etapasData => {
                 etapasDeF.forEach((etapaDeF, index) => {
                     /** Almacenamos las variable necesarias */
-                    var { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total } = inicializarVariablesEtapas(etapaDeF);
+                    var { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, G1_1, P2_1, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total } = inicializarVariablesEtapas(etapaDeF);
 
                     //En caso de que no haya una descripción para la etapa....
                     if (mote_etapa === null || mote_etapa === "null") {
@@ -834,7 +927,7 @@ function generarTablasPorEtapa(etapas) {
 
                             //Generamos el HTML de la tabla para la etapa
                             const tablaHTML = `
-                                <div id="contenedor-${FKey}-${referenciaComponente}-${id_etapa1}-${id_puesto}" class="mb-4 draggable-container" data-id-etapa="${id_etapa}">
+                                <div id="${id_etapa1}-${id_puesto}" class="mb-4 draggable-container" data-id-etapa="${id_etapa}">
                                     <h3 id="encabezadoEtapa-${FKey}-${referenciaComponente}"
                                         class="text-lg font-semibold mb-2 flex flex-wrap justify-between items-center p-2 rounded-lg animate-fadeIn 
                                             ${f === 'X' ? 'bg-stone-200 text-black' : color_etapa} text-black"
@@ -1055,6 +1148,12 @@ function generarTablasPorEtapa(etapas) {
                                         } else if (etapa.symbol === 'P5') {
                                             tiempoCalculado = P5
                                             actividad_en_minutos_final += tiempoCalculado;
+                                        } else if (etapa.symbol === 'G1_1') {
+                                            tiempoCalculado = G1_1;
+                                            actividad_en_minutos_final += tiempoCalculado;
+                                        } else if (etapa.symbol === 'P2_1') {
+                                            tiempoCalculado = P2_1;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         } else if (etapa.symbol === 'W5_2') {
                                             tiempoCalculado = W5_2;
                                             actividad_en_minutos_final += tiempoCalculado;
@@ -1120,21 +1219,27 @@ function generarTablasPorEtapa(etapas) {
                             let orden = [];
 
                             contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
+                            
 
                             // Inicializa SortableJS en el contenedor de las tablas
                             new Sortable(contenedorTablas, {
                                 animation: 150,
                                 ghostClass: 'sortable-ghost',
                                 handle: '.draggable-container',
-                                onEnd: function (evt) {
-                                    // Actualiza la variable 'orden'
+                                onStart: function(evt) {
+                                    // Llenar el array 'orden' antes de que comience el cambio
                                     orden = Array.from(contenedorTablas.children).map(child => child.id);
-
-                                    console.log("Orden: ", orden)
-                                    // Guarda el nuevo orden en localStorage
-                                    //localStorage.setItem('ordenContenedores', JSON.stringify(orden));
-
-                                    console.log("Escuchador");
+                                    console.log("Orden inicial: ", orden);
+                                },
+                                onEnd: function(evt) {
+                                    console.log("Orden antes de enviarlo al servidor:", orden);
+                                    
+                                    // Actualiza el array 'orden' con los nuevos valores
+                                    orden = Array.from(contenedorTablas.children).map(child => child.id);
+                                    console.log("Orden actualizado: ", orden);
+                                    
+                                    // Enviar el orden al backend
+                                    ordernarEtapa(orden);
                                 }
                             });
                         })
@@ -1146,24 +1251,31 @@ function generarTablasPorEtapa(etapas) {
             .catch(error => {
                 console.error('Error fetching etapas:', error);
             })
-            .finally(() => {
-                console.log("Dentro del finally")
-                ordenarPorIdEtapa(contenedorTablas);
-            })
     });
 }
 
-// Función para ordenar los contenedores por id_etapa
-function ordenarPorIdEtapa(contenedorTablas) {
-    const contenedores = Array.from(contenedorTablas.children);
-    contenedores.sort((a, b) => {
-        const idA = parseInt(a.getAttribute('data-id-etapa'));
-        const idB = parseInt(b.getAttribute('data-id-etapa'));
-        return idA - idB;
+/**
+ * Función para actualizar el orden de las etapas
+ * @param {Array} array Argumento que contiene las etapas ordenadas
+ */
+function ordernarEtapa(array) {
+    // Unimos el array con "," para enviarlo correctamente
+    let arrayString = array.join(','); 
+
+    // Enviar la solicitud al servidor
+    fetch(`/film/api/actualizarOrden/${encodeURIComponent(arrayString)}`, {
+        method: "PUT",
+    })
+    .then(response => {
+        if (response.ok) {
+            mostrarAlerta('Orden actualizado correctamente', null, null, 1)
+        } else {
+            mostrarAlerta('Error', 'Ha fallado', 'error', 0)
+        }
+    })
+    .catch(error => {
+        console.error('Error en la solicitud:', error);
     });
-    contenedores.forEach(contenedor => contenedorTablas.appendChild(contenedor));
-    // Actualiza la variable 'orden'
-    orden = contenedores.map(contenedor => contenedor.id);
 }
 
 /**
@@ -1235,7 +1347,8 @@ function gestionarEtapa_Visualizacion(data) {
             break;
 
         default:
-            confifurarModal_general(data);
+            visualizarPlano(puestoID, data[0].id);
+            //confifurarModal_general(data);
             break;
     }
 }
@@ -2166,7 +2279,7 @@ function configurarModal_F5(data) {
 }
 
 /**
- * Función manejador para el campo del speed
+ * Función que actualiza el campo de la velocidad (speed)
  * @param {String} value Argumento que contiene el valor de la velocidad 
  */
 function updateSpeedMachine(value) {
@@ -2448,28 +2561,45 @@ function inicializarVariablesEtapas(etapaDeF) {
     const L2 = etapaDeF.L2 ? etapaDeF.L2 : '0';
     const G1 = etapaDeF.G1 ? etapaDeF.G1 : '0';
     const P5 = etapaDeF.P5 ? etapaDeF.P5 : '0';
+    const G1_1 = etapaDeF.G1_1 ? etapaDeF.G1_1 : '0';
+    const P2_1 = etapaDeF.P2_1 ? etapaDeF.P2_1 : '0';
     const W5_2 = etapaDeF.W5_2 ? etapaDeF.W5_2 : '0';
     const nuevo = etapaDeF.nuevo ? etapaDeF.nuevo : '0';
     const nuevo_picadas = etapaDeF.nuevo_picadas ? etapaDeF.nuevo_picadas : '0';
     const tiempo_distancia_total = etapaDeF.tiempo_distancia_total ? etapaDeF.tiempo_distancia_total : '0';
 
     //Devolvemos las variables
-    return { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total };
+    return { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, G1_1, P2_1, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total };
 }
 
 /**
  * Función para disponer el modal de staturación de la UAT
  */
-function visualizarInformeStaturacionUAT() {
+function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
     //Mostramos el modal antes de añadir el gráfico
     $('#modalInforme').fadeIn(() => {
         //Creamos una instancia del contenedor del gráfico
         const graficoContainer = document.getElementById('modal-grafico-container');
         graficoContainer.innerHTML = '';
 
+        let fecha = new Date()
+
+        let fecha_actual = document.createElement("h4");
+        fecha_actual.append(`Fecha de toma de datos:`);
+        fecha_actual.append(document.createElement("br"));
+        fecha_actual.append(`${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`);
+        graficoContainer.append(fecha_actual);
+
         //Creamos el lienzo para el gráfico
         const canvas = document.createElement('canvas');
         graficoContainer.appendChild(canvas);
+
+        fecha.setDate(fecha.getDate() + 3 * 7);
+        let fecha_3_semanas = document.createElement("h4");
+        fecha_3_semanas.append(`Fecha a tres semanas:`);
+        fecha_3_semanas.append(document.createElement("br"));
+        fecha_3_semanas.append(`${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`);
+        graficoContainer.append(fecha_3_semanas);
 
         //Calculamos la saturación total
         const saturacionTotal = calcularSaturacionTotal(conteosPorPuesto);
@@ -2530,8 +2660,8 @@ function calcularSaturacionTotal(conteosPorPuesto) {
 }
 
 /**
- * Función para obtener el código MTM3 usando el ID del machine used
- * @param {int} machine_used Argumento que contiene el ID del machine used
+ * Función para obtener el código MTM3 usando el ID de la máquina utilizada
+ * @param {int} machine_used Argumento que contiene el ID de la máquina utilizada (machine used)
  * @returns Devuelve el código MTM3
  */
 function obtenerCodigoMTM3(machine_used) {
@@ -2577,7 +2707,6 @@ function toggleVisibility(id) {
 
 /**
  * Función para obtener las referencias de los componentes
- * @param {String} tipo_operacion Argumento que contiene el tipo de operación
  * @param {int} puesto_id Argumento que contiene el ID del puesto
  */
 function buscadorReferencias(puesto_id) {
@@ -2607,7 +2736,8 @@ function buscadorReferencias(puesto_id) {
 
 /**
  * Función para disponer las referencias dentro de la tabla con un buscador
- * @param {Array} data 
+ * @param {Array} data  Argumento que contiene los datos de cada referencia
+ * @param {*} puesto_id Argumento que representa el ID del puesto
  */
 function disponerReferenciasBuscador(data, puesto_id) {
     //Ocultamos el modal principal
@@ -2788,8 +2918,6 @@ function anyadirEtapa(id) {
         //Mostramos el modal
         $('#modal').modal('show');
 
-        console.log("Referencias: ", referencia_componente);
-
         //En caso de que la variable ya tenga referencias...
         if (referencia_componente !== null) {
             //Las añadimos al campo de las referencias
@@ -2815,9 +2943,6 @@ function anyadirEtapa(id) {
 
             //Almacenamos en una variable el número de picadas
             numero_picadas = document.getElementById('numeroPicadas').value;
-
-            //Almacenamos las referencias separadas por ";"
-            const referencias = referencia_componente.split(";").map(ref => ref.trim()).filter(ref => ref !== "");
 
             //Preparamos la petición GET para obtener las referencias válidas
             fetch(`/film/api/comprobarReferencias/${referencia_componente}/${tipo_operacion}/${planta}`, {
@@ -2877,6 +3002,7 @@ function anyadirEtapa(id) {
  * Función para obtener la cantidad a expedir por cada referencia
  * @param {Array} referencias_validas Argumento que contiene las referencias válidas
  * @param {String} columna Argumento que contiene el nombre de la columna a la que hora del conteo
+ * @param {*} puesto_id Argumento que contiene el id del puesto
  */
 function obtenerCantidadExpedir(referencias_validas, columna, puesto_id) {
     //Iteramos por cada referencia
@@ -3179,7 +3305,8 @@ function subirEtapa() {
             //Le asignamos NULL
             mote = null;
         }
-
+      
+        //Almacenamos en una variable el tipo de carga
         let tipo_carga = "";
 
         //Verificamos que referencia_componente no sea nulo o indefinido
@@ -3195,6 +3322,9 @@ function subirEtapa() {
         let referencias_finales = Array.isArray(referencia_componente)
             ? referencia_componente
             : referencia_componente.split(',');
+      
+        //Serializamos el diccionario con las referencias y el número de embalahjes
+        referencia_embalaje = encodeURIComponent(JSON.stringify(referencia_embalaje));
 
         //Iteramos por las referencias finales
         referencias_finales.forEach(referencia => {
@@ -3498,7 +3628,8 @@ function controlarRespuesta_Etapa(response) {
 
 /**
  * Función para abrir el plano en una nueva pestaña
- * @param {int} puestoID Argumento que contiene el ID del puesto
+ * @param {*} puesto_id Argumento que contiene el ID del puesto
+ * @param {*} id_etapa Argumento que contiene el ID de la etapa
  */
 function visualizarPlano(puesto_id, id_etapa) {
     //Creamos un array con los datos que tenemos que enviar
@@ -3849,9 +3980,6 @@ function obtenerPrimerDia(tipo_operacion) {
         .then(data => {
             //Asignamos el primer día a la variable global
             primer_dia = data[0].primer_dia.split('T')[0];
-
-            //Llamamos a la función para obtener el resto de los días quitando los fines de semana en cuatro semanas 
-            //obtenerRestoFechas(primer_dia);
         });
 }
 

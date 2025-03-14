@@ -33,17 +33,16 @@ function getDBConnection(callback) {
         }
     });
 }
-
 /**
  * End point para añadir un nuevo puesto
  */
 router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:mapa/:turno/:planta', (req, res) => {
     //Almacenamos los valores del formulario
     const { numero_puesto, nombre_puesto, numero_operarios, mapa, turno, planta } = req.params;
-
+ 
     //Creamos una variable para almacenar el path del mapa
     const ruta_mapa = `/assets/film/${mapa}`;
-
+ 
     //Controlamos los valores de los campos necesarios
     if (!numero_puesto || !nombre_puesto || !numero_operarios) {
         return res.status(400).send('Faltan campos en la solicitud');
@@ -56,7 +55,7 @@ router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:map
             console.error('> Error al conectar a la base de datos: ', err);
             return res.status(500).send('Error al conectar a la base de datos');
         }
-
+ 
         //Almacenamos en una variable la consulta SQL para obtener el ID del turno usando el turno y la planta
         const queryTurno = `
             SELECT
@@ -75,36 +74,36 @@ router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:map
                 p.codigo = ? AND
                 t.turno = ?
         `;
-
+ 
         //Ejecutamos la consulta para obtener el ID del turno
         connection.query(queryTurno, [planta, turno], (errorTurno, resultTurno) => {
             if (errorTurno) {
                 console.error('> Error a la hora de obtener el ID del turno: ', errorTurno);
                 return res.status(500).send('Error al obtener el ID del turno');
             }
-
+ 
             if (resultTurno.length === 0) {
                 return res.status(404).send('No se encontró el turno especificado');
             }
-
+ 
             //Almacenamos en la variable el ID del turno
             const id_turno = resultTurno[0].turno_id;
-
+          
             //Almacenamos en una nueva variable la consulta SQL para añadir el puesto
             const queryPuesto = `
-                INSERT INTO 
+                INSERT INTO
                     puestos(numero_puesto, nombre_puesto, numero_operarios, mapa, id_turno)
                 VALUES
                     (?, ?, ?, ?, ?)
             `;
-
+ 
             //Ejecutamos la consulta para añadir el puesto
             connection.query(queryPuesto, [numero_puesto, nombre_puesto, numero_operarios, ruta_mapa, id_turno], (errorPuesto, resultPuesto) => {
                 if (errorPuesto) {
                     console.error('> Error a la hora de añadir el puesto: ', errorPuesto);
                     return res.status(500).send('Error a la hora de añadir el puesto');
                 }
-
+ 
                 //Enviamos el status
                 res.status(201).send('Puesto añadido');
             });
@@ -307,7 +306,7 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
         case 'De puesto inferior a carro (UC)':
             query = `
                 INSERT INTO
-                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, G1, W5, P2, W5_2, nuevo, nuevo_picadas)
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, G1_1, W5, P2_1, W5_2, nuevo, nuevo_picadas)
                 VALUES
                     (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
@@ -639,9 +638,9 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                 null, //Linea 
                 10, //Máquina usada
                 10, //Velocidad
-                (1 * cantidad_mover) / 100, //G1
+                (1 * cantidad_mover) / 100, //G1_1
                 (1 * cantidad_mover) / 100, //W5
-                (1 * cantidad_mover) / 100, //P2
+                (1 * cantidad_mover) / 100, //P2_1
                 (2 * cantidad_mover) / 100, //W5_2
                 (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100, //Actividad en minutos
                 ((1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas // Actividad en minuto X picada
@@ -870,8 +869,6 @@ router.get('/obtenerEtapas_Puesto/:id_puesto', (req, res) => {
             ON 
                 EN.F = FS.FStandard
             WHERE EN.id_puesto = ?
-            ORDER BY
-                id ASC
         `;
 
         //Ejecutamos la consulta
@@ -1440,15 +1437,15 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
         //Almacenamos en una variable la consulta SQL
         const query = `
             SELECT 
-                id_puesto,
-                SUM(TL_TV + CDVB_CDL + TL + CDL + CCPE + CT10 + TC + CDC + DC + D1 + W5 + M1 + AL + W5_2) AS dinamico_NoVA,
-                SUM(TL_TV + CDVB_CDL + TC + CDV + TV + CDL + CCPE + DC113 + DS10 + PS14 + DS14 + DS15 + PS15 + DI21) AS dinamico_VA,
-                SUM(PS10 + PS14 + valor_simbolo_especial + DS10 + PPU43 + PDU44 + PP1 + PDU34 + PPU34 + PPD32 + G1 + P2) AS estatico_VA,
-                SUM(PP1 + TT + M1 + DL + P2 + L2 + G1 + P5) AS estatico_NoVA
-            FROM 
-                EN_IFM_STANDARD 
-            WHERE 
-                id_puesto = ?
+                c.id_puesto,
+                SUM(c.dinamico_VA) AS dinamico_VA,
+                SUM(c.dinamico_NoVA) AS dinamico_NoVA,
+                SUM(c.estatico_VA) AS estatico_VA,
+                SUM(c.estatico_NoVA) AS estatico_NoVA,
+                (SELECT (SUM(tiempo_distancia_total))/numero_picadas FROM EN_IFM_STANDARD WHERE id_puesto = c.id_puesto) AS tiempo_distancia_total
+            FROM chimenea c
+            WHERE c.id_puesto = ?
+            GROUP BY c.id_puesto;
         `;
 
         //Ejecutamos la consulta
@@ -1464,7 +1461,7 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
                 return res.status(501).send("Error en la consulta");
             }
 
-            console.log("> Resultados: ", results);
+            console.log("> Resultadossss: ", results);
 
             //Enviamos la información
             return res.json(results);
@@ -3453,7 +3450,7 @@ router.get('/obtener-referencias/:tipo_operacion/:id_puesto/:planta', (req, res)
 
             //Almacenamos en variables las jornadas de los tiempos
             jornada_inicio = result1[0].jornada_inicio;
-            jornada_fin = result1[0].jornada_fin; 7
+            jornada_fin = result1[0].jornada_fin;
 
             //Almacenamos en una variable la nueva consulta SQL
             query = `
@@ -3480,6 +3477,69 @@ router.get('/obtener-referencias/:tipo_operacion/:id_puesto/:planta', (req, res)
                 return res.json(result);
             })
         });
+    });
+});
+
+
+/**
+ * End point para actualizar el orden de las etapas
+ */
+router.put('/actualizarOrden/:array_ordenado', (req, res) => {
+    //Almacenamos la variable de los parámetros
+    let array_ordenado = decodeURIComponent(req.params.array_ordenado);
+
+    console.log("Array recibido en el backend:", array_ordenado); // Verificar el array recibido
+
+    // Convertir el string en un array separando por "-"
+    let array = array_ordenado.split(',');
+
+    console.log("Array separado:", array); // Verificar que la separación es correcta
+
+    //Almacenamos en una variable la query
+    let query = `
+        UPDATE
+            EN_IFM_STANDARD
+        SET
+            orden = ?
+        WHERE
+            id = ? AND
+            id_puesto = ?
+    `;
+
+    //let array = array_ordenado.split('-');
+
+    //Obtenemos la conexión
+    getDBConnection((err, connection) => {
+        //En caso de que se produzaca un error...
+        if (err) {
+            return res.status(400).send('Error al conectar con la base de datos');
+        }
+
+        // Usamos un índice para manejar el orden
+        for (let index = 0; index < array.length; index++) {
+            let item = array[index];
+            let [id, id_puesto] = item.split('-'); // Separar id e id_puesto
+            let orden = index + 1; // Asignar el orden basado en el índice
+
+            console.log(`Actualizando: ID=${id}, ID_Puesto=${id_puesto}, Orden=${orden}`); // Verificar los valores a actualizar
+
+            // Ejecutamos la consulta para cada etapa
+            connection.query(query, [orden, id, id_puesto], (error, result) => {
+                if (error) {
+                    console.error("> Error: ", error);
+                    connection.release();
+                    return res.status(500).send('Error en la consulta');
+                }
+
+                console.log(`Consulta exitosa para ID=${id} y ID_Puesto=${id_puesto}, resultado:`, result);
+
+                // Liberamos la conexión después de la última consulta
+                if (index === array.length - 1) {
+                    connection.release();
+                    res.status(200).send('Orden actualizado correctamente');
+                }
+            });
+        }
     });
 });
 
