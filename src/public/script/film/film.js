@@ -145,17 +145,17 @@ function gestionarPuesto(data) {
 /**
  * Función para verificar que tenemos todos los datos para renderizar los gráficos
  */
-function verificarFinalizacionDeDatos(data2) {
+function verificarFinalizacionDeDatos() {
     //En caso de que tengamos todos los datos necesarios...
     if (peticionesFinalizadas.puestos && peticionesFinalizadas.graficoChimenea) {
         //Llamamos a la función para renderizar el gráfico
-        renderizarGrafico(data2);
+        renderizarGrafico();
     }
 }
 
 /**
  * Función para obtener la información de los puestos para rellenar los graficos de chimenes
- * @param {*} data Argumento que contiene los datos de cada puesto
+ * @param {*} data Argumento que contiene los datos de cada gráfico chimenea
  */
 function gestionarGraficoChimenea(data) {
     //Creamos una variable para almacenar el número de peticiones completadas
@@ -163,8 +163,6 @@ function gestionarGraficoChimenea(data) {
 
     //Almacenamos en una variable el número de puestos disponibles
     const totalPuestos = data.length;
-
-    console.log("Data antes forEach: ", data)
 
     //Iteramos por los datos del puesto
     data.forEach(item => {
@@ -180,7 +178,6 @@ function gestionarGraficoChimenea(data) {
             //Controlamos los datos
             .then(data2 => {
 
-                let id, dinamico_NoVA, dinamico_VA, estatico_VA, estatico_NoVA, nuevo_picadas;
                 //Iteramos por los datos obtenidos
                 data2.forEach(itemChimenea => {
                     //Almacenamos en el array los datos que necesitamos para generar el gráfico de chimenea
@@ -193,9 +190,6 @@ function gestionarGraficoChimenea(data) {
                         tiempo_distancia_total: itemChimenea.tiempo_distancia_total
                     });
                 });
-
-                console.log("Data FINAL: ", data2)
-                console.log("dinamico_VA DATA: ", conteoGraficoChimenea[2]);
 
                 //Almacenamos el array por el ID del puesto
                 conteoGraficoChimenea.sort((a, b) => a.id - b.id);
@@ -221,7 +215,7 @@ function gestionarGraficoChimenea(data) {
 /**
  * Función para representar los gráficos
  */
-function renderizarGrafico(data2) {
+function renderizarGrafico() {
     //Almacenamos la instancia del contenedor de gráficos
     const graficosContainer = document.getElementById('graficos-container');
     graficosContainer.innerHTML = '';
@@ -265,8 +259,6 @@ function renderizarGrafico(data2) {
         const saturacion = (puesto.conteo / jornadaTotal) * 100;
 
         console.log("Puesto conteo: ", puesto.conteo, "\nSaturacion: ", saturacion, "\tNombre del puesto: ", puesto.nombre);
-
-        //console.log("> Saturación: ", saturacion, "\nPuesto conteo: ", puesto.conteo);
 
         /** Inicializamos la gráfica de la saturación */
         new Chart(canvasSaturacion, {
@@ -322,28 +314,12 @@ function renderizarGrafico(data2) {
             const estatico_NoVA = datosChimenea.estatico_NoVA || 0;
             const tiempo_distancia_total = datosChimenea.tiempo_distancia_total || 0;
             const total = 455;
-            //const total = 480;
             const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / total) * 100).toFixed(2) : 0;
             const porcentaje_VA = total > 0 ? ((dinamico_VA / total) * 100).toFixed(2) : 0;
             const porcentaje_estatico_VA = total > 0 ? ((estatico_VA / total) * 100).toFixed(2) : 0;
             const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / total) * 100).toFixed(2) : 0;
             const porcentaje_tiempo_distancia_total = total > 0 ? ((tiempo_distancia_total / total) * 100).toFixed(2) : 0;
 
-            // const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / 60 / total) * 100).toFixed(2) : 0;
-            // const porcentaje_VA = total > 0 ? ((dinamico_VA / 60 / total) * 100).toFixed(2) : 0;
-            // const porcentaje_estatico_VA = total > 0 ? ((estatico_VA / 60 / total) * 100).toFixed(2) : 0;
-            // const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / 60 / total) * 100).toFixed(2) : 0;
-
-            console.log(
-                //"Porcentaje dinamico NO VA: ", porcentaje_NoVA,
-                "dinamico_VA: ", dinamico_VA,
-                //"Porcentaje dinamico VA: ", porcentaje_VA,
-                //"Porcentaje estatico VA: ", porcentaje_estatico_VA,
-                "total: ", total,
-
-                // // "Porcentaje estatico NO VA: ", porcentaje_estatico_NoVA,
-                // // "Estatico no valor: ", estatico_NoVA
-            )
 
             /** Inicializamos la gráfica de la actividad */
             new Chart(canvasChimenea, {
@@ -740,6 +716,7 @@ function obtenerEtapas(puestoID) {
 
 /**
  * Función para calcular el número de la semana actual
+ * @param {*} [fecha=new Date()] Argumento que contiene la fecha actual
  */
 function obtenerNumeroSemana(fecha = new Date()) {
     //Creamos una copia del argumento
@@ -761,6 +738,8 @@ function obtenerNumeroSemana(fecha = new Date()) {
 
 /**
  * Función para disponer la información detalla del puesto
+ * @param {*} puesto_id Argumento que contiene el ID del puesto
+ * @param {*} nombre_puesto Argumento que contiene el nombre del puesto
  */
 function modalPuestoDetallado(puesto_id, nombre_puesto) {
     //Eliminamos el contenido del cuerpo del modal
@@ -1279,9 +1258,8 @@ function generarTablasPorEtapa(etapas) {
  * @param {Array} array Argumento que contiene las etapas ordenadas
  */
 function ordernarEtapa(array) {
-    console.log("Array enviado al servidor:", array);
-    let arrayString = array.join(','); // Unir con "," para enviarlo correctamente
-    console.log("ArrayString enviado al servidor:", arrayString);
+    // Unimos el array con "," para enviarlo correctamente
+    let arrayString = array.join(','); 
 
     // Enviar la solicitud al servidor
     fetch(`/film/api/actualizarOrden/${encodeURIComponent(arrayString)}`, {
@@ -1289,9 +1267,9 @@ function ordernarEtapa(array) {
     })
     .then(response => {
         if (response.ok) {
-            console.log('Orden actualizado correctamente');
+            mostrarAlerta('Orden actualizado correctamente', null, null, 1)
         } else {
-            console.error('Error al actualizar el orden');
+            mostrarAlerta('Error', 'Ha fallado', 'error', 0)
         }
     })
     .catch(error => {
@@ -2282,7 +2260,7 @@ function configurarModal_F5(data) {
 }
 
 /**
- * Función manejador para el campo del speed
+ * Función que actualiza el campo de la velocidad (speed)
  * @param {String} value Argumento que contiene el valor de la velocidad 
  */
 function updateSpeedMachine(value) {
@@ -2578,7 +2556,7 @@ function inicializarVariablesEtapas(etapaDeF) {
 /**
  * Función para disponer el modal de staturación de la UAT
  */
-function visualizarInformeStaturacionUAT() {
+function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
     //Mostramos el modal antes de añadir el gráfico
     $('#modalInforme').fadeIn(() => {
         //Creamos una instancia del contenedor del gráfico
@@ -2663,8 +2641,8 @@ function calcularSaturacionTotal(conteosPorPuesto) {
 }
 
 /**
- * Función para obtener el código MTM3 usando el ID del machine used
- * @param {int} machine_used Argumento que contiene el ID del machine used
+ * Función para obtener el código MTM3 usando el ID de la máquina utilizada
+ * @param {int} machine_used Argumento que contiene el ID de la máquina utilizada (machine used)
  * @returns Devuelve el código MTM3
  */
 function obtenerCodigoMTM3(machine_used) {
@@ -2710,7 +2688,6 @@ function toggleVisibility(id) {
 
 /**
  * Función para obtener las referencias de los componentes
- * @param {String} tipo_operacion Argumento que contiene el tipo de operación
  * @param {int} puesto_id Argumento que contiene el ID del puesto
  */
 function buscadorReferencias(puesto_id) {
@@ -2740,7 +2717,8 @@ function buscadorReferencias(puesto_id) {
 
 /**
  * Función para disponer las referencias dentro de la tabla con un buscador
- * @param {Array} data 
+ * @param {Array} data  Argumento que contiene los datos de cada referencia
+ * @param {*} puesto_id Argumento que representa el ID del puesto
  */
 function disponerReferenciasBuscador(data, puesto_id) {
     //Ocultamos el modal principal
@@ -2921,8 +2899,6 @@ function anyadirEtapa(id) {
         //Mostramos el modal
         $('#modal').modal('show');
 
-        console.log("Referencias: ", referencia_componente);
-
         //En caso de que la variable ya tenga referencias...
         if (referencia_componente !== null) {
             //Las añadimos al campo de las referencias
@@ -2948,9 +2924,6 @@ function anyadirEtapa(id) {
 
             //Almacenamos en una variable el número de picadas
             numero_picadas = document.getElementById('numeroPicadas').value;
-
-            //Almacenamos las referencias separadas por ";"
-            const referencias = referencia_componente.split(";").map(ref => ref.trim()).filter(ref => ref !== "");
 
             //Preparamos la petición GET para obtener las referencias válidas
             fetch(`/film/api/comprobarReferencias/${referencia_componente}/${tipo_operacion}/${planta}`, {
@@ -3009,6 +2982,7 @@ function anyadirEtapa(id) {
  * Función para obtener la cantidad a expedir por cada referencia
  * @param {Array} referencias_validas Argumento que contiene las referencias válidas
  * @param {String} columna Argumento que contiene el nombre de la columna a la que hora del conteo
+ * @param {*} puesto_id Argumento que contiene el id del puesto
  */
 function obtenerCantidadExpedir(referencias_validas, columna, puesto_id) {
     //Iteramos por cada referencia
@@ -3293,8 +3267,6 @@ function subirEtapa() {
             mote = null;
         }
 
-        //mote = "DESCRIPCION";
-
         //Serializamos el diccionario con las referencias y el número de embalahjes
         referencia_embalaje = encodeURIComponent(JSON.stringify(referencia_embalaje));
 
@@ -3381,8 +3353,9 @@ function mostrarAlerta(titulo, mensaje, icono, opcion) {
 /**
  * Función para visualizar la información de una etapa
  * @param {String} etapa Argumento que contiene el nombre de la etapa
+ * @param {*} id_etapa Argumento que contiene el ID de la etapa
  */
-function visualizarEtapa(etapa, referencia_componente, id_etapa) {
+function visualizarEtapa(etapa, id_etapa) {
     //Configuramos el título de la etapa
     $('#modalLargeTitle').text('Información de la etapa ', etapa);
 
@@ -3577,7 +3550,8 @@ function controlarRespuesta_Etapa(response) {
 
 /**
  * Función para abrir el plano en una nueva pestaña
- * @param {int} puestoID Argumento que contiene el ID del puesto
+ * @param {*} puesto_id Argumento que contiene el ID del puesto
+ * @param {*} id_etapa Argumento que contiene el ID de la etapa
  */
 function visualizarPlano(puesto_id, id_etapa) {
     //Creamos un array con los datos que tenemos que enviar
@@ -3928,9 +3902,6 @@ function obtenerPrimerDia(tipo_operacion) {
         .then(data => {
             //Asignamos el primer día a la variable global
             primer_dia = data[0].primer_dia.split('T')[0];
-
-            //Llamamos a la función para obtener el resto de los días quitando los fines de semana en cuatro semanas 
-            //obtenerRestoFechas(primer_dia);
         });
 }
 
