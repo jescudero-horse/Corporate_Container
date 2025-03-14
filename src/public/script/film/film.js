@@ -1219,25 +1219,25 @@ function generarTablasPorEtapa(etapas) {
                             let orden = [];
 
                             contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
-                            
+
 
                             // Inicializa SortableJS en el contenedor de las tablas
                             new Sortable(contenedorTablas, {
                                 animation: 150,
                                 ghostClass: 'sortable-ghost',
                                 handle: '.draggable-container',
-                                onStart: function(evt) {
+                                onStart: function (evt) {
                                     // Llenar el array 'orden' antes de que comience el cambio
                                     orden = Array.from(contenedorTablas.children).map(child => child.id);
                                     console.log("Orden inicial: ", orden);
                                 },
-                                onEnd: function(evt) {
+                                onEnd: function (evt) {
                                     console.log("Orden antes de enviarlo al servidor:", orden);
-                                    
+
                                     // Actualiza el array 'orden' con los nuevos valores
                                     orden = Array.from(contenedorTablas.children).map(child => child.id);
                                     console.log("Orden actualizado: ", orden);
-                                    
+
                                     // Enviar el orden al backend
                                     ordernarEtapa(orden);
                                 }
@@ -1260,22 +1260,22 @@ function generarTablasPorEtapa(etapas) {
  */
 function ordernarEtapa(array) {
     // Unimos el array con "," para enviarlo correctamente
-    let arrayString = array.join(','); 
+    let arrayString = array.join(',');
 
     // Enviar la solicitud al servidor
     fetch(`/film/api/actualizarOrden/${encodeURIComponent(arrayString)}`, {
         method: "PUT",
     })
-    .then(response => {
-        if (response.ok) {
-            mostrarAlerta('Orden actualizado correctamente', null, null, 1)
-        } else {
-            mostrarAlerta('Error', 'Ha fallado', 'error', 0)
-        }
-    })
-    .catch(error => {
-        console.error('Error en la solicitud:', error);
-    });
+        .then(response => {
+            if (response.ok) {
+                mostrarAlerta('Orden actualizado correctamente', null, null, 1)
+            } else {
+                mostrarAlerta('Error', 'Ha fallado', 'error', 0)
+            }
+        })
+        .catch(error => {
+            console.error('Error en la solicitud:', error);
+        });
 }
 
 /**
@@ -2582,24 +2582,12 @@ function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
         const graficoContainer = document.getElementById('modal-grafico-container');
         graficoContainer.innerHTML = '';
 
-        let fecha = new Date()
-
-        let fecha_actual = document.createElement("h4");
-        fecha_actual.append(`Fecha de toma de datos:`);
-        fecha_actual.append(document.createElement("br"));
-        fecha_actual.append(`${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`);
-        graficoContainer.append(fecha_actual);
-
         //Creamos el lienzo para el gráfico
         const canvas = document.createElement('canvas');
         graficoContainer.appendChild(canvas);
 
-        fecha.setDate(fecha.getDate() + 3 * 7);
-        let fecha_3_semanas = document.createElement("h4");
-        fecha_3_semanas.append(`Fecha a tres semanas:`);
-        fecha_3_semanas.append(document.createElement("br"));
-        fecha_3_semanas.append(`${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`);
-        graficoContainer.append(fecha_3_semanas);
+        //Llamamos a la función para establecer las fechas dentro del gráfico
+        obtenerTomaDatos(graficoContainer);
 
         //Calculamos la saturación total
         const saturacionTotal = calcularSaturacionTotal(conteosPorPuesto);
@@ -2614,7 +2602,7 @@ function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
                     backgroundColor: ['rgba(75, 192, 192, 0.8)', 'rgba(211, 211, 211, 0.5)'],
                     hoverBackgroundColor: ['rgba(75, 192, 192, 1)', 'rgba(211, 211, 211, 0.7)'],
                     borderWidth: 2,
-                    borderColor: '#ffffff',
+                    borderColor: '#ffffff'
                 }]
             },
             options: {
@@ -2624,6 +2612,7 @@ function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
                     title: {
                         display: true,
                         text: 'Saturación Total de Todos los Puestos',
+                        color: '#ffffff',
                     },
                     tooltip: {
                         callbacks: {
@@ -2631,7 +2620,12 @@ function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
                                 return `${context.label}: ${context.raw}%`;
                             }
                         }
-                    }
+                    },
+                    legend: {
+                        labels: {
+                            color: '#ffffff'
+                        }
+                    },
                 }
             }
         });
@@ -3305,7 +3299,7 @@ function subirEtapa() {
             //Le asignamos NULL
             mote = null;
         }
-      
+
         //Almacenamos en una variable el tipo de carga
         let tipo_carga = "";
 
@@ -3322,7 +3316,7 @@ function subirEtapa() {
         let referencias_finales = Array.isArray(referencia_componente)
             ? referencia_componente
             : referencia_componente.split(',');
-      
+
         //Serializamos el diccionario con las referencias y el número de embalahjes
         referencia_embalaje = encodeURIComponent(JSON.stringify(referencia_embalaje));
 
@@ -3928,9 +3922,10 @@ function configurarLinea() {
 }
 
 /**
- * Función para disponer la fecha de inicio y la fecha de fin de la los datos disponibles
+ * Función para disponer la fecha de inicio y la fecha de fin de los datos disponibles
+ * @param {HTMLElement} graficoContainer Argumento que contiene el contenedor del gráfico 
  */
-function mostrarTomaDatos() {
+function obtenerTomaDatos(graficoContainer) {
     //Preparamos la peticion GET para obtener las fechas 
     fetch('/film/api/fechaTomaDatos', {
         method: "GET"
@@ -3948,11 +3943,17 @@ function mostrarTomaDatos() {
 
         //Controlamos los datos
         .then(data => {
-            //Establecemos la fecha de inicio
-            document.getElementById('fechaInicio').innerHTML = data.fecha_inicio.split('T')[0];
+            //Almacenamos en una variable la fecha de inicio
+            let fecha_actual = document.createElement('h4');
+            fecha_actual.textContent = `Fecha de toma de datos:\n ${data.fecha_inicio.split('T')[0]}`;
 
-            //Establecemos la fecha de finalización
-            document.getElementById('fechaFinal').innerHTML = data.fecha_fin.split('T')[0];
+            //Almacenamos en una variable la fecha de finalización
+            let fecha_final = document.createElement('h4');
+            fecha_final.textContent = `Fecha de toma de datos:\n ${data.fecha_fin.split('T')[0]}`;
+
+            /**Añadimos ambas fechas al contenedor */
+            graficoContainer.append(fecha_actual);
+            graficoContainer.append(fecha_final);
         });
 }
 
@@ -4250,7 +4251,7 @@ window.addEventListener('DOMContentLoaded', function () {
     configurarPlanta();
 
     //Llamamos a la función para disponer las fechas de la toma de datos
-    mostrarTomaDatos();
+    obtenerTomaDatos();
 
     //Llamamos al método para obtener los puestos
     fetchData();
