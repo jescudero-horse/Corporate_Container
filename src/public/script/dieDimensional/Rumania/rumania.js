@@ -55,7 +55,7 @@ function renderTable(data) {
     data.forEach(item => {
         //Almacenamos en un array los datos necesarios
         const rowData = [
-            `<button type="button" onclick="verInforme(${item.id}ass="btn btn-outline-primary"><i class="bi bi-search"></i></button>`, //Botón para ver el informe
+            `<button type="button" onclick="verInforme(${item.id})" class="btn btn-outline-primary"><i class="bi bi-search"></i></button>`, //Botón para ver el informe
             item.fecha_registro.split('T')[0], //Fecha
             item.datamatrix, //Referencia
             item.description, //Descripción
@@ -76,5 +76,9 @@ function renderTable(data) {
  * @param {int} id Argumento que contiene el ID de la no conformidad
  */
 function verInforme(id) {
+    //Almacenamos en ID en formato JSON
+    const id_json = encodeURIComponent(JSON.stringify(id));
 
+    //Redireccionamos la página para poder ver el informe y enviamos el ID de la no conformidad
+    window.location.href = `/dieDimensional/viewReport-premachining-rumania?data=${id_json}`;
 }

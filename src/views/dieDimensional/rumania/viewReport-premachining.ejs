@@ -4,23 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premachining</title>
-    <script src="/script/dieDimensional/Rumania/rumania.js"></script>
+    <title>View Report</title>
     <!--INCLUIMOS LA CABECERA-->
     <%- include('../partials/head.ejs') %>
+        <script src="/script/dieDimensional/Rumania/verInforme.js"></script>
+        <script src="/script/dieDimensional/main.js"></script>
 </head>
 
 <body>
     <!--INCLUIMOS LA BARRA DE NAVEGACIÓN-->
     <%- include('../partials/nav.ejs') %>
 
-        <div class="container">
-            <!-- <h1><%-title %></h1> -->
-            <hr>
-
-            <!--INCLUIMOS EL DATA TABLE DEL PREMECANIZADO DE CURITIBA-->
-            <%- include('../partials/rumania/dt.ejs') %>
-        </div>
+        <!--INCLUIMOS LOS MODALES-->
+        <%- include('../partials/modal.ejs') %>
 </body>
 
 <script>

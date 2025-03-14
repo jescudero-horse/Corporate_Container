@@ -88,7 +88,7 @@ router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:map
  
             //Almacenamos en la variable el ID del turno
             const id_turno = resultTurno[0].turno_id;
- 
+          
             //Almacenamos en una nueva variable la consulta SQL para añadir el puesto
             const queryPuesto = `
                 INSERT INTO
@@ -795,6 +795,51 @@ router.post('/anyadirEtapa-viejo/:puesto_id/:referencia_embalaje/:operacion_sele
 
         //Enviamos el estados
         return res.status(201).send("End point procesado");
+    });
+});
+
+/**
+ * 
+ */
+router.put('/actualizarOrden/:array_ordenado', (req, res) => {
+    let array_ordenado = decodeURIComponent(req.params.array_ordenado);
+
+    let query = `
+        UPDATE
+            EN_IFM_STANDARD
+        SET
+            orden = ?
+        WHERE
+            id = ? AND
+            id_puesto = ?
+    `;
+
+    let array = array_ordenado.split('-')
+
+    getDBConnection((err, connection) => {
+        //En caso de que se produzaca un error...
+        if (err) {
+            return res.status(400).send('Error al conectar con la base de datos');
+        }
+
+        array.forEach((item, index) => {
+            connection.query(query, [array_ordenado[index], item[0], item[1]], (error, result) => {
+                //Liberamos la conexión
+                connection.release();
+
+                //En caso de que se produzca un error...
+                if (error) {
+                    console.error("> Error: ", error);
+
+                    //Enviamos el status
+                    return res.status(500).send('Error en la consulta');
+
+                    //En otro caso...
+                } else {
+                    return res.status(201);
+                }
+            })
+        })
     });
 });
 

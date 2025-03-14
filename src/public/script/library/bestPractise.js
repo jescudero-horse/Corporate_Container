@@ -1188,6 +1188,14 @@ function generateReport(groupedData, numberOfBestPractise, numberOfBestPractiase
 }
 
 /**
+ * Función para abrir en una nueva pestaña el control matrix
+ */
+function viewControlMatrix() {
+    //Abrimos en una ventana el control matrix
+    window.open('/library/viewControlMatrix', '_blank');
+}
+
+/**
  * Función para aplicar los filtros
  */
 function applyFilters() {
