@@ -665,8 +665,9 @@ function disponerTurno(turno, jornadaInicio, jornadaFin) {
  * @param {String} titulo Argumento que contiene el titulo de la alerta
  * @param {int} id Argumento que contiene el ID del elemento a eliminar
  * @param {String} tabla Argumento que contiene el nombre de la tabla
+ * @param {int} id_puesto Argumento que contiene el ID del puesto
  */
-function confirmarEliminar(icono, titulo, id, tabla) {
+function confirmarEliminar(icono, titulo, id, tabla, id_puesto) {
     //Configuramos y mostramos la alerta
     Swal.fire({
         title: titulo,
@@ -679,7 +680,7 @@ function confirmarEliminar(icono, titulo, id, tabla) {
         //En caso de que el usuario haya pulsado sobre el confirmar
         if (result.isConfirmed) {
             //Llamamos a la función para eliminar el elemento
-            eliminarRegistro(id, tabla);
+            eliminarRegistro(id, tabla, id_puesto);
         }
     });
 }
@@ -947,7 +948,7 @@ function generarTablasPorEtapa(etapas) {
                                     : ''}
 
                                         <button id="botonEliminarEtapa" type="button" class="text-red-500 ml-2" 
-                                            onclick="eliminarRegistro('${id_etapa}', 'EN_IFM_STANDARD')">
+                                            onclick="eliminarRegistro('${id_etapa}', 'EN_IFM_STANDARD', ${id_puesto})">
                                             <i class="bi bi-trash-fill"></i>
                                         </button>
 
@@ -3323,7 +3324,7 @@ function subirEtapa() {
         let referencias_finales = Array.isArray(referencia_componente)
             ? referencia_componente
             : referencia_componente.split(',');
-      
+
         //Serializamos el diccionario con las referencias y el número de embalahjes
         referencia_embalaje = encodeURIComponent(JSON.stringify(referencia_embalaje));
 
@@ -3649,10 +3650,11 @@ function visualizarPlano(puesto_id, id_etapa) {
  * Función para llamar al end point para eliminar el registro
  * @param {int} id_elemento Argumento que contiene el ID del elemento a eliminar
  * @param {String} tabla Argumento que contiene el nombre de la tabla del elemento a eliminar
+ * @param {int} id_puesto Argumento que contiene el ID del puesto
  */
-function eliminarRegistro(id_elemento, tabla) {
+function eliminarRegistro(id_elemento, tabla, id_puesto) {
     //Preparamos la solicitud DELETE
-    fetch(`/film/api/eliminarRegistro/${id_elemento}/${tabla}`, {
+    fetch(`/film/api/eliminarRegistro/${id_elemento}/${tabla}/${id_puesto}`, {
         method: "DELETE"
     })
         //Controlamos la respuesta
@@ -3797,8 +3799,11 @@ function gestionarEtapa(id_etapa) {
                     });
             });
 
+            //Configuramos el footer del modal
+            $('#modal .modal-footer').html('');
+
             //Mostramos el modal
-            $('#modal').fadeIn();
+            $('#modal').modal('show');
         })
 }
 
