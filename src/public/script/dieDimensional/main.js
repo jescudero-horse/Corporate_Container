@@ -65,3 +65,22 @@ function mostrarAlerta(titulo, mensaje, icono, opcion) {
         });
     }
 }
+
+async function fetchIdioma(planta) {
+    let translation = null;
+
+    try {
+        const response = await fetch(`/dieDimensional/api/${planta}-translation`);
+
+        if (!response.ok) {
+            throw new Error('Error fetching data');
+        }
+
+        translation = await response.json();
+
+    } catch (error) {
+        console.error("Error en la obtención del idioma: ", error);
+    }
+
+    return translation;
+}

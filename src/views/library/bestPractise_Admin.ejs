@@ -31,7 +31,7 @@
                     <div class="container">
                         <h1 id="title"><%-title %></h1>
 
-                        <div class="col-md-8">
+                        <div class="col-md-10">
                             <a class="btn btn-primary" id="button" href="/library/addBestPractise">
                                 <div class="text">Add information <i class="bi bi-plus-circle"></i></div>
                             </a>
@@ -50,6 +50,9 @@
                             <button id="generateReportButton" type="button" class="btn btn-info"
                                 onclick="displayGenerateReportModal()">Generate report <i
                                     class="bi bi-file-earmark-bar-graph-fill"></i></button>
+
+                            <button class="btn btn-light" onclick="viewControlMatrix()">View the matrix <i
+                                    class="bi bi-table"></i></button>
                         </div>
 
                         <br>
@@ -100,11 +103,11 @@
                 setTimeout(() => {
                     const filterPanel = document.querySelector('#offcanvasExample');
                     console.log("Estado actual del panel de filtros: ", filterPanel.style.display);
-                    
+
                     //En caso de que el panel este oculto
                     if (filterPanel && filterPanel.style.display === 'none') {
                         //Mostramos el panel
-                        filterPanel.style.display = 'block'; 
+                        filterPanel.style.display = 'block';
                         console.log("Panel de filtros mostrado.");
                     }
                 }, 500);
@@ -196,4 +199,5 @@
         }
     ];
 </script>
+
 </html>

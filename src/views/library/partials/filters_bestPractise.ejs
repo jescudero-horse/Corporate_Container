@@ -1,7 +1,8 @@
 <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasExampleLabel">Select the filters</h5>
-        <button id="cerrarPanelFiltros" type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <button id="cerrarPanelFiltros" type="button" class="btn-close" data-bs-dismiss="offcanvas"
+            aria-label="Close"></button>
     </div>
     <div class="d-flex justify-content-between mb-3">
         <button class="btn btn-outline-danger" id="clearFiltersButton" onclick="clearFilters()">
@@ -113,6 +114,42 @@
             </div>
         </div>
 
+        <div class="form-group" id="validationFilter">
+            <label id="validationCommittee_label"><b>Validation Committee</b></label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Brick Committee">
+                <label class="form-check-label">Brick Committee</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Process Capitalization Committee">
+                <label class="form-check-label">Process Capitalization Committee</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Club M. ASSY ENG.">
+                <label class="form-check-label">Club M. ASSY ENG.</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Club M. ASSY GB.">
+                <label class="form-check-label">Club M. ASSY GB.</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Club M. HPDC ALUM.">
+                <label class="form-check-label">Club M. HPDC ALUM.</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Club M. LOGISTIC">
+                <label class="form-check-label">Club M. LOGISTIC</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Club M. MACH. ENG.">
+                <label class="form-check-label">Club M. MACH. ENG.</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="Club M.MACH. GB.">
+                <label class="form-check-label">Club M. MACH. GB.</label>
+            </div>
+        </div>
+
         <div class="form-group" id="tagsDiv">
             <label id="tags-label"><b>Tags-input</b></label>
 
@@ -132,15 +169,18 @@
             <div class="options-container">
                 <label class="section-title">Transmissions</label>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="Transmissions - Machining" value="Transmissions - Machining">
+                    <input class="form-check-input" type="checkbox" id="Transmissions - Machining"
+                        value="Transmissions - Machining">
                     <label class="form-check-label" for="machining">Machining</label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="Transmissions - Assembly" value="Transmissions - Assembly">
+                    <input class="form-check-input" type="checkbox" id="Transmissions - Assembly"
+                        value="Transmissions - Assembly">
                     <label class="form-check-label" for="assembly">Assembly</label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="Transmissions - Flow" value="Transmissions - Flow">
+                    <input class="form-check-input" type="checkbox" id="Transmissions - Flow"
+                        value="Transmissions - Flow">
                     <label class="form-check-label" for="flow">Flow</label>
                 </div>
             </div>
@@ -180,7 +220,8 @@
             <div class="options-container">
                 <label class="section-title">Management</label>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="Management - Quality" value="Management - Quality">
+                    <input class="form-check-input" type="checkbox" id="Management - Quality"
+                        value="Management - Quality">
                     <label class="form-check-label" for="quality">Quality</label>
                 </div>
                 <div class="form-check">
@@ -195,8 +236,7 @@
                 </div>
 
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="Management - Cost"
-                        value="Management - Cost">
+                    <input class="form-check-input" type="checkbox" id="Management - Cost" value="Management - Cost">
                     <label class="form-check-label" for="cost">Cost</label>
                 </div>
 

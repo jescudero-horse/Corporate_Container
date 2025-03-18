@@ -1188,6 +1188,14 @@ function generateReport(groupedData, numberOfBestPractise, numberOfBestPractiase
 }
 
 /**
+ * Función para abrir en una nueva pestaña el control matrix
+ */
+function viewControlMatrix() {
+    //Abrimos en una ventana el control matrix
+    window.open('/library/viewControlMatrix', '_blank');
+}
+
+/**
  * Función para aplicar los filtros
  */
 function applyFilters() {
@@ -1206,12 +1214,21 @@ function applyFilters() {
         .filter(checkbox => checkbox.checked)
         .map(checkbox => checkbox.value);
 
-    //Almacenamos las buenas prácticas filtradas
-    const filteredData = original_data.filter(item =>
-        (selectedFactories.length === 0 || selectedFactories.includes(item.factory)) &&
-        (selectedCategorizacion.length === 0 || selectedCategorizacion.includes(item.categorization)) &&
-        (selectedEntities.length === 0 || selectedEntities.some(entity => item.category.includes(entity)))
-    );
+    // Filtros para el club validador
+    const selectedValidation = Array.from(document.querySelectorAll('#validationFilter .form-check-input'))
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+
+    // Almacenamos las buenas prácticas filtradas
+    const filteredData = original_data.filter(item => {
+        return (
+            (selectedFactories.length === 0 || selectedFactories.includes(item.factory)) &&
+            (selectedCategorizacion.length === 0 || selectedCategorizacion.includes(item.categorization)) &&
+            (selectedValidation.length === 0 || selectedValidation.includes(item.metier)) &&
+            (selectedEntities.length === 0 || selectedEntities.some(entity => item.category.includes(entity)))
+        );
+    });
+
 
     //Llamamos a la función para disponer las buenas prácticas filtradas
     renderCards(filteredData);

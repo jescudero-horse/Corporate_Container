@@ -40,10 +40,10 @@ function getDBConnection(callback) {
 router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:mapa/:turno/:planta', (req, res) => {
     //Almacenamos los valores del formulario
     const { numero_puesto, nombre_puesto, numero_operarios, mapa, turno, planta } = req.params;
- 
+
     //Creamos una variable para almacenar el path del mapa
     const ruta_mapa = `/assets/film/${mapa}`;
- 
+
     //Controlamos los valores de los campos necesarios
     if (!numero_puesto || !nombre_puesto || !numero_operarios) {
         return res.status(400).send('Faltan campos en la solicitud');
@@ -56,7 +56,7 @@ router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:map
             console.error('> Error al conectar a la base de datos: ', err);
             return res.status(500).send('Error al conectar a la base de datos');
         }
- 
+
         //Almacenamos en una variable la consulta SQL para obtener el ID del turno usando el turno y la planta
         const queryTurno = `
             SELECT
@@ -75,21 +75,21 @@ router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:map
                 p.codigo = ? AND
                 t.turno = ?
         `;
- 
+
         //Ejecutamos la consulta para obtener el ID del turno
         connection.query(queryTurno, [planta, turno], (errorTurno, resultTurno) => {
             if (errorTurno) {
                 console.error('> Error a la hora de obtener el ID del turno: ', errorTurno);
                 return res.status(500).send('Error al obtener el ID del turno');
             }
- 
+
             if (resultTurno.length === 0) {
                 return res.status(404).send('No se encontró el turno especificado');
             }
- 
+
             //Almacenamos en la variable el ID del turno
             const id_turno = resultTurno[0].turno_id;
- 
+
             //Almacenamos en una nueva variable la consulta SQL para añadir el puesto
             const queryPuesto = `
                 INSERT INTO
@@ -97,14 +97,14 @@ router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:map
                 VALUES
                     (?, ?, ?, ?, ?)
             `;
- 
+
             //Ejecutamos la consulta para añadir el puesto
             connection.query(queryPuesto, [numero_puesto, nombre_puesto, numero_operarios, ruta_mapa, id_turno], (errorPuesto, resultPuesto) => {
                 if (errorPuesto) {
                     console.error('> Error a la hora de añadir el puesto: ', errorPuesto);
                     return res.status(500).send('Error a la hora de añadir el puesto');
                 }
- 
+
                 //Enviamos el status
                 res.status(201).send('Puesto añadido');
             });
@@ -333,7 +333,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
     //Creamos una variable 
     let cantidad_mover = data[2], numero_picadas = data[6];
 
-    console.log("Numero picadas, ", numero_picadas);
+    console.log("Data FINAL --> ", data);
 
     //Controlamos el tipo de operación
     switch (operacion_seleccionada) {
@@ -709,6 +709,7 @@ router.post('/anyadirEtapa/:puesto_id/:referencia_embalaje/:operacion_selecciona
         //Iteramos sobre las referencias y ejecutamos las operaciones
         const keys = Object.keys(referencia_embalaje);
         for (const referencia of keys) {
+            //Obtenemos 
             const valor = referencia_embalaje[referencia];
 
             const data = [
@@ -736,6 +737,51 @@ router.post('/anyadirEtapa/:puesto_id/:referencia_embalaje/:operacion_selecciona
     }
 });
 
+
+/**
+ * 
+ */
+router.put('/actualizarOrden/:array_ordenado', (req, res) => {
+    let array_ordenado = decodeURIComponent(req.params.array_ordenado);
+
+    let query = `
+        UPDATE
+            EN_IFM_STANDARD
+        SET
+            orden = ?
+        WHERE
+            id = ? AND
+            id_puesto = ?
+    `;
+
+    let array = array_ordenado.split('-')
+
+    getDBConnection((err, connection) => {
+        //En caso de que se produzaca un error...
+        if (err) {
+            return res.status(400).send('Error al conectar con la base de datos');
+        }
+
+        array.forEach((item, index) => {
+            connection.query(query, [array_ordenado[index], item[0], item[1]], (error, result) => {
+                //Liberamos la conexión
+                connection.release();
+
+                //En caso de que se produzca un error...
+                if (error) {
+                    console.error("> Error: ", error);
+
+                    //Enviamos el status
+                    return res.status(500).send('Error en la consulta');
+
+                    //En otro caso...
+                } else {
+                    return res.status(201);
+                }
+            })
+        })
+    });
+});
 
 /**
  * End point para obtener las etapas de un puesto
@@ -2908,6 +2954,9 @@ router.get('/cantidadExpedirHoras/:referencia/:tipo_operacion/:planta/:columna/:
     //Creamos una variable para almacenar el nombre de la columan de la fabrica
     let columna_fabrica;
 
+    //Variable para almacenar el nombre de la columna de la cantidad
+    let columna_2;
+
     //Almacenamos en una variable la consulta SQL para obtener la hora de inicio y fin dell turno de una planta
     const query_jornada = `
         SELECT
@@ -2922,19 +2971,18 @@ router.get('/cantidadExpedirHoras/:referencia/:tipo_operacion/:planta/:columna/:
             p.id = ?
     `;
 
-    let columna_2 = 'quantite_calculee_par_GPI';
-
     //Asignamos el nombre de la columna dependiendo del tipo de operación... en caso de sea "Programa_Recepcion"
     if (tipo_operacion === 'Programa_Recepcion') {
         columna_hora = 'heure_de_la_periode';
         //columna_fabrica = 'compte_fournisseur';
         columna_fabrica = 'compte_client';
+        columna_2 = 'quantite_calculee_par_GPI';
 
         //En caso de que sea "Programa_Expedicion_Forklift"
     } else if (tipo_operacion === 'Programa_Expedicion_Forklift') {
         columna_hora = 'heure_expedition';
         columna_fabrica = 'compte_fournisseur';
-        //columna_fabrica = 'compte_client';
+        columna_2 = 'quantitea_a_expedir';
     }
 
     //Creamos la conexión a la base de datos
@@ -3130,17 +3178,15 @@ router.get('/obtenerValorCarga/:tipo_carga/:planta/:referencia/:tipo_operacion',
     }
 
     //Controlamos el valor de la variable del tipo de operación para asignar el nombre de la columna de la fabrica... en caso de de que sea Programa de Expedicion
-    // if (tipo_operacion === 'Programa_Expedicion_Forklift') {
-    //     columna_fabrica = 'compte_fournisseur';
-    //     //columna_fabrica = 'compte_client';
+    if (tipo_operacion === 'Programa_Expedicion_Forklift') {
+        columna_fabrica = 'compte_fournisseur';
+        //columna_fabrica = 'compte_client';
 
-    //     //En caso de que sea Programa de Recepcion
-    // } else if (tipo_operacion === 'Programa_Recepcion') {
-    //     //columna_fabrica = 'compte_fournisseur';
-    //     columna_fabrica = 'compte_client';
-    // }
-
-    columna_fabrica = 'compte_client';
+        //En caso de que sea Programa de Recepcion
+    } else if (tipo_operacion === 'Programa_Recepcion') {
+        //columna_fabrica = 'compte_fournisseur';
+        columna_fabrica = 'compte_client';
+    }
 
     //Creamos la conexión a la base de datos
     getDBConnection((err, connection) => {
