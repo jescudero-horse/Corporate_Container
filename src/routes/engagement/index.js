@@ -2144,9 +2144,11 @@ router.post('/actualizarInformacionEtapa/:puestoID/:distance_empty_zone/:number_
 /**
  * End point para eliminar un registros en especifico
  */
-router.delete('/eliminarRegistro/:id_elemento/:tabla', (req, res) => {
+router.delete('/eliminarRegistro/:id_elemento/:tabla/:id_etapa', (req, res) => {
     /** Almacenamos las variables de los parámetros */
-    const { id_elemento, tabla } = req.params;
+    const { id_elemento, tabla, id_puesto } = req.params;
+
+    console.log("> ID elemento: ", id_elemento, "\tTabla: ", tabla, "\tID etapa: ", id_puesto);
 
     //Creamos la conexión a la base de datos
     getDBConnection((err, connection) => {
@@ -2193,6 +2195,23 @@ router.delete('/eliminarRegistro/:id_elemento/:tabla', (req, res) => {
                         console.error("> Error: ", error);
                     }
                 })
+            } else if (tabla === "EN_IFM_STANDARD") {
+                const query = `
+                    DELETE
+                    FROM
+                        chimenea
+                    WHERE
+                        id_puesto = ? AND
+                        id_etapa = ?
+                `;
+
+                //Ejecutamos la consulta
+                connection.query(query, [id_puesto, id_elemento], (error, result) => {
+                    //En caso de que falle
+                    if (error) {
+                        console.error("> Error: ", error);
+                    }
+                })
             }
 
             //Liberamos la conexión
@@ -2208,6 +2227,8 @@ router.delete('/eliminarRegistro/:id_elemento/:tabla', (req, res) => {
  * End point para gestionar la etapa
  */
 router.post('/gestionarEtapa/:id_etapa/:id_puesto/:gestion', (req, res) => {
+    console.log("> Dentro del gestionar etapa");
+
     /** Almacenamos las variables de los parámetros */
     const { id_etapa, id_puesto, gestion } = req.params;
 
@@ -2242,6 +2263,7 @@ router.post('/gestionarEtapa/:id_etapa/:id_puesto/:gestion', (req, res) => {
                         speed,
                         distancia_total,
                         numero_curvas,
+                        puntos,
                         mote,
                         numero_cruces,
                         numero_puertas,
@@ -2287,80 +2309,44 @@ router.post('/gestionarEtapa/:id_etapa/:id_puesto/:gestion', (req, res) => {
                         PPD32,
                         PDD34,
                         PPU43,
-                        PDU44
+                        PDU44,
+                        CHMAN,
+                        CHMAN_2,
+                        CHMAN_3,
+                        PS15,
+                        DI21,
+                        DC113,
+                        numero_picadas,
+                        DS14,
+                        DS15,
+                        DC,
+                        D1,
+                        W5,
+                        TT,
+                        AL,
+                        P2,
+                        L2,
+                        G1,
+                        P5,
+                        G1_1,
+                        P2_1,
+                        W5_2,
+                        nuevo_picadas,
+                        actividad_en_minutos,
+                        tiempo_distancia_total,
+                        orden
                     FROM
                         EN_IFM_STANDARD
                     WHERE
                         id = ?;
 
-                    UPDATE
-                        temp_table
-                    SET
-                        id_puesto = ?;
+                UPDATE
+                    temp_table
+                SET
+                    id_puesto = ?;
 
-                    INSERT INTO
-                        EN_IFM_STANDARD (
-                            id_puesto,
-                            referencia_componente,
-                            linea,
-                            cantidad_a_mover,
-                            F,
-                            comments,
-                            distance_empty_zone,
-                            number_of_packages_loaded_at_once,
-                            loading_type,
-                            machine_used,
-                            speed,
-                            distancia_total,
-                            numero_curvas,
-                            mote,
-                            numero_cruces,
-                            numero_puertas,
-                            TL_TV,
-                            CDVB_CDL,
-                            nuevo,
-                            NC,
-                            NP,
-                            frecuencia_recorrido,
-                            PS10,
-                            PS14,
-                            simbolo_especial,
-                            valor_simbolo_especial,
-                            tipo_operacion,
-                            distancia_F5,
-                            acceso_al_camion_F5,
-                            embalaje_descargado_F5,
-                            DC221,
-                            TC_TL,
-                            DS10,
-                            CDL,
-                            CCPE,
-                            distancia,
-                            numero_bultos_por_pila,
-                            altura_embalaje,
-                            almacenamiento_emlabajes_mediante,
-                            en_la_tienda_pila,
-                            soporte_embalaje,
-                            TC,
-                            TL,
-                            CT10,
-                            PP1,
-                            CDC,
-                            distancia_tren,
-                            distancia_almacenamiento,
-                            numero_bases_rodantes,
-                            M1,
-                            DL,
-                            CDV,
-                            PDU34,
-                            PPU34,
-                            TV,
-                            PPD32,
-                            PDD34,
-                            PPU43,
-                            PDU44
-                        )
-                    SELECT
+                INSERT INTO
+                    EN_IFM_STANDARD (
                         id_puesto,
                         referencia_componente,
                         linea,
@@ -2374,6 +2360,7 @@ router.post('/gestionarEtapa/:id_etapa/:id_puesto/:gestion', (req, res) => {
                         speed,
                         distancia_total,
                         numero_curvas,
+                        puntos,
                         mote,
                         numero_cruces,
                         numero_puertas,
@@ -2419,11 +2406,39 @@ router.post('/gestionarEtapa/:id_etapa/:id_puesto/:gestion', (req, res) => {
                         PPD32,
                         PDD34,
                         PPU43,
-                        PDU44
-                    FROM
-                        temp_table;
+                        PDU44,
+                        CHMAN,
+                        CHMAN_2,
+                        CHMAN_3,
+                        PS15,
+                        DI21,
+                        DC113,
+                        numero_picadas,
+                        DS14,
+                        DS15,
+                        DC,
+                        D1,
+                        W5,
+                        TT,
+                        AL,
+                        P2,
+                        L2,
+                        G1,
+                        P5,
+                        G1_1,
+                        P2_1,
+                        W5_2,
+                        nuevo_picadas,
+                        actividad_en_minutos,
+                        tiempo_distancia_total,
+                        orden
+                    )
+                SELECT
+                    *
+                FROM
+                    temp_table;
 
-                    DROP TABLE temp_table;
+                DROP TABLE temp_table
                 `;
 
                 //Ejecutamos la consulta
@@ -2470,7 +2485,6 @@ router.post('/gestionarEtapa/:id_etapa/:id_puesto/:gestion', (req, res) => {
                         numero_puertas,
                         TL_TV,
                         CDVB_CDL,
-                        nuevo,
                         NC,
                         NP,
                         frecuencia_recorrido,
@@ -2510,7 +2524,33 @@ router.post('/gestionarEtapa/:id_etapa/:id_puesto/:gestion', (req, res) => {
                         PPD32,
                         PDD34,
                         PPU43,
-                        PDU44
+                        PDU44,
+                        CHMAN,
+                        CHMAN_2,
+                        CHMAN_3,
+                        PS15,
+                        DI21,
+                        DC113,
+                        numero_picadas,
+                        DS14,
+                        DS15,
+                        DC,
+                        D1,
+                        W5,
+                        TT,
+                        AL,
+                        P2,
+                        L2,
+                        G1,
+                        P5,
+                        G1_1,
+                        P2_1,
+                        W5_2,
+                        nuevo_picadas,
+                        nuevo,
+                        actividad_en_minutos,
+                        tiempo_distancia_total,
+                        orden
                     FROM
                         EN_IFM_STANDARD
                     WHERE
@@ -2541,7 +2581,6 @@ router.post('/gestionarEtapa/:id_etapa/:id_puesto/:gestion', (req, res) => {
                             numero_puertas,
                             TL_TV,
                             CDVB_CDL,
-                            nuevo,
                             NC,
                             NP,
                             frecuencia_recorrido,
@@ -2581,68 +2620,36 @@ router.post('/gestionarEtapa/:id_etapa/:id_puesto/:gestion', (req, res) => {
                             PPD32,
                             PDD34,
                             PPU43,
-                            PDU44
+                            PDU44,
+                            CHMAN,
+                            CHMAN_2,
+                            CHMAN_3,
+                            PS15,
+                            DI21,
+                            DC113,
+                            numero_picadas,
+                            DS14,
+                            DS15,
+                            DC,
+                            D1,
+                            W5,
+                            TT,
+                            AL,
+                            P2,
+                            L2,
+                            G1,
+                            P5,
+                            G1_1,
+                            P2_1,
+                            W5_2,
+                            nuevo_picadas,
+                            nuevo,
+                            actividad_en_minutos,
+                            tiempo_distancia_total,
+                            orden
                         )
                     SELECT
-                        id_puesto,
-                        referencia_componente,
-                        linea,
-                        cantidad_a_mover,
-                        F,
-                        comments,
-                        distance_empty_zone,
-                        number_of_packages_loaded_at_once,
-                        loading_type,
-                        machine_used,
-                        speed,
-                        distancia_total,
-                        numero_curvas,
-                        mote,
-                        numero_cruces,
-                        numero_puertas,
-                        TL_TV,
-                        CDVB_CDL,
-                        nuevo,
-                        NC,
-                        NP,
-                        frecuencia_recorrido,
-                        PS10,
-                        PS14,
-                        simbolo_especial,
-                        valor_simbolo_especial,
-                        tipo_operacion,
-                        distancia_F5,
-                        acceso_al_camion_F5,
-                        embalaje_descargado_F5,
-                        DC221,
-                        TC_TL,
-                        DS10,
-                        CDL,
-                        CCPE,
-                        distancia,
-                        numero_bultos_por_pila,
-                        altura_embalaje,
-                        almacenamiento_emlabajes_mediante,
-                        en_la_tienda_pila,
-                        soporte_embalaje,
-                        TC,
-                        TL,
-                        CT10,
-                        PP1,
-                        CDC,
-                        distancia_tren,
-                        distancia_almacenamiento,
-                        numero_bases_rodantes,
-                        M1,
-                        DL,
-                        CDV,
-                        PDU34,
-                        PPU34,
-                        TV,
-                        PPD32,
-                        PDD34,
-                        PPU43,
-                        PDU44
+                        *
                     FROM
                         temp_table;
 
@@ -3173,6 +3180,7 @@ router.get('/obtenerValorCarga/:tipo_carga/:planta/:referencia/:tipo_operacion',
     //Controlamos el valor de la variable "tipo_carga"
     if (tipo_carga === 'UM') {
         columna = 'nb_uc_par_um';
+
     } else if (tipo_carga === 'UC') {
         columna = 'nb_pieces_par_uc';
     }
