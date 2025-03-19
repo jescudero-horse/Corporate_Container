@@ -3671,14 +3671,14 @@ function gestionarEtapa(id_etapa) {
             let opciones = data.map(item => `<option value="${item.id}">${item.nombre_puesto}</option>`).join("");
 
             //Configuramos el titulo del modal
-            $('#modalTitle').text('Gestión de etapas');
+            $('#modal .modal-title').text('Gestión de etapas');
 
             //Configure the body of the modal
             $('.modal-body').html(`
                 <form id="gestionarEtapa" method="POST">
                     <!-- Select para los puestos -->
                     <div class="mt-6">
-                        <label for="puesto" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Seleccione una opción para gestionar la etapa</label>
+                        <label for="puesto" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Seleccione un puesto para gestionar la etapa</label>
                         <select id="puesto" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             ${opciones}
                         </select>
@@ -3699,7 +3699,7 @@ function gestionarEtapa(id_etapa) {
                     </div>
                 </form>
             `);
-
+            
             //Aplicamos la funcionalidad al formulario
             $('#gestionarEtapa').on('submit', async function (e) {
                 //Paramos la propagación
@@ -3707,7 +3707,7 @@ function gestionarEtapa(id_etapa) {
 
                 /** Almacenamos en variables las opciones elegidas */
                 const id_puesto = document.getElementById('puesto').value, gestion = document.getElementById('gestion').value;
-
+                
                 //Preparamos la solicitud POST para llamar al end point para gestionar la etapa
                 fetch(`/film/api/gestionarEtapa/${id_etapa}/${id_puesto}/${gestion}`, {
                     method: "POST"
