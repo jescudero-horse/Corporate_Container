@@ -28,7 +28,7 @@ async function fetchData() {
     /**INFORMACIÓN PARA LA TABLA DEL STATUS */
     try {
         //Almacenamos en una variable la respuesta de la peticion GET 
-        const response = await fetch(`/dieDimensional/api/obtener-status-premecanizado/${id}`);
+        const response = await fetch(`/dieDimensional/api/obtener-status-premecanizado/${id}/${'curitiba'}`);
 
         //En caso de que no haya salido bien
         if (!response.ok) {
@@ -39,7 +39,7 @@ async function fetchData() {
         const data = await response.json();
 
         //Llamamos a la función para disponer la información de la tabla de la alerta del molde
-        renderizarTablaAlertaMolde(data);
+        renderizarTablaAlertaMolde(data, 'curitiba');
 
     } catch (error) {
         console.error("Error fetching data");
@@ -137,7 +137,7 @@ function renderizarTablaAlertaMolde(data) {
  */
 function mostrarInforme(id, id_caracteristica) {
     //Preparamos la petición GET
-    fetch(`/dieDimensional/api/obtener-informacion-detallada-premecanizado/${id}/${id_caracteristica}`, {
+    fetch(`/dieDimensional/api/obtener-informacion-detallada-premecanizado/${id}/${id_caracteristica}/${'curitiba'}`, {
         method: "GET"
     })
         //Controlamos la respuesta
@@ -202,12 +202,10 @@ async function configurarModalCorrespondenciaEntreTaladros2(data) {
     //Creamos una variable para el estado de la caracteristica
     let clase, estado_caracteristica, translation = await obtenerIdioma();
 
-    console.log("Dentro del taladros 2: ", translation);
-
     //Creamos un if para controlar el valor excecido... en caso de que sea 0
     if (data[0].valor_exceed === 0) {
         clase = 'text-field-bad'
-        estado_caracteristica = '<span class="bg-danger font-weight-bold text-center"><i class="bi bi-exclamation-triangle-fill"></i> FUERA LÍMITES</span>';
+        estado_caracteristica = `<span class="bg-danger font-weight-bold text-center"><i class="bi bi-exclamation-triangle-fill"></i> ${translation.fuera_limites}</span>`;
 
         //En cualquier otro caso
     } else {
@@ -510,6 +508,9 @@ function obtenerID() {
     id = JSON.parse(decodeURIComponent(id_json));
 }
 
+/**
+ * Event listener para cuando la página este lista
+ */
 $(document).ready(function () {
     //Añadimos la funcionalidad para cuando se pulse sobre el botón del comentario
     $('#comentarios').on('keydown', function (event) {
