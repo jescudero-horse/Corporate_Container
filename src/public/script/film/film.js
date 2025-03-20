@@ -3769,6 +3769,8 @@ function gestionarEtapa(id_etapa) {
                 /** Almacenamos en variables las opciones elegidas */
                 const id_puesto = document.getElementById('puesto').value, gestion = document.getElementById('gestion').value;
 
+                console.log("ID etapa: ", id_etapa, "\tid_puesto: ", id_puesto, "\tGestion: ", gestion);
+
                 //Preparamos la solicitud POST para llamar al end point para gestionar la etapa
                 fetch(`/film/api/gestionarEtapa/${id_etapa}/${id_puesto}/${gestion}`, {
                     method: "POST"
@@ -3778,7 +3780,6 @@ function gestionarEtapa(id_etapa) {
                         console.log("Response: ", response);
                         //En caso de que todo haya salido bien
                         if (response.status === 201) {
-                            //mostrarAlerta("Etapa gestionada", null, null, 1);
                             //Configuramos la alerta para dar un aviso a la persona
                             Swal.fire({
                                 title: "Etapa gestionada",
@@ -3796,6 +3797,9 @@ function gestionarEtapa(id_etapa) {
                         } else {
                             mostrarAlerta("Estado no controlado", "No se ha sido capaz de controlar el estado de la creación del puesto", "question", null);
                         }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
                     });
             });
 

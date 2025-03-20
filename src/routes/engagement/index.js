@@ -2292,6 +2292,8 @@ router.post('/gestionarEtapa/:id_etapa/:id_puesto/:gestion', (req, res) => {
     /** Almacenamos las variables de los parámetros */
     const { id_etapa, id_puesto, gestion } = req.params;
 
+    console.log("> ID etapa: ", id_etapa, "\tID puesto: ", id_puesto, "\nGestion: ", gestion);
+
     //Creamos la conexión a la base de datos
     getDBConnection((err, connection) => {
         //En caso de que se produzca un error...

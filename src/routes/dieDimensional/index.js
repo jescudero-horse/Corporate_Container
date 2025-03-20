@@ -59,9 +59,26 @@ router.get('/curitiba-translation', (req, res) => {
 /**
  * End point para actualizar para el comentario de la medida
  */
-router.post('/actualizar-comentario-medida/:id/:comentario/:tabla', (req, res) => {
+router.post('/actualizar-comentario-medida/:id/:comentario/:planta', (req, res) => {
     //Almacenamos las variables de los parámeros
-    const { id, comentario, tabla } = req.params;
+    const { id, comentario, planta } = req.params;
+
+    //Creamos una variable para almacenar la tabla
+    let tabla;
+
+    //Añadimos un control para el tipo de planta
+    switch (planta) {
+        case 'curitiba':
+            tabla = "dieDimensional_Curitiba_no_conformidades";
+            break;
+
+        case 'rumania':
+            tabla = "dieDimensional_Rumania_no_conformidades";
+            break;
+
+        default:
+            break;
+    }
 
     //Almacenamos en una variable la consulta para actualizar el comentario
     let query = `
@@ -98,6 +115,56 @@ router.post('/actualizar-comentario-medida/:id/:comentario/:tabla', (req, res) =
             return res.status(201).send('Comentario actualizado');
         });
     })
+});
+
+/**
+ * End point para obtener los status de las no conformidades del premecanizado
+ */
+router.get('/obtener-status-premecanizado/:id/:planta', (req, res) => {
+    //Almacenamos los argumentos de los parámetros
+    const { id, planta } = req.params;
+
+    //Almacenamos en una variable la sentencia SQL para obtener la información de las alertas
+    let query = `
+        SELECT 
+            ancplnc.caracteristica,
+            ancplnc.descripcion,
+            ancprnc.valor_exceed,
+            ancprnc.id_listado_caracteristica
+        FROM 
+            aa_no_confomidades_premeca_registro_no_conformidades ancprnc 
+        INNER JOIN aa_no_confomidades_premeca_listado_no_conformidades_${planta} ancplnc 
+        ON 
+            ancprnc.id_listado_caracteristica  = ancplnc.id 
+        WHERE 
+            ancprnc.id_sala_3d = ?
+    `;
+
+    //Obtenemos la conexión a la base de datos
+    getDBConnection((err, connection) => {
+        //En caso de que ocurra algun error en la conexión a la base de datos
+        if (err) {
+            //Enviamos el status
+            console.error("> Error en la conexión a la base de datos: ", err);
+            return res.status(501).send('Error en la conexión a la base de datos');
+        }
+
+        //Ejecutamos la consulta SQL para obtener los valores excedidos
+        connection.query(query, [id], (error, result) => {
+            //Liberamos la conexión
+            connection.release();
+
+            //En caso de que ocurra algun error en la consulta
+            if (error) {
+                //Enviamos el status
+                console.error("> Error en la consulta: ", error);
+                return res.status(501).send('Error en la ejecución de la consulta');
+            }
+
+            //Enviamos la información
+            return res.json(result);
+        });
+    });
 });
 
 /**
@@ -153,9 +220,9 @@ router.get('/obtener-status-premecanizado/:id', (req, res) => {
 /**
  * End point para obtener la información de las no conformidades - PREMECANIZADO
  */
-router.get('/obtener-informacion-detallada-premecanizado/:id/:id_caracteristica', (req, res) => {
+router.get('/obtener-informacion-detallada-premecanizado/:id/:id_caracteristica/:planta', (req, res) => {
     //Almacenamos los datos de los parámetros
-    const { id, id_caracteristica } = req.params;
+    const { id, id_caracteristica, planta } = req.params;
 
     //Almacenamos en una variable la consulta
     let query = `
@@ -164,7 +231,7 @@ router.get('/obtener-informacion-detallada-premecanizado/:id/:id_caracteristica'
         FROM 
             aa_no_confomidades_premeca_registro_no_conformidades ancprnc 
         INNER JOIN
-            aa_no_confomidades_premeca_listado_no_conformidades ancplnc 
+            aa_no_confomidades_premeca_listado_no_conformidades_${planta} ancplnc 
         ON
             ancprnc.id_listado_caracteristica = ancplnc.id 
         WHERE 
@@ -382,6 +449,44 @@ router.get('/rumania-no-conformidades', (req, res) => {
             }
 
             //Enviamos la información obtenida
+            return res.json(result);
+        });
+    });
+});
+
+/**
+ * End point para obtener la información básica de premecanizado
+ */
+router.get('/obtenerInformacionBasica-premecanizado-rumania/:id', (req, res) => {
+    //Creamos la query
+    let query = `
+        SELECT
+            ddrnc.fecha_registro, ddrnc.datamatrix, ddrnc.tipo_pieza, ddrnc.molde, ddrnc.comentario
+        FROM
+            dieDimensional_Rumania_no_conformidades ddrnc
+        WHERE
+            ddrnc.id = ?
+    `;
+
+    //Obtenemos la conexión a la base de datos
+    getDBConnection((err, connection) => {
+        //En caso de que ocurra algun error
+        if (err) {
+            //Enviamos el status
+            console.error("> Error en la conexión a la base de datos: ", err);
+            return res.status(501).send('Error en la conexión a la base de datos');
+        }
+
+        //Ejecutamos la query para obtener la información básica
+        connection.query(query, [req.params.id], (error, result) => {
+            //En caso de que ocurra algun error en la consulta
+            if (error) {
+                //Enviamos el status
+                console.error("> Error en la ejecución de la consulta: ", error);
+                return res.status(501).send('Error en la ejecución de la consulta');
+            }
+
+            //Enviamos la información
             return res.json(result);
         });
     });

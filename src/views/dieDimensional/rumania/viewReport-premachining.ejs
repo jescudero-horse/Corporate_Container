@@ -17,37 +17,22 @@
 
         <!--INCLUIMOS LOS MODALES-->
         <%- include('../partials/modal.ejs') %>
+            <br>
+
+            <!--INCLUIMOS LOS CAMPOS DE LA INFORMACIÓN BÁSICA-->
+            <%- include('../partials/informacion_basica_informe_premecanizado.ejs') %>
+
+                <div class="container">
+                    <hr>
+
+                    <!--INCLUIMOS EL DT DEL LISTADO DE NO CONFORMIDADES - PREMECANIZADO-->
+                    <%- include('../partials/dt_premeca_listado_no_conformidades.ejs') %>
+                </div>
 </body>
 
 <script>
     //Marcamos la pestaña de Rumania
     document.getElementById('rumania_nav').classList.add('active');
-
-    //Escuchador para cuando termine de cargar la página
-    window.addEventListener("DOMContentLoaded", async () => {
-        try {
-            //Creamos una variabe con la respuesta a la llamada del end point
-            const response = await fetch('/dieDimensional/api/rumania-translation');
-
-            //En caso de que haya salido algo mal
-            if (!response.ok) {
-                //Mostramos un error
-                throw new Error("Error fetching data");
-            }
-
-            //Almacenamos en una variable el JSON con el idioma
-            const translation = await response.json();
-
-            //Llamamos a la función para disponer el idioma en rumano
-            establecerIdioma(translation)
-
-        } catch (error) {
-            console.error("Error: ", error);
-        }
-
-        //Llamamos a la función para obtener las no conformidades
-        fetchData();
-    });
 </script>
 
 </html>

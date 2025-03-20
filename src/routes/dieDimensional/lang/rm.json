@@ -15,10 +15,12 @@
     "fecha_creacion_informe": "Data creării raportului",
     "maquina": "MAȘINĂ",
     "puesto": "POZIȚIE",
+    "puesto_min": "Poziție",
     "comentarios_sobre_la_medida": "COMENTARII PE MĂSURĂTOARE",
     "listado_caracteristicas_en_alerta_del_molde": "LISTĂ CARACTERISTICI ÎN ALERTĂ A MATRIȚEI",
     "caracteristica": "CARACTERISTICĂ",
-    "descripcion": "Descriere",
+    "descripcion": "DESCRIERE",
+    "descripcion_normal": "Descriere",
     "estado": "STARE",
     "fecha_archivo": "Data fișierului",
     "numero_no_conformidades": "Nr. neconformități",
@@ -34,6 +36,7 @@
     "capturas_de_pantalla": "CAPTURI DE ECRAN",
     "fuera_limites": "ÎN AFARA LIMITELOR",
     "caracteristica_a_tratar": "CARACTERISTICĂ DE TRATAT",
+    "caracteristica_a_tratar_normal": "Caracteristică de tratat",
     "caracteristica_fuera_de_limites": "CARACTERISTICĂ ÎN AFARA LIMITELOR",
     "avisar_a_mantenimiento": "NOTIFICARE MENTENANȚĂ",
     "caracteristica_dentro_de_limites": "CARACTERISTICI ÎN LIMITA",
@@ -106,5 +109,7 @@
     "desvio_mayus": "DEVIERE",
     "tipo_pieza": "Tip de piesă",
     "comentario": "Comentarii",
-    "deja_comentario": "Lasă un comentariu"
+    "deja_comentario": "Lasă un comentariu",
+    "informacion_x": "Informații axa X",
+    "informacion_y": "Informații axa Y"
 }

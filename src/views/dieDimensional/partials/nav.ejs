@@ -12,11 +12,43 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
                 <a id="curitiba_nav" class="nav-link" href="/dieDimensional/curitiba_premachining">Curitiba</a>
-                <a id="argentina_nav" class="nav-link" href="#">Argentina</a>
+                <a id="argentina_nav" class="nav-link" href="#" hidden>Argentina</a>
                 <a id="rumania_nav" class="nav-link" href="/dieDimensional/rumania">Rumania</a>
-                <a id="bursa_nav" class="nav-link" href="#">Bursa</a>
-                <a id="leave_a_comment_nav" class="nav-link">Leave a comment</a>
+                <a id="bursa_nav" class="nav-link" href="#" hidden>Bursa</a>
+                <a id="leave_a_comment_nav" class="nav-link" href="javascript:void(0);"
+                    onclick="enviarComentario()">Leave a comment</a>
             </div>
         </div>
     </div>
 </nav>
+
+<script>
+    /**
+     * Función para abrir Outlook y enviar un correo electrónico
+     */
+    function enviarComentario() {
+        //Creamos una variable con el correo de destino
+        const destinatario = "jesus.escudero-extern@horse.tech";
+
+        //Creamos una variable con el asunto
+        const asunto = "Die Dimensional feedback";
+
+        //Creamos una variable con el cuerpo del mensaje
+        const cuerpo = `
+            1. Which plant do you belong to?
+
+            2. Was there any problem with the information provided?
+
+            3. Would you like to suggest any improvements?
+
+            4. Do you have any additional comments?
+        `;
+
+        //Creamos el enlace 
+        const mailtoLink = `mailto:${destinatario}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+
+        //Abrimos Outlook
+        window.location.href = mailtoLink;
+    }
+
+</script>
