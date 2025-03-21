@@ -34,6 +34,7 @@ function getDBConnection(callback) {
         }
     });
 }
+
 /**
  * End point para añadir un nuevo puesto
  */
@@ -737,6 +738,135 @@ router.post('/anyadirEtapa/:puesto_id/:referencia_embalaje/:operacion_selecciona
     }
 });
 
+/**
+ * End point para añadir la referencia manual
+ */
+router.post('/anyadirEtapaManual/:puesto_id/:referencia/:operacion_seleccionada/:mote/:tipo_operacion/:numero_picadas', async (req, res) => {
+    //Almacenamos la información de los parámetrod
+    const { puesto_id, operacion_seleccionada, mote, tipo_operacion, numero_picadas } = req.params;
+
+    //Decofificamos el diccionario
+    let referencia;
+    try {
+        referencia = JSON.parse(decodeURIComponent(req.params.referencia));
+    } catch (error) {
+        return res.status(400).send("Error al decodificar la referencia.");
+    }
+
+    // reamos la conexión a la base de datos
+    const connection = await new Promise((resolve, reject) => {
+        getDBConnection((err, conn) => {
+            if (err) reject(err);
+            else resolve(conn);
+        });
+    });
+
+    //Almacenamos la key de la referencia
+    const keys = Object.keys(referencia);
+
+    //Obtenemos sobre las keys
+    for (const referenciaKey of keys) {
+        //Almacenamos el valor de cada referencia
+        const valor = referencia[referenciaKey];
+
+        //Almacenamos en una variable la consulta SQL para saber si ya existe esa referencia
+        const query = `SELECT * FROM x WHERE id_puesto = ? AND referencia_componente = ?`;
+
+        //Ejecutamos la consulta SQL
+        connection.query(query, [puesto_id, referenciaKey], (err, rows) => {
+            if (err) {
+                console.error("Error en la consulta de verificación:", err);
+                return;
+            }
+
+            if (rows.length > 0) {
+                console.log(`Referencia ${referenciaKey} ya existe para id_puesto ${puesto_id}. No se insertará.`);
+            } else {
+                console.log(`Referencia ${referenciaKey} no existe. Procediendo a insertar.`);
+
+                //Almacenamos los datos para la inserción
+                const data = [
+                    puesto_id,
+                    referenciaKey,
+                    valor,
+                    operacion_seleccionada,
+                    mote,
+                    tipo_operacion,
+                    numero_picadas
+                ];
+
+                //Llamamos a la función para insertar
+                anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada);
+            }
+        });
+    }
+
+    //Liberamos la conexión después de finalizar todas las operaciones
+    connection.release();
+
+    //Enviamos la respuesta
+    return res.status(201).send("End point procesado correctamente");
+});
+
+/**
+ * End point para añadir una nueva etapa a un puesto BUENO
+ */
+router.post('/anyadirEtapa-viejo/:puesto_id/:referencia_embalaje/:operacion_seleccionada/:descripcion/:tipo_operacion', (req, res) => {
+    //Almacenamos en variables los parámetros
+    let { puesto_id, referencia_embalaje, operacion_seleccionada, descripcion, tipo_operacion } = req.params;
+
+    //Almacenamos el diccionario deserializado
+    //referencia_embalaje = JSON.parse(decodeURIComponent(referencia_embalaje));
+
+    //Almacenamos en una variable la consulta SQL
+    const query = `
+        INSERT INTO
+            EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, comments, distance_empty_zone, number_of_packages_loaded_at_once, loading_type, machine_used, speed, mote, tipo_operacion)
+        VALUES
+            (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    console.log(
+        "Puesto ID: ", puesto_id,
+        "\nDiccionario: ", referencia_embalaje,
+        "\nOperacion seleccionada: ", operacion_seleccionada,
+        "\nDescripcion: ", descripcion
+    )
+
+    //Creamos la conexión a la base de datos
+    getDBConnection((err, connection) => {
+        //En caso de que ocurra algun error...
+        if (err) {
+            console.log("> Error en la conexión a la base de datos: ", err);
+            return res.status(501).send('Error en la conexión a la base de datos');
+        }
+
+        //Iteramos el diccionario
+        for (const referencia in referencia_embalaje) {
+            //Comprobamos que la clave pertenece al objeto
+            if (referencia_embalaje.hasOwnProperty(referencia)) {
+                console.log(`>>> Clave: ${referencia} \tValor: ${referencia_embalaje[referencia]}`);
+
+                //Ejecutamos la sentencia por cada referencia válida
+                connection.query(query, [puesto_id, referencia, referencia_embalaje[referencia], operacion_seleccionada, 'Área de almacenamiento de envases vacíos => Camión', 40, 2, 'Air plane', 1, 12, descripcion, tipo_operacion], (error, result) => {
+                    //En caso de ocurra algún error...
+                    if (error) {
+                        console.log("> Error en la consulta: ", error);
+                        res.status(501).send('Error a la hora de añadir la etapa: ', error);
+                    }
+
+                    console.log("> Resultados: ", result);
+                });
+            }
+        }
+
+        //Liberamos la conexión
+        connection.release();
+
+        //Enviamos el estados
+        return res.status(201).send("End point procesado");
+    });
+});
 
 /**
  * 
