@@ -1283,75 +1283,8 @@ function ordernarEtapa(array) {
  * Función para configurar el cuerpo del modal con los datos de la etapa
  * @param {Array} data Argumento que contiene los datos de la etapa 
  */
-function gestionarEtapa_Visualizacion(data) {
-
-    //Creamos un stwich para controlar el tipo de F
-    switch (data[0].F) {
-        //F5
-        case 'F5':
-            //Llamamos a la función para configurar el cuerpo del modal F5
-            configurarModal_F5(data);
-            break;
-
-        //F29
-        case 'F29':
-            //Llamamos a la función para configurar el cuerpo del modal F29
-            configurarModal_F29(data);
-            break;
-
-        //F10
-        case 'F10':
-            //Llamamos a la función para configurar el cuerpo del modal F10
-            configurarModal_F10(data);
-            break;
-
-        //F14
-        case 'F14':
-            //Llamamos a la función para configurar el cuerpo del modal F14
-            configurarModal_F14(data);
-            break;
-
-        //F27
-        case 'F27':
-            //Llamamos a la función para confdigurar del modal F27
-            configurarModal_F27(data);
-            break;
-
-        //F12
-        case 'F12':
-            //Llamamos a la función para condigurar el cuerpo del modal F12
-            configurarModal_F12(data);
-            break;
-
-        //Coger UC/UM y dejar en stock altura media
-        case 'Coger UC/UM y dejar en stock altura media':
-            //Llamamos a la función para configurar el modal
-            configurarModal_Coger_UC_UM_dejar_stock_altura_media(data);
-            break;
-
-        //Coger bac y colocar en carro/estanteria
-        case 'Coger bac y colocar en carro/estanteria':
-            //Llamamos a la función para configfurar el modal
-            configurarModal_Coger_bac_colocar_en_carro_estanteria(data);
-            break;
-
-        //Carga cassette nacelle J 22 bacs
-        case 'Carga cassette nacelle J 22 bacs':
-            //Llamamos a la función para configurar el modal
-            configurarModal_carga_cassette_nacelle_J_22_bacs(data);
-            break;
-
-        //Colocacion carros manualmente
-        case 'Colocacion carros manualmente':
-            //Llamamos a la función para configurar el modal
-            configurarModal_colocacionCarrosManualmente(data);
-            break;
-
-        default:
-            visualizarPlano(puestoID, data[0].id);
-            //confifurarModal_general(data);
-            break;
-    }
+function gestionarEtapa_Visualizacion(id) {
+    visualizarPlano(puestoID, id);
 }
 
 /**
@@ -3445,6 +3378,8 @@ function visualizarEtapa(etapa, referencia_componente, id_etapa) {
     //Configuramos el título de la etapa
     $('#modalLargeTitle').text('Información de la etapa ', etapa);
 
+    console.log("ID etapa PLANO: ", id_etapa)
+
     //Preparamos la petición GET para obtener la información de la etapa
     fetch(`/film/api/obtenerInformacionEtapa/${id_etapa}`, {
         method: "GET"
@@ -3457,13 +3392,17 @@ function visualizarEtapa(etapa, referencia_componente, id_etapa) {
             }
 
             //Devolvemos los datos obtenidos
+            console.log(response)
+
             return response.json();
         })
 
         //Controlamos los datos obtenidos
         .then(data => {
+            console.log("Data PLANO: ", data.length)
+
             //Llamamos a la función para configurar la visualización de la etapa dependiendo de cual sea
-            gestionarEtapa_Visualizacion(data);
+            gestionarEtapa_Visualizacion(data[0].id);
         });
 }
 
@@ -3742,14 +3681,14 @@ function gestionarEtapa(id_etapa) {
             let opciones = data.map(item => `<option value="${item.id}">${item.nombre_puesto}</option>`).join("");
 
             //Configuramos el titulo del modal
-            $('#modalTitle').text('Gestión de etapas');
+            $('#modal .modal-title').text('Gestión de etapas');
 
             //Configure the body of the modal
             $('.modal-body').html(`
                 <form id="gestionarEtapa" method="POST">
                     <!-- Select para los puestos -->
                     <div class="mt-6">
-                        <label for="puesto" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Seleccione una opción para gestionar la etapa</label>
+                        <label for="puesto" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Seleccione un puesto para gestionar la etapa</label>
                         <select id="puesto" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                             ${opciones}
                         </select>
@@ -3770,7 +3709,7 @@ function gestionarEtapa(id_etapa) {
                     </div>
                 </form>
             `);
-
+            
             //Aplicamos la funcionalidad al formulario
             $('#gestionarEtapa').on('submit', async function (e) {
                 //Paramos la propagación
@@ -3778,9 +3717,7 @@ function gestionarEtapa(id_etapa) {
 
                 /** Almacenamos en variables las opciones elegidas */
                 const id_puesto = document.getElementById('puesto').value, gestion = document.getElementById('gestion').value;
-
-                console.log("ID etapa: ", id_etapa, "\tid_puesto: ", id_puesto, "\tGestion: ", gestion);
-
+              
                 //Preparamos la solicitud POST para llamar al end point para gestionar la etapa
                 fetch(`/film/api/gestionarEtapa/${id_etapa}/${id_puesto}/${gestion}`, {
                     method: "POST"

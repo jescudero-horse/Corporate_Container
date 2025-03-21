@@ -22,6 +22,7 @@ const pool = mysql.createPool({
 
 /**
  * Función para obtener una conexión del pool
+ * @param {*} callback La función de callback a ejecutar.
  */
 function getDBConnection(callback) {
     pool.getConnection((err, connection) => {
@@ -721,8 +722,6 @@ router.post('/anyadirEtapa/:puesto_id/:referencia_embalaje/:operacion_selecciona
                 tipo_operacion,
                 numero_picadas
             ];
-
-            console.log("Valor: ", valor);
 
             //Llamamos a la función para añadir la etapa
             anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada);
