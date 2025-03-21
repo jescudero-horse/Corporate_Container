@@ -111,7 +111,7 @@ function gestionarPuesto(data) {
             //Controlamos los datos
             .then(data => {
                 //Almacenamos en una variable los minutos totales de un puesto
-                const sumaTotal_puesto = (data.length > 0) ? data[0]["SUM(actividad_en_minutos + nuevo)"] : 0;
+                const sumaTotal_puesto = (data.length > 0) ? data[0]["SUM(actividad_en_minutos + nuevo_picadas)"] : 0;
 
                 //Almacenamos en el array la información necesarias
                 conteosPorPuesto.push({
@@ -2993,7 +2993,7 @@ function obtenerValorCarga(item, cantidad_a_expedir, tipo_operacion, tipo_carga)
             const valor_carga = data.valor_carga;
 
             //Almacenamos en una variable el número de embalajes redondeado a la alta
-            const numero_embalajes = Math.ceil((cantidad_a_expedir / valor_carga) / 8);
+            const numero_embalajes = Math.ceil((cantidad_a_expedir / valor_carga));
 
             console.log("Numero de embalajes: ", numero_embalajes, "\tValor de carga: ", valor_carga, "\tCantidad a expedir: ", cantidad_a_expedir)
 

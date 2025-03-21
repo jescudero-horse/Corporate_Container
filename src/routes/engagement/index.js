@@ -1333,7 +1333,7 @@ router.get('/tiempoTotal/:id_puesto', (req, res) => {
         //Almacenamos en una variable la consulta SQL
         const query = `
             SELECT
-                SUM(actividad_en_minutos + nuevo)
+                SUM(actividad_en_minutos + nuevo_picadas)
             FROM 
                 EN_IFM_STANDARD
             WHERE
@@ -2906,7 +2906,7 @@ router.get('/cantidadExpedir/:referencia/:tipo_operacion', (req, res) => {
     //Almacenamos en una variable la consulta SQL
     const query = `
         SELECT
-            SUM(??) AS cantidad_expedir
+            SUM(??)/ AS cantidad_expedir
         FROM
             ??
         WHERE
@@ -3019,7 +3019,7 @@ router.get('/cantidadExpedirHoras/:referencia/:tipo_operacion/:planta/:columna/:
             //Almacenamos en una variable la consulta para obtener la cantidad a expedir
             const query = `
                 SELECT
-                    SUM(??) AS cantidad_expedir
+                    SUM(??)/15 AS cantidad_expedir
                 FROM
                     ??
                 WHERE
