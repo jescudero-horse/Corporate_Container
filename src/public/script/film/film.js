@@ -2516,6 +2516,10 @@ function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
         const graficoContainer = document.getElementById('modal-grafico-container');
         graficoContainer.innerHTML = '';
 
+        //Creamos el lienzo para el gráfico
+        const canvas = document.createElement('canvas');
+        graficoContainer.appendChild(canvas);
+
         //Llamamos a la función para establecer las fechas dentro del gráfico
         obtenerTomaDatos(graficoContainer);
 
@@ -3143,9 +3147,9 @@ function disponerInformacionModal2(referencia, cantidad_a_expedir, valor_carga, 
 /**
  * Función para disponer el modal del selector de etapas para las referencias
  */
-function mostrarModalEtapas() {
+function mostrarModalEtapas(opcion) {
     //Cerramos el modal del informe
-    $('#modalInformeFinal').modal('hide');
+    //$('#modalInformeFinal').modal('hide');
 
     //Configuramos el título del modal del selector de etapas
     $('#modal .modal-title').text('Selecciona una etapa');
@@ -3223,13 +3227,13 @@ function mostrarModalEtapas() {
     $('#modal').modal('show');
 
     //Llamamos a la función para añadir la etapa al puesto
-    subirEtapa();
+    subirEtapa(opcion);
 }
 
 /**
  * Función para añadir una etapa al puesto
  */
-function subirEtapa() {
+function subirEtapa(opcion) {
     //Añadimos la funcionalidad al formulario de añadir la etapa
     $("#formulario_anyadirEtapa").on('submit', function (e) {
         //Paramos la propagación
@@ -3260,6 +3264,12 @@ function subirEtapa() {
 
         //Serializamos el diccionario con las referencias y el número de embalahjes
         referencia_embalaje = encodeURIComponent(JSON.stringify(referencia_embalaje));
+
+        //En caso de que opcion sea 1
+        if (opcion == 1) {
+            //Llamamos a la función para subir la referencia manual
+            subirEtapaManual(referencia_embalaje);
+        }
 
         //Iteramos por las referencias finales
         referencias_finales.forEach(referencia => {
@@ -3906,6 +3916,94 @@ function obtenerTomaDatos(graficoContainer) {
         });
 }
 
+function graficoPrueba() {
+    console.log("Dentro del modal");
+    //Configuramos el título del modal
+    $('#modal .modal-title').text("");
+
+    //Configuramos el footer del modal
+    $('#modal .modal-footer').html(`
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+    `);
+
+    //Configuramos el cuerpo del modal con el canvas para el gráfico
+    $('#modal .modal-body').html('<canvas id="graficoCanvas"></canvas>');
+
+    //Mostramos el modal
+    $('#modal').modal('show');
+
+    //Datos del gráfico
+    const ctx = document.getElementById('graficoCanvas').getContext('2d');
+
+    //Creamos una variable para contener los datos
+    const datos = {
+        labels: ['7', '9', '11', '13'],
+        datasets: [
+            {
+                type: 'bar',
+                label: 'Porcentaje de Uso',
+                data: [40, 55, 30, 80],
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            },
+            {
+                type: 'line',
+                label: 'Tendencia',
+                data: [50, 50, 50, 50],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                //backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderWidth: 2,
+                fill: true
+            }
+        ]
+    };
+
+    //Configuramos el gráfico
+    const config = {
+        type: 'bar',
+        data: datos,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: '#ffffff'
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Horas',
+                        color: '#ffffff'
+                    },
+                    ticks: {
+                        color: '#ffffff'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Porcentaje (%)',
+                        color: '#ffffff'
+                    },
+                    ticks: {
+                        color: '#ffffff'
+                    },
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    };
+
+    //Inicializamos el gráfico
+    new Chart(ctx, config);
+}
+
 /**
  * Función para obtener el primer día
  * @param {String} tipo_operacion Argumento que contiene el nombre de la tabla de la base de datos
@@ -3931,6 +4029,27 @@ function obtenerPrimerDia(tipo_operacion) {
             //Asignamos el primer día a la variable global
             primer_dia = data[0].primer_dia.split('T')[0];
         });
+}
+
+/**
+ * Función para subir las etapas manuales
+ * @param {Array} referencia_embalaje Aregumento que contiene las referencias finales
+ */
+function subirEtapaManual(referencia_embalaje) {
+    const referencia_embalaje_final = JSON.parse(decodeURIComponent(referencia_embalaje));
+    console.log("Referencia embalaje: ", referencia_embalaje_final)
+    //Iteramos por las referenicas finales
+    Object.keys(referencia_embalaje_final).forEach(referencia => {
+        //Preparamos la peticion POST para añadir la etapa manual
+        fetch(`/film/api/anyadirEtapaManual/${puestoID}/${encodeURIComponent(JSON.stringify({ [referencia]: referencia_embalaje_final[referencia] }))}/${encodeURIComponent(operacion_seleccionada)}/${mote}/${tipo_operacion}/${numero_picadas}`, {
+            method: "POST"
+        })
+
+            //Controlamos la respuesta
+            .then(response => {
+                console.log("> Response: ", response);
+            })
+    });
 }
 
 /**
@@ -3992,8 +4111,21 @@ function anyadirReferenciaManual() {
             </select>
         </div>
 
-        <!-- Tipo de carga -->
+        <!--Numero picadas -->
         <div class="relative inline-block w-64 mb-4">
+            <label for="numeroPicadas" class="block text-sm font-medium text-white mb-2">Coger UC/UM y dejar en stock altura media</label>
+            <select id="numeroPicadas" name="numeroPicadas" class="block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white text-white">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+            </select>
+        </div>
+
+        <!-- Tipo de carga -->
+        <div class="relative inline-block w-64 mb-4" hidden>
             <label for="tipoCarga" class="block text-sm font-medium text-gray-700 mb-2">Seleccione un tipo de carga</label>
             <select id="tipoCarga" name="tipoCarga" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
                 <option value="UM">UM</option>
@@ -4028,7 +4160,7 @@ function anyadirReferenciaManual() {
 function almacenarDatosManuales() {
     /**Almacenamos los datos del formulario */
     let referencia = document.getElementById('referencia_componente').value;
-    let mote = document.getElementById('mote').value;
+    mote = document.getElementById('mote').value;
     let pieza_por_carga = document.getElementById('pieza_por_tipo_carga')?.value || "";
     let cantidad_piezas = document.getElementById('cantidad_piezas')?.value || "";
     let numero_embalajes = document.getElementById('numero_embalajes')?.value || "";
@@ -4037,9 +4169,10 @@ function almacenarDatosManuales() {
     let linea = document.getElementById('linea')?.value || "";
 
     linea = linea;
+    numero_picadas = document.getElementById('numeroPicadas').value;
 
     //Cerramos el modal principal
-    $('#modal').modal('hide');
+    //$('#modal').modal('hide');
 
     //Asignamos la referencia introducida por el usuario en la variable global
     referencia_componente = referencia;
@@ -4051,7 +4184,7 @@ function almacenarDatosManuales() {
     tipo_operacion = bbdd;
 
     //Llamamos a la funcion para disponer el modal de las etapas
-    mostrarModalEtapas();
+    mostrarModalEtapas(1);
 }
 
 /**
