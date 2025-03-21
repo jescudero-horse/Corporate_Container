@@ -3036,7 +3036,7 @@ router.get('/cantidadExpedir/:referencia/:tipo_operacion', (req, res) => {
     //Almacenamos en una variable la consulta SQL
     const query = `
         SELECT
-            SUM(??)/ AS cantidad_expedir
+            SUM(??)/15 AS cantidad_expedir
         FROM
             ??
         WHERE
