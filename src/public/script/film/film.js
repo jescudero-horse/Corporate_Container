@@ -255,7 +255,7 @@ function renderizarGrafico() {
         graficoContainer.appendChild(canvasSaturacion);
 
         //Almacenamos en una variable la jornada laboral
-        const jornadaTotal = 455;
+        const jornadaTotal = 442;
 
         //Almacenamos la saturación del puesto
         const saturacion = (puesto.conteo / jornadaTotal) * 100;
@@ -344,7 +344,7 @@ function renderizarGrafico() {
             const estatico_VA = datosChimenea.estatico_VA || 0;
             const estatico_NoVA = datosChimenea.estatico_NoVA || 0;
             const tiempo_distancia_total = datosChimenea.tiempo_distancia_total || 0;
-            const total = 455;
+            const total = 442;
             const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / total) * 100).toFixed(2) : 0;
             const porcentaje_VA = total > 0 ? ((dinamico_VA / total) * 100).toFixed(2) : 0;
             const porcentaje_estatico_VA = total > 0 ? ((estatico_VA / total) * 100).toFixed(2) : 0;
