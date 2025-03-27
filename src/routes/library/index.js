@@ -3952,5 +3952,69 @@ router.get("/getForecast/:reference", (req, res) => {
     });
 });
 
+/**
+ * End point para obtener los datos de la Quality Matrix - Best practise
+ */
+router.get('/obtener-controlMatrix', (req, res) => {
+    //Almacenamos en una variable la consulta SQL   
+    const query = `
+        SELECT 
+            bp.title AS SECTION,
+            CASE 
+                WHEN bp.factory = 'Sevilla' THEN bp.creation_date
+                WHEN bpa.factory_applied = 'Sevilla' THEN IFNULL(bpa.estimatedDate, 'X')
+                ELSE 'X'
+            END AS Sevilla,
+            CASE 
+                WHEN bp.factory = 'Bursa' THEN bp.creation_date
+                WHEN bpa.factory_applied = 'Bursa' THEN IFNULL(bpa.estimatedDate, 'X')
+                ELSE 'X'
+            END AS Bursa,
+            CASE 
+                WHEN bp.factory = 'Aveiro' THEN bp.creation_date
+                WHEN bpa.factory_applied = 'Aveiro' THEN IFNULL(bpa.estimatedDate, 'X')
+                ELSE 'X'
+            END AS Aveiro,
+            CASE 
+                WHEN bp.factory = 'Motores' THEN bp.creation_date
+                WHEN bpa.factory_applied = 'Motores' THEN IFNULL(bpa.estimatedDate, 'X')
+                ELSE 'X'
+            END AS Motores,
+            CASE 
+                WHEN bp.factory = 'Mioveni' THEN bp.creation_date
+                WHEN bpa.factory_applied = 'Mioveni' THEN IFNULL(bpa.estimatedDate, 'X')
+                ELSE 'X'
+            END AS Mioveni,
+            CASE 
+                WHEN bp.factory = 'CMC' THEN bp.creation_date
+                WHEN bpa.factory_applied = 'CMC' THEN IFNULL(bpa.estimatedDate, 'X')
+                ELSE 'X'
+            END AS CMC,
+            CASE 
+                WHEN bp.factory = 'PFA' THEN bp.creation_date
+                WHEN bpa.factory_applied = 'PFA' THEN IFNULL(bpa.estimatedDate, 'X')
+                ELSE 'X'
+            END AS PFA
+    FROM 
+        best_practise bp
+    LEFT JOIN 
+        bestPractiseApplied bpa
+        ON bp.id = bpa.idBestPractise;
+    `;
+
+    //Ejecutamos la consulta
+    db.query(query, [], (err, result) => {
+        //En caso de que ocurra algun error
+        if (err) {
+            //Enviamos el status
+            console.error("> Error en la ejecución de la consulta: ", err);
+            return res.status(501).send('Error fetching data');
+        }
+
+        //Enviamos la información
+        return res.json(result);
+    });
+});
+
 //Exportamos el enrutador
 export default router;
