@@ -1895,39 +1895,17 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
         }
 
         //Almacenamos en una variable la consulta SQL
-        // const query = `
-        //     SELECT 
-        //         c.id_puesto,
-        //         SUM(c.dinamico_VA) AS dinamico_VA,
-        //         SUM(c.dinamico_NoVA) AS dinamico_NoVA,
-        //         SUM(c.estatico_VA) AS estatico_VA,
-        //         SUM(c.estatico_NoVA) AS estatico_NoVA,
-        //         (SELECT (SUM(tiempo_distancia_total))/numero_picadas FROM EN_IFM_STANDARD WHERE id_puesto = c.id_puesto) AS tiempo_distancia_total
-        //     FROM chimenea c
-        //     WHERE c.id_puesto = ?
-        //     GROUP BY c.id_puesto;
-        // `;
-
         const query = `
-            SELECT     
-                SUM(dinamico_noVA) AS dinamico_noVA,    
-                SUM(dinamico_VA) AS dinamico_VA,    
-                SUM(estatico_noVA) AS estatico_noVA, 
-                SUM(estatico_VA) AS estatico_VA,  
-                SUM(dinamico_noVA + dinamico_VA + estatico_noVA + estatico_VA) AS total_saturaciones,  
-                32.31 AS saturacion_total_esperada  
-            FROM (    
-                SELECT         
-                    id,         
-                    SUM(CDC + CDL + DC + D1 + W5 + W5_2 + M1 + AL + G1 + TT + TT_2 + PS14 + P2) / 455 * 100 / numero_picadas AS dinamico_noVA,  
-                    SUM(PS14 + DS10 + DS15 + DS14 + PS15 + DI21 + P2 + P2_1) / 455 * 100 / numero_picadas AS dinamico_VA,  
-                    SUM(TT + P2 + L2 + G1 + P5 + P2_1) / 455 * 100 / numero_picadas AS estatico_noVA,
-                    SUM(G1 + P2) / 455 * 100 / numero_picadas AS estatico_VA  
-                FROM EN_IFM_STANDARD    
-                WHERE id_puesto = ?    
-                GROUP BY id  
-            ) AS subquery  
-            LIMIT 0, 25;
+            SELECT 
+                c.id_puesto,
+                SUM(c.dinamico_VA) AS dinamico_VA,
+                SUM(c.dinamico_NoVA) AS dinamico_NoVA,
+                SUM(c.estatico_VA) AS estatico_VA,
+                SUM(c.estatico_NoVA) AS estatico_NoVA,
+                (SELECT (SUM(tiempo_distancia_total))/numero_picadas FROM EN_IFM_STANDARD WHERE id_puesto = c.id_puesto) AS tiempo_distancia_total
+            FROM chimenea c
+            WHERE c.id_puesto = ?
+            GROUP BY c.id_puesto;
         `;
 
         //Ejecutamos la consulta
