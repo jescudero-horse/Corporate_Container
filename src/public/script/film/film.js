@@ -177,7 +177,6 @@ function gestionarGraficoChimenea(data) {
             })
             //Controlamos los datos
             .then(data2 => {
-
                 //Iteramos por los datos obtenidos
                 data2.forEach(itemChimenea => {
                     //Almacenamos en el array los datos que necesitamos para generar el gráfico de chimenea
@@ -856,9 +855,7 @@ function generarTablasPorEtapa(etapas) {
         const f = etapasDeF[0].F;
         const numero_picadas = etapasDeF[0].numero_picadas
         const id_puesto = etapasDeF[0].id_puesto;
-        const actividad_en_minutos_x_picada = etapasDeF[0].nuevo_picadas;
-
-        console.log("ID1:", id_etapa1)
+        const actividad_en_minutos_x_picada = etapasDeF[0].nuevo;
 
         //Creamos una solicitud para obtener los datos de las etapas
         fetch(`/film/api/obtenerEtapas/${encodeURIComponent(FKey)}`, {
@@ -873,7 +870,7 @@ function generarTablasPorEtapa(etapas) {
             .then(etapasData => {
                 etapasDeF.forEach((etapaDeF, index) => {
                     /** Almacenamos las variable necesarias */
-                    var { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, G1_1, P2_1, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total } = inicializarVariablesEtapas(etapaDeF);
+                    var { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, G1_1, P2_1, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total, E2, TT_2, M2 } = inicializarVariablesEtapas(etapaDeF);
 
                     //En caso de que no haya una descripción para la etapa....
                     if (mote_etapa === null || mote_etapa === "null") {
@@ -934,11 +931,11 @@ function generarTablasPorEtapa(etapas) {
                                             ${f === 'X' ? 'bg-stone-200 text-black' : color_etapa} text-black"
                                         ${f !== 'X' ? `onclick="toggleVisibility('etapa-${FKey}-${referenciaComponente}')"` : ''}>
 
-                                        <span class="min-w-[150px]">Etapa: <strong>${nombre_etapa}</strong></span>
+                                        <span cla-ss="min-w-[150px]">Etapa: <strong>${nombre_etapa}</strong></span>
                                         <span class="min-w-[150px]">Descripción: <strong>${mote_etapa}</strong></span>
                                         ${f !== 'X' ? `<span class="min-w-[150px]">Componente: <strong>${referenciaComponente}</strong></span>` : ''}
                                         ${f !== 'X' ? `<span class="min-w-[150px]">Línea: <strong>${linea}</strong></span>` : ''}
-                                        <span class="min-w-[150px]"><i class="bi bi-stopwatch-fill"></i> <strong>${actividad_en_minutos_x_picada}</strong></span>
+                                        <span class="min-w-[150px]"><i class="bi bi-stopwatch-fill"></i> <strong>${nuevo_picadas}</strong></span>
 
                                         ${f !== 'X' ? `
                                             <button id="botonVisualizarEtapa" type="button" class="text-blue-500 ml-2" 
@@ -1158,6 +1155,15 @@ function generarTablasPorEtapa(etapas) {
                                         } else if (etapa.symbol === 'W5_2') {
                                             tiempoCalculado = W5_2;
                                             actividad_en_minutos_final += tiempoCalculado;
+                                        } else if (etapa.symbol === 'E2') {
+                                            tiempoCalculado = E2;
+                                            actividad_en_minutos_final += tiempoCalculado;
+                                        } else if (etapa.symbol === "TT_2") {
+                                            tiempoCalculado = TT_2;
+                                            actividad_en_minutos_final += tiempoCalculado;
+                                        } else if (etapa.symbol === 'M2') {
+                                            tiempoCalculado = M2;
+                                            actividad_en_minutos_final += tiempoCalculado;
                                         }
 
                                         if (speed === 10) {
@@ -1172,7 +1178,6 @@ function generarTablasPorEtapa(etapas) {
                                             valor = 1;
                                         }
                                         tiempoDesplazamiento = Math.round((distancia_total * valor * etapaDeF.cantidad_a_mover) / 100)
-
 
                                         return `
                                     <tr>
@@ -1230,18 +1235,18 @@ function generarTablasPorEtapa(etapas) {
                                 onStart: function (evt) {
                                     // Llenar el array 'orden' antes de que comience el cambio
                                     orden = Array.from(contenedorTablas.children).map(child => child.id);
-                                    console.log("Orden inicial: ", orden);
+                                    //console.log("Orden inicial: ", orden);
                                 },
-                                onEnd: function (evt) {
-                                    console.log("Orden antes de enviarlo al servidor:", orden);
+                                // onEnd: function (evt) {
+                                //     console.log("Orden antes de enviarlo al servidor:", orden);
 
-                                    // Actualiza el array 'orden' con los nuevos valores
-                                    orden = Array.from(contenedorTablas.children).map(child => child.id);
-                                    console.log("Orden actualizado: ", orden);
+                                //     // Actualiza el array 'orden' con los nuevos valores
+                                //     orden = Array.from(contenedorTablas.children).map(child => child.id);
+                                //     console.log("Orden actualizado: ", orden);
 
-                                    // Enviar el orden al backend
-                                    ordernarEtapa(orden);
-                                }
+                                //     // Enviar el orden al backend
+                                //     ordernarEtapa(orden);
+                                // }
                             });
                         })
                         .catch(error => {
@@ -2501,9 +2506,12 @@ function inicializarVariablesEtapas(etapaDeF) {
     const nuevo = etapaDeF.nuevo ? etapaDeF.nuevo : '0';
     const nuevo_picadas = etapaDeF.nuevo_picadas ? etapaDeF.nuevo_picadas : '0';
     const tiempo_distancia_total = etapaDeF.tiempo_distancia_total ? etapaDeF.tiempo_distancia_total : '0';
+    const E2 = etapaDeF.E2 ? etapaDeF.E2 : '0';
+    const TT_2 = etapaDeF.TT_2 ? etapaDeF.TT_2 : '0';
+    const M2 = etapaDeF.M2 ? etapaDeF.M2 : '0';
 
     //Devolvemos las variables
-    return { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, G1_1, P2_1, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total };
+    return { mote_etapa, referenciaComponente, nombre_etapa, actividad_en_minutos, id_etapa, distancia_total, TL_TV, numero_curvas, CDV_CDL, numero_cruces, NC, numero_puertas, NP, PS10, PS14, simbolo_especial, valor_simbolo_especial, DC221, TC_TL, DS10, CDL, CCPE, TC, CT10, PP1, TL, M1, DL, PDU34, PPU34, TV, PPD32, PDD34, PPU43, CHMAN, numberOfPackagesLoadedAtOnce, CHMAN_2, CHMAN_3, DC113, CDC, PS15, DI21, DS14, DS15, DC, D1, W5, TT, AL, P2, L2, G1, P5, G1_1, P2_1, W5_2, nuevo, nuevo_picadas, tiempo_distancia_total, E2, TT_2, M2 };
 }
 
 /**
@@ -2919,6 +2927,10 @@ function anyadirEtapa(id) {
                             mostrarModalEtapas();
                             break;
 
+                        case "Programa_Fabricacion":
+                            mostrarModalEtapas();
+                            break;
+
                         default:
                             break;
                     }
@@ -2927,6 +2939,8 @@ function anyadirEtapa(id) {
     }
 }
 
+
+//* REVISAR
 /**
  * Función para obtener la cantidad a expedir por cada referencia
  * @param {Array} referencias_validas Argumento que contiene las referencias válidas
@@ -3865,17 +3879,14 @@ function configurarLinea() {
             //En caso de las opciones sean programa de expedición o programa de recepción...
             case 'Programa_Expedicion_Forklift':
             case 'Programa_Recepcion':
+            case 'Programa_Fabricacion':
                 //Ocultamos el contenedor de la linea
                 contenedorLinea.hidden = true;
                 break;
 
-            //En caso de que el tipo de operación sea programa de fabricación...
-            case 'Programa_Fabricacion':
-                contenedorLinea.hidden = false;
-                break;
-
             default:
                 console.warn("Operación no reconocida:", tipoOperacion);
+                break;
         }
     });
 }
