@@ -3480,7 +3480,7 @@ router.get('/cantidadExpedir/:referencia/:tipo_operacion', (req, res) => {
                 console.error("> Error a la hora de obtener la cantidad a expedir: ", error);
                 return res.status(501).send("Error a la hora de obtener la cantidad a expedir: ", error);
             } else {
-                console.log("Resultados: ", result);
+                console.log("Resultados Q: ", result);
 
                 //Verificamos que el resultado contenga datos
                 if (result && result[0]) {
@@ -3587,7 +3587,7 @@ router.get('/cantidadExpedirHoras/:referencia/:tipo_operacion/:planta/:columna/:
 
             //Ejecutamos la query
             connection.query(query, [columna_2, tipo_operacion, columna_fabrica, planta, referencia, columna_hora, jornada_inicio, columna_hora, jornada_final], (error, result) => {
-                console.log(">>>>> OBTENER CANTIDAD EXPEDIR\n", connection.format(query, [columna, tipo_operacion, columna_fabrica, planta, referencia, columna_hora, jornada_inicio, columna_hora, jornada_final]));
+                console.log(">>>>> OBTENER CANTIDAD EXPEDIR\n", connection.format(query, [columna_2, tipo_operacion, columna_fabrica, planta, referencia, columna_hora, jornada_inicio, columna_hora, jornada_final]));
 
                 //Liberamos la conexión
                 connection.release();

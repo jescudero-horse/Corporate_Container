@@ -289,14 +289,43 @@ function renderizarGrafico() {
                     },
                     tooltip: {
                         callbacks: {
-                            label: context => `${context.label}: ${context.raw}%`
+                            label: context => ` ${context.raw}%`
+                        }
+                    },
+                    centerText: {
+                        display: true,
+                        text: `${saturacion.toFixed(2)}%`,
+                        color: '#ffffff',
+                        font: {
+                            size: 15,
+                            weight: 'bold'
                         }
                     }
                 },
                 responsive: false,
                 cutout: '70%',
                 rotation: -90
-            }
+            },
+            plugins: [{
+                id: 'centerText',
+                beforeDraw: chart => {
+                    const ctx = chart.ctx;
+                    const width = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
+                    const height = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
+                    const text = chart.config.options.plugins.centerText.text;
+                    const color = chart.config.options.plugins.centerText.color;
+                    const fontSize = chart.config.options.plugins.centerText.font.size;
+                    const fontWeight = chart.config.options.plugins.centerText.font.weight;
+
+                    ctx.save();
+                    ctx.font = `${fontWeight} ${fontSize}px Arial`;
+                    ctx.fillStyle = color;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(text, width, height);
+                    ctx.restore();
+                }
+            }]
         });
 
         //Creamos el lienzo para el gráfico de las actividades
