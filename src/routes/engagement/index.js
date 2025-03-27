@@ -3223,6 +3223,7 @@ router.get('/comprobarReferencias/:referencias/:tipo_operacion/:planta', (req, r
 
     //Almacenamos en un array las referencias obtenidas
     const array_referencias = referencias.split(' ');
+    const referencias_juntas = array_referencias.map(ref => `'${ref}'`).join(', ');
 
     //Creamos un nuevo arrray filtrado por referencias únicas
     const array_referencias_unicas = [...new Set(array_referencias)];
@@ -3249,11 +3250,39 @@ router.get('/comprobarReferencias/:referencias/:tipo_operacion/:planta', (req, r
         FROM
             ??
         WHERE
-            reference = ?
+            reference IN (${referencias_juntas})
         AND
             ?? = ?
     `;
 
+    getDBConnection((err, connection) => {
+        //En caso de que se produzca algún error...
+        if (err) {
+            console.error("> Error al conectar a la base de datos: ", err);
+            return res.status(500).send('Error al conectar con la base de datos: ', err);
+        }
+        connection.query(query, [tipo_operacion, columna_fabrica, planta], (error, result) => {
+
+            console.log(connection.format(query, [tipo_operacion, columna_fabrica, planta]));
+
+            //Liberamos la conexión
+            connection.release();
+
+            //En caso de que se produzca un error en la consulta
+            if (error) {
+                console.error("> Error: ", error);
+                return res.status(501).send('Error a la hora de comprobar si la referencia es válida: ', error);
+            }
+
+            //Verificamos si el resultado es mayor que 0 (referencia encontrada)
+            if (!result || result[0]['COUNT(*)'] <= 0) {
+                console.log("> No se encontró la referencia:", item);
+            }
+
+            return res.json({ validReferences: array_referencias_unicas });
+        });
+    });
+    /*
     //Creamos un array para almacenar las referencias válidas
     let referencias_finales = [];
     let totalConsultas = array_referencias_unicas.length;  //Número total de referencias a comprobar
@@ -3300,7 +3329,7 @@ router.get('/comprobarReferencias/:referencias/:tipo_operacion/:planta', (req, r
                 }
             });
         });
-    });
+    });*/
 });
 
 /**
