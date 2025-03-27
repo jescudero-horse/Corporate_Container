@@ -314,6 +314,76 @@ function queryOperacionSeleccionada(operacion_seleccionada) {
             `;
             break;
 
+        //En caso de que sea "Nacelle J 22bacs (UC)"
+        case 'Nacelle J 22bacs (UC)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, W5, M1, PS14, TT, G1, P2, E2, P2_1, TT_2, DS10, M1_2, nuevo, nuevo_picadas)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+
+        //En caso de que sea "Documentacion camión (UM)"
+        case 'Documentacion camión (UM)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, DC, D1, W5, TT, W5_2, M1, AL, nuevo, nuevo_picadas)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+
+        //En caso de que sea "Zipado (UM)"
+        case 'Zipado (UM)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, DC, D1, W5, G1, W5_2, M1, AL, nuevo, nuevo_picadas)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            `;
+            break;
+
+        //En caso de que sea "De stock a imagen camion (UM)"
+        case 'De stock a imagen camion (UM)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, PS14, CDC, DS10, CDL, nuevo, nuevo_picadas)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+
+        //En caso de que sea 'De imagen camion a muelle (UM)'
+        case 'De imagen camion a muelle (UM)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, PS14, CDC, DS10, CDL, nuevo, nuevo_picadas)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+
+        //En caso de que sea 'Plegado de vacíos (UM)'
+        case 'Plegado de vacíos (UM)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, DC, D1, W5, TT, TT_2, W5_2, M1, AL, nuevo, nuevo_picadas)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+
+        //<En caso de que sea 'De stock a carro (UM)'
+        case 'De stock a carro (UM)':
+            query = `
+                INSERT INTO
+                    EN_IFM_STANDARD (id_puesto, referencia_componente, cantidad_a_mover, F, mote, tipo_operacion, numero_picadas, linea, machine_used, speed, PP11, CDC, DS15, CDL, PS14, CDC_2, DI21, CDL_2, nuevo, nuevo_picadas)
+                VALUES
+                    (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            break;
+
         default:
             query = null;
             break;
@@ -512,142 +582,462 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
         //En caso de que sea "Descarga camión en muelle (UM)"
         case 'Descarga camión en muelle (UM)':
             data.push(
-                null, //Linea 
-                10, //Máquina usada
-                10, //Velocidad
-                (42 * cantidad_mover) / 100, //DC113
-                (6 * cantidad_mover) / 100, //CDC
-                (19 * cantidad_mover) / 100, //DS10
-                (6 * cantidad_mover) / 100, //CDL
-                (42 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (19 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100, //Actividad en minutos
-                ((42 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (19 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picada
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((42 * cantidad_mover) / 100), // DC113
+                Math.ceil((6 * cantidad_mover) / 100), // CDC
+                Math.ceil((19 * cantidad_mover) / 100), // DS10
+                Math.ceil((6 * cantidad_mover) / 100), // CDL
+                Math.ceil(
+                    (42 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100 +
+                    (19 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100
+                ), // Actividad en minutos
+                Math.ceil(
+                    (
+                        (42 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100 +
+                        (19 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
             );
             break;
 
         //En caso de que sea "De estantería a puesto inferior (UM)"
         case 'De estantería a puesto inferior (UM)':
             data.push(
-                null, //Linea 
-                10, //Máquina usada
-                10, //Velocidad
-                (44 * cantidad_mover) / 100, //PS15
-                (30 * cantidad_mover) / 100, //DI21
-                (6 * cantidad_mover) / 100, //CDL
-                (44 * cantidad_mover) / 100 + (30 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100, //Actividad en minutos
-                ((44 * cantidad_mover) / 100 + (30 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100) / numero_picadas, //Actividad en minuros X picada
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((44 * cantidad_mover) / 100), // PS15
+                Math.ceil((30 * cantidad_mover) / 100), // DI21
+                Math.ceil((6 * cantidad_mover) / 100), // CDL
+                Math.ceil(
+                    (44 * cantidad_mover) / 100 +
+                    (30 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100
+                ), // Actividad en minutos
+                Math.ceil(
+                    (
+                        (44 * cantidad_mover) / 100 +
+                        (30 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
             );
             break;
 
         //En caso de que sea "De imagen camión a stock (UM)"
         case 'De imagen camión a stock (UM)':
             data.push(
-                null, //Linea 
-                10, //Máquina usada
-                10, //Velocidad
-                (38 * cantidad_mover) / 100, //PS14
-                (6 * cantidad_mover) / 100, //CDC
-                (38 * cantidad_mover) / 100, //DS14
-                (6 * cantidad_mover) / 100, //CDL
-                (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100, //Actividad en minutos
-                ((38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100) / numero_picadas // Actividad en minutos X picada
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((38 * cantidad_mover) / 100), // PS14
+                Math.ceil((6 * cantidad_mover) / 100), // CDC
+                Math.ceil((38 * cantidad_mover) / 100), // DS14
+                Math.ceil((6 * cantidad_mover) / 100), // CDL
+                Math.ceil(
+                    (38 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100 +
+                    (38 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100
+                ), // Actividad en minutos
+                Math.ceil(
+                    (
+                        (38 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100 +
+                        (38 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
             );
             break;
 
         //En caso de que sea "De stock a estantería (UM)"
         case 'De stock a estantería (UM)':
             data.push(
-                null, //Linea 
-                10, //Máquina usada
-                10, //Velocidad
-                (38 * cantidad_mover) / 100, //PS14
-                (6 * cantidad_mover) / 100, //CDC
-                (49 * cantidad_mover) / 100, //DS15
-                (6 * cantidad_mover) / 100, //CDL
-                (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100, //Actividad en minutos
-                ((38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picadas
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((38 * cantidad_mover) / 100), // PS14
+                Math.ceil((6 * cantidad_mover) / 100), // CDC
+                Math.ceil((49 * cantidad_mover) / 100), // DS15
+                Math.ceil((6 * cantidad_mover) / 100), // CDL
+                Math.ceil(
+                    (38 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100 +
+                    (49 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100
+                ), // Actividad en minutos
+                Math.ceil(
+                    (
+                        (38 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100 +
+                        (49 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picadas
             );
-            console.log("actividad min: ", data[14])
             break;
 
         //En caso de que sea "De imagen camión a estantería (UM)"
         case 'De imagen camión a estantería (UM)':
             data.push(
-                null, //Linea 
-                10, //Máquina usada
-                10, //Velocidad
-                (38 * cantidad_mover) / 100, //PS14
-                (6 * cantidad_mover) / 100, //CDC
-                (49 * cantidad_mover) / 100, //DS15
-                (6 * cantidad_mover) / 100, //CDL
-                (38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100, //Actividad en minutos
-                ((38 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (49 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100) / numero_picadas //Actividad en mintos X picada
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((38 * cantidad_mover) / 100), // PS14
+                Math.ceil((6 * cantidad_mover) / 100), // CDC
+                Math.ceil((49 * cantidad_mover) / 100), // DS15
+                Math.ceil((6 * cantidad_mover) / 100), // CDL
+                Math.ceil(
+                    Math.ceil((38 * cantidad_mover) / 100) +
+                    Math.ceil((6 * cantidad_mover) / 100) +
+                    Math.ceil((49 * cantidad_mover) / 100) +
+                    Math.ceil((6 * cantidad_mover) / 100)
+                ), // Actividad en minutos
+                Math.ceil(
+                    Math.ceil(
+                        Math.ceil((38 * cantidad_mover) / 100) +
+                        Math.ceil((6 * cantidad_mover) / 100) +
+                        Math.ceil((49 * cantidad_mover) / 100) +
+                        Math.ceil((6 * cantidad_mover) / 100)
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
             );
             break;
 
         //En caso de que sea "Apertura (UM)"
         case 'Apertura (UM)':
             data.push(
-                null, //Linea 
-                10, //Máquina usada
-                10, //Velocidad
-                (4 * cantidad_mover) / 100, //DC
-                (6 * cantidad_mover) / 100, //D1
-                (1 * cantidad_mover) / 100, //W5
-                (20 * cantidad_mover) / 100, //TT
-                (7 * cantidad_mover) / 100, //M1
-                (2 * cantidad_mover) / 100, //AL
-                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (20 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100, //Actividad en minutos
-                ((4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (20 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picada
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((4 * cantidad_mover) / 100), // DC
+                Math.ceil((6 * cantidad_mover) / 100), // D1
+                Math.ceil((1 * cantidad_mover) / 100), // W5
+                Math.ceil((20 * cantidad_mover) / 100), // TT
+                Math.ceil((7 * cantidad_mover) / 100), // M1
+                Math.ceil((2 * cantidad_mover) / 100), // AL
+                Math.ceil(
+                    (4 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100 +
+                    (1 * cantidad_mover) / 100 +
+                    (20 * cantidad_mover) / 100 +
+                    (7 * cantidad_mover) / 100 +
+                    (2 * cantidad_mover) / 100
+                ), // Actividad en minutos
+                Math.ceil(
+                    (
+                        (4 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100 +
+                        (1 * cantidad_mover) / 100 +
+                        (20 * cantidad_mover) / 100 +
+                        (7 * cantidad_mover) / 100 +
+                        (2 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
             );
             break;
 
         //En caso de que sea "Gestión de residuos (UM)"
         case 'Gestión de residuos (UM)':
             data.push(
-                null, //Linea 
-                10, //Máquina usada
-                10, //Velocidad
-                (4 * cantidad_mover) / 100, //DC
-                (6 * cantidad_mover) / 100, //D1
-                (1 * cantidad_mover) / 100, //W5
-                (35 * cantidad_mover) / 100, //TT
-                (7 * cantidad_mover) / 100, //M1
-                (2 * cantidad_mover) / 100, //AL
-                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (35 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100, //Actividad en minutos
-                ((4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (35 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picada
-
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((4 * cantidad_mover) / 100), // DC
+                Math.ceil((6 * cantidad_mover) / 100), // D1
+                Math.ceil((1 * cantidad_mover) / 100), // W5
+                Math.ceil((35 * cantidad_mover) / 100), // TT
+                Math.ceil((7 * cantidad_mover) / 100), // M1
+                Math.ceil((2 * cantidad_mover) / 100), // AL
+                Math.ceil(
+                    (4 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100 +
+                    (1 * cantidad_mover) / 100 +
+                    (35 * cantidad_mover) / 100 +
+                    (7 * cantidad_mover) / 100 +
+                    (2 * cantidad_mover) / 100
+                ), // Actividad en minutos
+                Math.ceil(
+                    (
+                        (4 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100 +
+                        (1 * cantidad_mover) / 100 +
+                        (35 * cantidad_mover) / 100 +
+                        (7 * cantidad_mover) / 100 +
+                        (2 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
             );
             break;
 
         //En caso de que sea "Plegar y apilar (UC)"
         case 'Plegar y apilar (UC)':
             data.push(
-                null, //Linea 
-                10, //Máquina usada
-                10, //Velocidad
-                (1 * cantidad_mover) / 100, //P2
-                (1 * cantidad_mover) / 100, //L2
-                (1 * cantidad_mover) / 100, //G1
-                (2 * cantidad_mover) / 100, //P5
-                (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100, //Actividad en minutos
-                ((1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos X picada
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((1 * cantidad_mover) / 100), // P2
+                Math.ceil((1 * cantidad_mover) / 100), // L2
+                Math.ceil((1 * cantidad_mover) / 100), // G1
+                Math.ceil((2 * cantidad_mover) / 100), // P5
+                Math.ceil(
+                    (1 * cantidad_mover) / 100 +
+                    (1 * cantidad_mover) / 100 +
+                    (1 * cantidad_mover) / 100 +
+                    (2 * cantidad_mover) / 100
+                ), // Actividad en minutos
+                Math.ceil(
+                    (
+                        (1 * cantidad_mover) / 100 +
+                        (1 * cantidad_mover) / 100 +
+                        (1 * cantidad_mover) / 100 +
+                        (2 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
             );
             break;
 
         //En caso de que sea "De puesto inferior a carro (UC)"
         case 'De puesto inferior a carro (UC)':
             data.push(
-                null, //Linea 
-                10, //Máquina usada
-                10, //Velocidad
-                (1 * cantidad_mover) / 100, //G1_1
-                (1 * cantidad_mover) / 100, //W5
-                (1 * cantidad_mover) / 100, //P2_1
-                (2 * cantidad_mover) / 100, //W5_2
-                (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100, //Actividad en minutos
-                ((1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas // Actividad en minuto X picada
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((1 * cantidad_mover) / 100), // G1_1
+                Math.ceil((1 * cantidad_mover) / 100), // W5
+                Math.ceil((1 * cantidad_mover) / 100), // P2_1
+                Math.ceil((2 * cantidad_mover) / 100), // W5_2
+                Math.ceil(
+                    (1 * cantidad_mover) / 100 +
+                    (1 * cantidad_mover) / 100 +
+                    (1 * cantidad_mover) / 100 +
+                    (2 * cantidad_mover) / 100
+                ), // Actividad en minutos
+                Math.ceil(
+                    (
+                        (1 * cantidad_mover) / 100 +
+                        (1 * cantidad_mover) / 100 +
+                        (1 * cantidad_mover) / 100 +
+                        (2 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
             );
             break;
+
+        //En caso de que sea "Nacelle J 22bacs (UC)":
+        case 'Nacelle J 22bacs (UC)': +
+            data.push(
+                null, //Linea
+                10, //Linea
+                10, //Velocidad
+                (10 * cantidad_mover) / 100, //W5
+                (6 * cantidad_mover) / 100, //M1
+                (38 * cantidad_mover) / 100, //PS14
+                (40 * cantidad_mover) / 100, //TT
+                (2 * cantidad_mover) / 100, //G1
+                (1 * cantidad_mover) / 100, //P2
+                (2 * cantidad_mover) / 100, //E2
+                (2 * cantidad_mover) / 100, //PS2_1
+                (40 * cantidad_mover) / 100, //TT_2
+                (19 * cantidad_mover) / 100, //DS10
+                (7 * cantidad_mover) / 100, //M2
+                (10 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (38 * cantidad_mover) / 100 + (40 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 + (40 * cantidad_mover) / 100 + (19 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100, //Actividad en minutos
+                ((10 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (38 * cantidad_mover) / 100 + (40 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 + (1 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 + (40 * cantidad_mover) / 100 + (19 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100) / numero_picadas // Actividad en minutos x picadas
+            );
+            break;
+
+        //En el caso 'Documentacion camión (UM)'
+        case 'Documentacion camión (UM)':
+            data.push(
+                null, //Linea
+                10, //Linea
+                10, //Velocidad
+                (4 * cantidad_mover) / 100, //DC
+                (6 * cantidad_mover) / 100, //D1
+                (2 * cantidad_mover) / 100, //W5
+                (400 * cantidad_mover) / 100, //TT
+                (2 * cantidad_mover) / 100, //W5_2
+                (7 * cantidad_mover) / 100, //M1
+                (2 * cantidad_mover) / 100, //AL
+                (4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 + (400 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100, //Actividad en minutos
+                ((4 * cantidad_mover) / 100 + (6 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 + (400 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100 + (7 * cantidad_mover) / 100 + (2 * cantidad_mover) / 100) / numero_picadas //Actividad en minutos x numero picadas
+            )
+            break;
+
+        //En caso de que sea'Zipado (UM)'
+        case 'Zipado (UM)':
+            data.push(
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((4 * cantidad_mover) / 100), // DC
+                Math.ceil((6 * cantidad_mover) / 100), // D1
+                Math.ceil((2 * cantidad_mover) / 100), // W5
+                Math.ceil((4 * cantidad_mover) / 100), // G1
+                Math.ceil((2 * cantidad_mover) / 100), // W5_2
+                Math.ceil((7 * cantidad_mover) / 100), // M1
+                Math.ceil((2 * cantidad_mover) / 100), // AL
+                Math.ceil(
+                    (4 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100 +
+                    (2 * cantidad_mover) / 100 +
+                    (4 * cantidad_mover) / 100 +
+                    (2 * cantidad_mover) / 100 +
+                    (7 * cantidad_mover) / 100 +
+                    (2 * cantidad_mover) / 100
+                ), // Actividad en 
+                Math.ceil(
+                    (
+                        (4 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100 +
+                        (2 * cantidad_mover) / 100 +
+                        (4 * cantidad_mover) / 100 +
+                        (2 * cantidad_mover) / 100 +
+                        (7 * cantidad_mover) / 100 +
+                        (2 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
+            )
+            break;
+
+        //En caso de que sea 'De stock a imagen camion (UM)'
+        case 'De stock a imagen camion (UM)':
+            data.push(
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((38 * cantidad_mover) / 100), // PS14
+                Math.ceil((6 * cantidad_mover) / 100), // CDC
+                Math.ceil((19 * cantidad_mover) / 100), // DS10
+                Math.ceil((6 * cantidad_mover) / 100), // CDL
+                Math.ceil(
+                    (38 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100 +
+                    (19 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100
+                ), // Actividad en minutos
+                Math.ceil(
+                    (
+                        (38 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100 +
+                        (19 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
+            )
+            break;
+
+        //En caso de que swwa 'De imagen camion a muelle (UM)'
+        case 'De imagen camion a muelle (UM)':
+            data.push(
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((38 * cantidad_mover) / 100), // PS14
+                Math.ceil((6 * cantidad_mover) / 100), // CDC
+                Math.ceil((19 * cantidad_mover) / 100), // DS10
+                Math.ceil((6 * cantidad_mover) / 100), // CDL
+                Math.ceil(
+                    (38 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100 +
+                    (19 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100
+                ), // Actividad en minutos
+                Math.ceil(
+                    (
+                        (38 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100 +
+                        (19 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
+            );
+            break;
+
+        //En caso de que sea 'Plegado de vacíos (UM)'
+        case 'Plegado de vacíos (UM)':
+            data.push(
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((4 * cantidad_mover) / 100), // DC
+                Math.ceil((6 * cantidad_mover) / 100), // D1
+                Math.ceil((2 * cantidad_mover) / 100), // W5
+                Math.ceil((20 * cantidad_mover) / 100), // TT
+                Math.ceil((20 * cantidad_mover) / 100), // TT_2
+                Math.ceil((2 * cantidad_mover) / 100), // W5_2
+                Math.ceil((7 * cantidad_mover) / 100), // M1
+                Math.ceil((2 * cantidad_mover) / 100), // AL
+                Math.ceil(
+                    (4 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100 +
+                    (2 * cantidad_mover) / 100 +
+                    (20 * cantidad_mover) / 100 +
+                    (20 * cantidad_mover) / 100 +
+                    (2 * cantidad_mover) / 100 +
+                    (7 * cantidad_mover) / 100 +
+                    (2 * cantidad_mover) / 100 
+                ), // Actividad en minutos
+                Math.ceil(
+                    (
+                        (4 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100 +
+                        (2 * cantidad_mover) / 100 +
+                        (20 * cantidad_mover) / 100 +
+                        (20 * cantidad_mover) / 100 +
+                        (2 * cantidad_mover) / 100 +
+                        (7 * cantidad_mover) / 100 +
+                        (2 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
+            );
+            break;
+
+        //<En caso de que sea 'De stock a carro (UM)'
+        case 'De stock a carro (UM)':
+            data.push(
+                null, // Línea 
+                10, // Máquina usada
+                10, // Velocidad
+                Math.ceil((38 * cantidad_mover) / 100), // PP11
+                Math.ceil((6 * cantidad_mover) / 100), // CDC
+                Math.ceil((49 * cantidad_mover) / 100), // DS15
+                Math.ceil((6 * cantidad_mover) / 100), // CDL
+                Math.ceil((38 * cantidad_mover) / 100), // PS14
+                Math.ceil((6 * cantidad_mover) / 100), // CDC_2
+                Math.ceil((29 * cantidad_mover) / 100), // DL21
+                Math.ceil((9 * cantidad_mover) / 100), //CDL_3
+                Math.ceil(
+                    (38 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100 +
+                    (49 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100 +
+                    (38 * cantidad_mover) / 100 +
+                    (6 * cantidad_mover) / 100 +
+                    (29 * cantidad_mover) / 100 +
+                    (9 * cantidad_mover) / 100 
+                ), // Actividad en minutos
+                Math.ceil(
+                    (
+                        (38 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100 +
+                        (49 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100 +
+                        (38 * cantidad_mover) / 100 +
+                        (6 * cantidad_mover) / 100 +
+                        (29 * cantidad_mover) / 100 +
+                        (9 * cantidad_mover) / 100
+                    ) / numero_picadas
+                ) // Actividad en minutos X picada
+            )
+        break;
 
         default:
             break;
@@ -1505,17 +1895,39 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
         }
 
         //Almacenamos en una variable la consulta SQL
+        // const query = `
+        //     SELECT 
+        //         c.id_puesto,
+        //         SUM(c.dinamico_VA) AS dinamico_VA,
+        //         SUM(c.dinamico_NoVA) AS dinamico_NoVA,
+        //         SUM(c.estatico_VA) AS estatico_VA,
+        //         SUM(c.estatico_NoVA) AS estatico_NoVA,
+        //         (SELECT (SUM(tiempo_distancia_total))/numero_picadas FROM EN_IFM_STANDARD WHERE id_puesto = c.id_puesto) AS tiempo_distancia_total
+        //     FROM chimenea c
+        //     WHERE c.id_puesto = ?
+        //     GROUP BY c.id_puesto;
+        // `;
+
         const query = `
-            SELECT 
-                c.id_puesto,
-                SUM(c.dinamico_VA) AS dinamico_VA,
-                SUM(c.dinamico_NoVA) AS dinamico_NoVA,
-                SUM(c.estatico_VA) AS estatico_VA,
-                SUM(c.estatico_NoVA) AS estatico_NoVA,
-                (SELECT (SUM(tiempo_distancia_total))/numero_picadas FROM EN_IFM_STANDARD WHERE id_puesto = c.id_puesto) AS tiempo_distancia_total
-            FROM chimenea c
-            WHERE c.id_puesto = ?
-            GROUP BY c.id_puesto;
+            SELECT     
+                SUM(dinamico_noVA) AS dinamico_noVA,    
+                SUM(dinamico_VA) AS dinamico_VA,    
+                SUM(estatico_noVA) AS estatico_noVA, 
+                SUM(estatico_VA) AS estatico_VA,  
+                SUM(dinamico_noVA + dinamico_VA + estatico_noVA + estatico_VA) AS total_saturaciones,  
+                32.31 AS saturacion_total_esperada  
+            FROM (    
+                SELECT         
+                    id,         
+                    SUM(CDC + CDL + DC + D1 + W5 + W5_2 + M1 + AL + G1 + TT + TT_2 + PS14 + P2) / 455 * 100 / numero_picadas AS dinamico_noVA,  
+                    SUM(PS14 + DS10 + DS15 + DS14 + PS15 + DI21 + P2 + P2_1) / 455 * 100 / numero_picadas AS dinamico_VA,  
+                    SUM(TT + P2 + L2 + G1 + P5 + P2_1) / 455 * 100 / numero_picadas AS estatico_noVA,
+                    SUM(G1 + P2) / 455 * 100 / numero_picadas AS estatico_VA  
+                FROM EN_IFM_STANDARD    
+                WHERE id_puesto = ?    
+                GROUP BY id  
+            ) AS subquery  
+            LIMIT 0, 25;
         `;
 
         //Ejecutamos la consulta
@@ -2844,6 +3256,10 @@ router.get('/comprobarReferencias/:referencias/:tipo_operacion/:planta', (req, r
     } else if (tipo_operacion === 'Programa_Expedicion_Forklift') {
         columna_fabrica = 'compte_fournisseur';
         //columna_fabrica = 'compte_client';
+
+        //En caso de que el tipo de operación sea "Programa_Fabricacion"
+    } else if (tipo_operacion === "Programa_Fabricacion") {
+        columna_fabrica = "cpte_usine";
     }
 
     //Almacenamos en una variable la consulta SQL
@@ -3096,6 +3512,8 @@ router.get('/cantidadExpedirHoras/:referencia/:tipo_operacion/:planta/:columna/:
     //Variable para almacenar el nombre de la columna de la cantidad
     let columna_2;
 
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TIPO DE OPERACION: ", tipo_operacion);
+
     //Almacenamos en una variable la consulta SQL para obtener la hora de inicio y fin dell turno de una planta
     const query_jornada = `
         SELECT
@@ -3122,6 +3540,12 @@ router.get('/cantidadExpedirHoras/:referencia/:tipo_operacion/:planta/:columna/:
         columna_hora = 'heure_expedition';
         columna_fabrica = 'compte_fournisseur';
         columna_2 = 'quantitea_a_expedir';
+
+        //En caso de que sea "Programa_Fabricacion"
+    } else if (tipo_operacion === 'Programa_Fabricacion') {
+        columna_hora = "horodate_debut_periode";
+        columna_fabrica = "cpte_usine";
+        columna_2 = "besoin";
     }
 
     //Creamos la conexión a la base de datos
@@ -3311,7 +3735,7 @@ router.get('/obtenerValorCarga/:tipo_carga/:planta/:referencia/:tipo_operacion',
 
     //Controlamos el valor de la variable "tipo_carga"
     if (tipo_carga === 'UM') {
-        columna = 'nb_uc_par_um';
+        columna = 'nb_pieces_par_um';
 
     } else if (tipo_carga === 'UC') {
         columna = 'nb_pieces_par_uc';
@@ -3325,6 +3749,10 @@ router.get('/obtenerValorCarga/:tipo_carga/:planta/:referencia/:tipo_operacion',
         //En caso de que sea Programa de Recepcion
     } else if (tipo_operacion === 'Programa_Recepcion') {
         //columna_fabrica = 'compte_fournisseur';
+        columna_fabrica = 'compte_client';
+
+        //En caso de que sea "Programa_Fabricacion"
+    } else if (tipo_operacion === 'Programa_Fabricacion') {
         columna_fabrica = 'compte_client';
     }
 
@@ -3506,6 +3934,11 @@ router.get('/obtener-referencias/:tipo_operacion/:id_puesto/:planta', (req, res)
             columna_hora = "heure_expedition";
             break;
 
+        case "Programa_Fabricacion":
+            columna = "cpte_usine";
+            columna_hora = "horodate_debut_periode";
+            break;
+
         default:
             break;
     }
@@ -3524,7 +3957,7 @@ router.get('/obtener-referencias/:tipo_operacion/:id_puesto/:planta', (req, res)
             //En caso de que ocurra algun error en la consulta SQL
             if (erro1) {
                 //Enviamos el status
-                console.error("> Error en la ejecución de la consulta SQL: ", error1);
+                console.error("> Error en la ejecución de la consulta SQL: ", erro1);
                 return res.status(501).send('Error en la consulta SQL');
             }
 
