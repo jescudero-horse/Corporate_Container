@@ -51,6 +51,8 @@ async function fetchData() {
         //Almacenamos los puestos obtenidos
         const data = await response.json();
 
+        console.log("DATAAA -> ", data)
+
         //Llamamos al método para disponer los puestos en el panel superior
         gestionarPuesto(data);
 
@@ -118,11 +120,12 @@ function gestionarPuesto(data) {
                     id: item.id,
                     nombre: item.nombre_puesto,
                     conteo: sumaTotal_puesto,
-                    turno: item.turno
+                    turno: item.turno,
+                    numero: item.numero_puesto
                 });
 
-                //Ordenamos los puestos por el ID del mismo
-                conteosPorPuesto.sort((a, b) => a.id - b.id);
+                //Ordenamos los puestos por el número del mismo
+                conteosPorPuesto.sort((a, b) => a.numero_puesto - b.numero_puesto);
 
                 //Aumentamos el contador de peticiones
                 peticionesCompletadas++;

@@ -1814,6 +1814,8 @@ router.get('/obtenerPuestos', (req, res) => {
                 turnos t
             ON
                 p.id_turno = t.id
+            ORDER BY 
+                p.numero_puesto ASC
         `;
 
         //Ejecutamos la consulta
@@ -1828,7 +1830,7 @@ router.get('/obtenerPuestos', (req, res) => {
             }
 
             //En cualquier otro caso...
-            console.log("> Resultados: ", results);
+            console.log("> Resultados PUESTOS: ", results);
 
             //Enviamos la información y el estado
             return res.status(200).json(results);
