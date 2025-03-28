@@ -3303,13 +3303,15 @@ function subirEtapa(opcion) {
 
         console.log("Tipo de carga: ", tipo_carga, "\tTipo de operacion: ", operacion_seleccionada);
 
+        console.log("REFERENCIA: ", referencia_componente)
+
         //Separamos las referencias finales
         let referencias_finales = Array.isArray(referencia_componente)
             ? referencia_componente
             : referencia_componente.split(',');
 
-        //Serializamos el diccionario con las referencias y el número de embalahjes
-        referencia_embalaje = encodeURIComponent(JSON.stringify(referencia_embalaje));
+        //Serializamos el diccionario con las referencias y el número de embalajes
+        referencia_embalaje = encodeURIComponent(JSON.stringify(referencias_finales));
 
         //En caso de que opcion sea 1
         if (opcion == 1) {
@@ -3317,32 +3319,78 @@ function subirEtapa(opcion) {
             subirEtapaManual(referencia_embalaje);
         }
 
-        //Iteramos por las referencias finales
-        referencias_finales.forEach(referencia => {
-            //Preparamos la petición GET para obtener la cantidad a expedir
-            fetch(`/film/api/cantidadExpedirHoras/${referencia}/${tipo_operacion}/${planta}/${"quantite_de_forcage"}/${puestoID}`, {
-                method: "GET"
-            })
-                //Controlamos la respuesta
-                .then(response => {
-                    //En caso de que no sea correcta
-                    if (!response.ok) {
-                        throw new Error('Error fetching data');
-                    }
+        let referenciasQuery = referencias_finales.join(',');
 
-                    //Devolvemos la información
-                    return response.json();
-                })
-
-                //Controlamos los datos
-                .then(data => {
-                    //Almacenamos la cantidad a expedir
-                    cantidad_a_expedir = data[0].cantidad_expedir;
-
-                    //Llamamos a la función para obtener el valor de la carga
-                    obtenerValorCarga(referencia, cantidad_a_expedir, tipo_operacion, tipo_carga);
-                })
+        /*fetch(`/film/api/cantidadExpedirHoras/${referenciasQuery}/${tipo_operacion}/${planta}/${"quantite_de_forcage"}/${puestoID}`, {
+            method: "GET"
         })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error fetching data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            let cantidades = {};
+            data.forEach(item => {
+                cantidades[item.referencia] = item.cantidad_expedir;
+            });
+
+            // Obtener valores de carga en una sola petición
+            return fetch(`/film/api/obtenerValorCarga/${tipo_carga}/${planta}/${referenciasQuery}/${tipo_operacion}`, { method: "GET" });
+        })
+        .then(response => {
+            if (!response.ok) {
+                mostrarAlerta('Error al obtener el valor de la carga', 'La referencia no pertenece al turno del puesto', 'error', 0);
+                return;
+            }
+            return response.json();
+        })
+        .then(data => {
+            let referencia_embalaje_datos = {};
+
+            data.forEach(item => {
+                let cantidad_a_expedir = cantidades[item.reference] || 0;
+                let valor_carga = item.valor_carga;
+                let numero_embalajes = Math.ceil((cantidad_a_expedir / valor_carga));
+
+                referencia_embalaje_datos[item.reference] = numero_embalajes;
+            });
+
+            referencia_embalaje = referencia_embalaje_datos;
+            anyadirEtapaFinal();
+        })
+        .finally(() => {
+            mostrarAlerta("Etapa/s creada/s", null, null, 1);
+        });*/
+
+        fetch(`/film/api/obtenerDatos/${tipo_carga}/${planta}/${referenciasQuery}/${tipo_operacion}/${puestoID}`, {
+            method: "GET"
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error fetching data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            let referencia_embalaje_datos = {};
+
+            data.forEach(item => {
+                let cantidad_a_expedir = item.cantidad_expedir || 0;
+                let valor_carga = item.valor_carga || 1;
+                let numero_embalajes = Math.ceil(cantidad_a_expedir / valor_carga);
+
+                referencia_embalaje_datos[item.reference] = numero_embalajes;
+            });
+
+            referencia_embalaje = referencia_embalaje_datos;
+            anyadirEtapaFinal();
+        })
+        .finally(() => {
+            mostrarAlerta("Etapa/s creada/s", null, null, 1);
+        });
+    
     });
 }
 
