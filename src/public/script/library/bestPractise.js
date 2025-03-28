@@ -718,11 +718,6 @@ function renderTable(data) {
     const table = $('#dataTable').DataTable();
     table.clear();
 
-    //Hide the entities column
-    table.column
-
-    console.log("Datos de las buenas prácticas: ", data);
-
     //Iterate throw the data and display it into the dataTable
     data.forEach(item => {
         //Split the tags by ";"
