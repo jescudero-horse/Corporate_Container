@@ -92,7 +92,7 @@ function gestionarPuesto(data) {
     //Creamos una variable para almacenar el número de peticiones completadas
     let peticionesCompletadas = 0;
 
-    console.log("Data: ", data);
+    console.log("Data PUESTOS: ", data);
 
     //Almacenamos en una variable el número de puestos disponibles
     const totalPuestos = data.length;
@@ -2613,7 +2613,7 @@ function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
  */
 function calcularSaturacionTotal(conteosPorPuesto) {
     //Almacenamos en una variable el tiempo total en minutos 
-    const jornadaPorPuesto = 445;
+    const jornadaPorPuesto = 442;
     const numeroDePuestos = conteosPorPuesto.length;
     const jornadaTotal = jornadaPorPuesto * numeroDePuestos;
 

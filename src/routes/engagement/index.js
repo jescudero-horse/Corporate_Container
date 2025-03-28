@@ -4080,7 +4080,7 @@ router.get('/obtenerDatos/:tipo_carga/:planta/:referencia/:tipo_operacion/:puest
     const referenciasArray = referencia.split(',');
 
     let jornada_inicio, jornada_final;
-    let columna_hora, columna_fabrica, columna_2, columna_valor_carga;
+    let columna_hora, columna_fabrica, columna_fabrica2, columna_2, columna_valor_carga;
 
     // Obtener el inicio y fin de la jornada
     const query_jornada = `
@@ -4094,15 +4094,18 @@ router.get('/obtenerDatos/:tipo_carga/:planta/:referencia/:tipo_operacion/:puest
     if (tipo_operacion === 'Programa_Recepcion') {
         columna_hora = 'heure_de_la_periode';
         columna_fabrica = 'compte_client';
+        columna_fabrica2 = columna_fabrica;
         columna_2 = 'quantite_calculee_par_GPI';
         //columna_2 = 'quantite_de_forcage';
     } else if (tipo_operacion === 'Programa_Expedicion_Forklift') {
         columna_hora = 'heure_expedition';
         columna_fabrica = 'compte_fournisseur';
+        columna_fabrica2 = columna_fabrica;
         columna_2 = 'quantitea_a_expedir';
     } else if (tipo_operacion === 'Programa_Fabricacion') {
         columna_hora = "horodate_debut_periode";
         columna_fabrica = "cpte_usine";
+        columna_fabrica2 = "compte_client";
         columna_2 = "besoin";
     }
 
@@ -4138,7 +4141,7 @@ router.get('/obtenerDatos/:tipo_carga/:planta/:referencia/:tipo_operacion/:puest
                     POE p 
                 ON 
                     t.reference = p.reference
-                    AND t.${columna_fabrica} = p.${columna_fabrica}
+                    AND t.${columna_fabrica} = p.${columna_fabrica2}
                 WHERE 
                     t.?? = ? 
                     AND t.reference IN (?) 
