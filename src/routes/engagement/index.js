@@ -3284,9 +3284,17 @@ router.get('/comprobarReferencias/:referencias/:tipo_operacion/:planta', (req, r
     });
     /*
     //Creamos un array para almacenar las referencias válidas
-    let referencias_finales = [];
-    let totalConsultas = array_referencias_unicas.length;  //Número total de referencias a comprobar
-    let consultasRealizadas = 0;  //Contador de consultas realizadas
+    //let referencias_finales = [];
+
+    let referencias_finales = `'${referencias.split(" ").join("','")}'`;
+
+    console.log("Referencias finales: ", referencias_finales);
+
+    //Número total de referencias a comprobar
+    let totalConsultas = array_referencias_unicas.length;
+
+    //Contador de consultas realizadas
+    let consultasRealizadas = 0;
 
     //Creamos la conexión a la base de datos
     getDBConnection((err, connection) => {

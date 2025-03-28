@@ -3959,6 +3959,7 @@ router.get('/obtener-controlMatrix', (req, res) => {
     //Almacenamos en una variable la consulta SQL   
     const query = `
         SELECT 
+            bp.id,
             bp.title AS SECTION,
             CASE 
                 WHEN bp.factory = 'Sevilla' THEN bp.creation_date
@@ -3999,7 +4000,9 @@ router.get('/obtener-controlMatrix', (req, res) => {
         best_practise bp
     LEFT JOIN 
         bestPractiseApplied bpa
-        ON bp.id = bpa.idBestPractise;
+        ON bp.id = bpa.idBestPractise
+    ORDER BY
+        bp.id ASC
     `;
 
     //Ejecutamos la consulta
