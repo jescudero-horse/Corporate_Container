@@ -1807,6 +1807,7 @@ router.get('/obtenerPuestos', (req, res) => {
         const query = `
             SELECT
                 DISTINCT(p.id), p.numero_puesto, p.numero_operarios, p.nombre_puesto,
+                ROUND((COALESCE(SUM(eis.actividad_en_minutos + eis.nuevo_picadas), 0) / 442) * 100, 2) AS saturacion,
                 t.turno
             FROM
                 puestos p
@@ -1814,6 +1815,13 @@ router.get('/obtenerPuestos', (req, res) => {
                 turnos t
             ON
                 p.id_turno = t.id
+            LEFT JOIN 
+                EN_IFM_STANDARD eis 
+            ON 
+                p.id = eis.id_puesto
+            GROUP BY 
+                p.id,
+                p.nombre_puesto 
             ORDER BY 
                 p.numero_puesto ASC
         `;
@@ -1841,7 +1849,7 @@ router.get('/obtenerPuestos', (req, res) => {
 /**
  * End point para obener el conteo de Fs usando el ID del puesto
  */
-router.get('/tiempoTotal/:id_puesto', (req, res) => {
+/*router.get('/tiempoTotal/:id_puesto', (req, res) => {
     //Almacenamos el ID del puesto de los parámetros
     const id_puesto = req.params.id_puesto;
 
@@ -1880,7 +1888,7 @@ router.get('/tiempoTotal/:id_puesto', (req, res) => {
             res.json(results);
         })
     });
-});
+});*/
 
 /**
  * End point para obtener los datos de: dinámico - No VA //dinámico - VA //estático - VA

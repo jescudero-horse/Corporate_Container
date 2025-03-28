@@ -99,6 +99,33 @@ function gestionarPuesto(data) {
 
     //Iteramos por los datos del puesto
     data.forEach(item => {
+        console.log("PUESTOS -> ", item.saturacion, item.id)
+        //Almacenamos en el array la información necesarias
+        conteosPorPuesto.push({
+            id: item.id,
+            nombre: item.nombre_puesto,
+            conteo: item.saturacion,
+            turno: item.turno,
+            numero: item.numero_puesto
+        });
+
+        //Ordenamos los puestos por el número del mismo
+        conteosPorPuesto.sort((a, b) => a.numero_puesto - b.numero_puesto);
+
+
+        //Aumentamos el contador de peticiones
+        peticionesCompletadas++;
+
+        //En caso de que las peticiones se hayan completado
+        if (peticionesCompletadas === totalPuestos) {
+            //Establecemos a true la información
+            peticionesFinalizadas.puestos = true;
+
+            //Llamamos al método para controlar los datos para generar los gráficos
+            verificarFinalizacionDeDatos();
+        }
+
+        /*
         //Preparamos la petición GET para obtener el tiempo total de un puesto
         fetch(`/film/api/tiempoTotal/${item.id}`, { method: "GET" })
             //Controlamos la respuesta
@@ -141,7 +168,7 @@ function gestionarPuesto(data) {
             })
 
             //Controlamos el error
-            .catch(error => console.error('Error al cargar datos:', error));
+            .catch(error => console.error('Error al cargar datos:', error));*/
     });
 }
 
@@ -222,6 +249,8 @@ function renderizarGrafico() {
     const graficosContainer = document.getElementById('graficos-container');
     graficosContainer.innerHTML = '';
 
+    console.log("------------------------")
+
     //Iteramos sobre los datos del puesto
     conteosPorPuesto.forEach((puesto, index) => {
         //Creamos un div para el gráfico del puesto
@@ -254,13 +283,13 @@ function renderizarGrafico() {
         canvasSaturacion.width = 200;
         graficoContainer.appendChild(canvasSaturacion);
 
-        //Almacenamos en una variable la jornada laboral
+        /*//Almacenamos en una variable la jornada laboral
         const jornadaTotal = 442;
 
         //Almacenamos la saturación del puesto
-        const saturacion = (puesto.conteo / jornadaTotal) * 100;
+        const saturacion = (puesto.conteo / jornadaTotal) * 100;*/
 
-        console.log("Puesto conteo: ", puesto.conteo, "\nSaturacion: ", saturacion, "\tNombre del puesto: ", puesto.nombre);
+        console.log("Puesto conteo: ", puesto.conteo, "\nSaturacion: ", puesto.conteo, "\tNombre del puesto: ", puesto.nombre);
 
         /** Inicializamos la gráfica de la saturación */
         new Chart(canvasSaturacion, {
@@ -268,7 +297,7 @@ function renderizarGrafico() {
             data: {
                 labels: ['Tiempo Utilizado', 'Tiempo Libre'],
                 datasets: [{
-                    data: [saturacion.toFixed(2), (100 - saturacion).toFixed(2)],
+                    data: [puesto.conteo, (100 - puesto.conteo)],
                     backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(211, 211, 211, 0.3)'],
                     borderWidth: 1
                 }]
@@ -294,7 +323,7 @@ function renderizarGrafico() {
                     },
                     centerText: {
                         display: true,
-                        text: `${saturacion.toFixed(2)}%`,
+                        text: `${puesto.conteo}%`,
                         color: '#ffffff',
                         font: {
                             size: 15,
