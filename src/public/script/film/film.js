@@ -51,8 +51,6 @@ async function fetchData() {
         //Almacenamos los puestos obtenidos
         const data = await response.json();
 
-        console.log("DATAAA -> ", data)
-
         //Llamamos al método para disponer los puestos en el panel superior
         gestionarPuesto(data);
 
@@ -100,6 +98,7 @@ function gestionarPuesto(data) {
     //Iteramos por los datos del puesto
     data.forEach(item => {
         console.log("PUESTOS -> ", item.saturacion, item.id)
+        
         //Almacenamos en el array la información necesarias
         conteosPorPuesto.push({
             id: item.id,
@@ -239,12 +238,14 @@ function gestionarGraficoChimenea(data) {
 }
 
 /**
- * Función para representar los gráficos
+ * Función para renderizar el gráfico principal
  */
 function renderizarGrafico() {
-    //Almacenamos la instancia del contenedor de gráficos
+    //Creamos una instancia del contenedor principal
     const graficosContainer = document.getElementById('graficos-container');
     graficosContainer.innerHTML = '';
+
+    console.log("------------------------")
 
     //Iteramos sobre los datos del puesto
     conteosPorPuesto.forEach((puesto, index) => {
@@ -308,7 +309,7 @@ function renderizarGrafico() {
                     },
                     legend: {
                         labels: {
-                            color: '#ffffff',
+                            color: '#ffffff'
                         }
                     },
                     tooltip: {
@@ -358,77 +359,60 @@ function renderizarGrafico() {
         graficoContainer.appendChild(canvasChimenea);
 
         //Almacenamos en una variable los datos del puesto
-        const datosChimenea = conteoGraficoChimenea.filter(c => c.id === puesto.id);
-
-        console.log(datosChimenea)
+        const datosChimenea = conteoGraficoChimenea.find(c => c.id === puesto.id);
 
         //En caso de que haya datos
         if (datosChimenea) {
-            //Almacenamos en variables los datos necesarios 
+            /** Almacenamos en variables los datos necesarios */
+            const dinamico_NoVA = datosChimenea.dinamico_NoVA || 0;
+            const dinamico_VA = datosChimenea.dinamico_VA || 0;
+            const estatico_VA = datosChimenea.estatico_VA || 0;
+            const estatico_NoVA = datosChimenea.estatico_NoVA || 0;
+            const tiempo_distancia_total = datosChimenea.tiempo_distancia_total || 0;
             const total = 442;
-            const porcentajes = datosChimenea.map(item => ((item.minutos / total) * 100).toFixed(2));
-            //const porcentaje = total > 0 ? ((datosChimenea.minutos / total) * 100).toFixed(2) : 0;
-
-            // Array de colores para las actividades
-            const colores = [
-                'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)',
-                'rgba(255, 206, 86, 0.7)', 'rgba(75, 192, 132, 0.7)',
-                'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)'
-            ];
-
-            // Crear el dataset del gráfico
-            const datasets = datosChimenea.map((item, index) => ({
-                label: item.nombre,
-                data: [porcentajes[index]],
-                backgroundColor: colores[index % colores.length]
-            }));
+            const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / total) * 100).toFixed(2) : 0;
+            const porcentaje_VA = total > 0 ? ((dinamico_VA / total) * 100).toFixed(2) : 0;
+            const porcentaje_estatico_VA = total > 0 ? ((estatico_VA / total) * 100).toFixed(2) : 0;
+            const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / total) * 100).toFixed(2) : 0;
+            const porcentaje_tiempo_distancia_total = total > 0 ? ((tiempo_distancia_total / total) * 100).toFixed(2) : 0;
 
 
-            // Inicializamos la gráfica de la actividad
+            /** Inicializamos la gráfica de la actividad */
             new Chart(canvasChimenea, {
                 type: 'bar',
                 data: {
                     labels: ['Actividades'],
-                    datasets: datasets
+                    datasets: [
+                        { label: 'Dinamico NoVA', data: [porcentaje_NoVA], backgroundColor: '#024d7e', borderColor: '#024d7e', borderWidth: 1, stack: 'Stack 0' },
+                        { label: 'Dinamico VA', data: [porcentaje_VA], backgroundColor: '#0493f2', borderColor: '#0493f2', borderWidth: 1, stack: 'Stack 0' },
+                        { label: 'Estático VA', data: [porcentaje_estatico_VA], backgroundColor: '#67adea', borderColor: '#67adea', borderWidth: 1, stack: 'Stack 0' },
+                        { label: 'Estático NoVA', data: [porcentaje_estatico_NoVA], backgroundColor: '#ffffff', borderColor: '#ffffff', borderWidth: 1, stack: 'Stack 0' },
+                        { label: 'Tiempo desplazamiento', data: [porcentaje_tiempo_distancia_total], backgroundColor: '#7374cc', borderColor: '#7374cc', borderWidth: 1, stack: 'Stack 0' }
+                    ]
                 },
                 options: {
                     responsive: true,
                     plugins: {
                         legend: {
-                            display: false, // Ocultar la leyenda
+                            position: 'top',
                             labels: {
-                                color: '#ffffff', // Leyenda en blanco
-                                font: {
-                                    size: 11 // Tamaño de la fuente de la leyenda
-                                },
-                                textAlign: 'center',
-                                boxWidth: 20 // Tamaño del cuadro de color
+                                color: '#ffffff'
                             }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: context => `${context.dataset.label}: ${context.raw}%`
-                            }
-                        },
+                        }
                     },
                     scales: {
-                        x: {
-                            stacked: true, // Apilar las barras en el eje X
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
                             ticks: {
-                                color: '#ffffff' // Color de los valores del eje X
+                                stepSize: 20,
+                                color: '#ffffff',
+                                callback: value => `${value}%`
                             }
                         },
-                        y: {
-                            stacked: true, // Apilar las barras en el eje Y
-                            beginAtZero: true,
-                            max: 100, // El porcentaje no puede superar el 100%
-                            title: {
-                                display: true,
-                                text: 'Porcentaje (%)', // Título para el eje Y
-                                color: '#ffffff' // Color del título del eje Y
-                            },
+                        x: {
                             ticks: {
-                                color: '#ffffff' // Color de los valores del eje Y
+                                color: '#ffffff'
                             }
                         }
                     }
