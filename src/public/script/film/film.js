@@ -212,11 +212,8 @@ function gestionarGraficoChimenea(data) {
                     //Almacenamos en el array los datos que necesitamos para generar el gráfico de chimenea
                     conteoGraficoChimenea.push({
                         id: item.id,
-                        dinamico_NoVA: itemChimenea.dinamico_NoVA,
-                        dinamico_VA: itemChimenea.dinamico_VA,
-                        estatico_VA: itemChimenea.estatico_VA,
-                        estatico_NoVA: itemChimenea.estatico_NoVA,
-                        tiempo_distancia_total: itemChimenea.tiempo_distancia_total
+                        nombre: itemChimenea.nombre,
+                        minutos: itemChimenea.minutos,
                     });
                 });
 
@@ -248,8 +245,6 @@ function renderizarGrafico() {
     //Almacenamos la instancia del contenedor de gráficos
     const graficosContainer = document.getElementById('graficos-container');
     graficosContainer.innerHTML = '';
-
-    console.log("------------------------")
 
     //Iteramos sobre los datos del puesto
     conteosPorPuesto.forEach((puesto, index) => {
@@ -313,7 +308,7 @@ function renderizarGrafico() {
                     },
                     legend: {
                         labels: {
-                            color: '#ffffff'
+                            color: '#ffffff',
                         }
                     },
                     tooltip: {
@@ -363,60 +358,77 @@ function renderizarGrafico() {
         graficoContainer.appendChild(canvasChimenea);
 
         //Almacenamos en una variable los datos del puesto
-        const datosChimenea = conteoGraficoChimenea.find(c => c.id === puesto.id);
+        const datosChimenea = conteoGraficoChimenea.filter(c => c.id === puesto.id);
+
+        console.log(datosChimenea)
 
         //En caso de que haya datos
         if (datosChimenea) {
-            /** Almacenamos en variables los datos necesarios */
-            const dinamico_NoVA = datosChimenea.dinamico_NoVA || 0;
-            const dinamico_VA = datosChimenea.dinamico_VA || 0;
-            const estatico_VA = datosChimenea.estatico_VA || 0;
-            const estatico_NoVA = datosChimenea.estatico_NoVA || 0;
-            const tiempo_distancia_total = datosChimenea.tiempo_distancia_total || 0;
+            //Almacenamos en variables los datos necesarios 
             const total = 442;
-            const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / total) * 100).toFixed(2) : 0;
-            const porcentaje_VA = total > 0 ? ((dinamico_VA / total) * 100).toFixed(2) : 0;
-            const porcentaje_estatico_VA = total > 0 ? ((estatico_VA / total) * 100).toFixed(2) : 0;
-            const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / total) * 100).toFixed(2) : 0;
-            const porcentaje_tiempo_distancia_total = total > 0 ? ((tiempo_distancia_total / total) * 100).toFixed(2) : 0;
+            const porcentajes = datosChimenea.map(item => ((item.minutos / total) * 100).toFixed(2));
+            //const porcentaje = total > 0 ? ((datosChimenea.minutos / total) * 100).toFixed(2) : 0;
+
+            // Array de colores para las actividades
+            const colores = [
+                'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)',
+                'rgba(255, 206, 86, 0.7)', 'rgba(75, 192, 132, 0.7)',
+                'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)'
+            ];
+
+            // Crear el dataset del gráfico
+            const datasets = datosChimenea.map((item, index) => ({
+                label: item.nombre,
+                data: [porcentajes[index]],
+                backgroundColor: colores[index % colores.length]
+            }));
 
 
-            /** Inicializamos la gráfica de la actividad */
+            // Inicializamos la gráfica de la actividad
             new Chart(canvasChimenea, {
                 type: 'bar',
                 data: {
                     labels: ['Actividades'],
-                    datasets: [
-                        { label: 'Dinamico NoVA', data: [porcentaje_NoVA], backgroundColor: '#024d7e', borderColor: '#024d7e', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Dinamico VA', data: [porcentaje_VA], backgroundColor: '#0493f2', borderColor: '#0493f2', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Estático VA', data: [porcentaje_estatico_VA], backgroundColor: '#67adea', borderColor: '#67adea', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Estático NoVA', data: [porcentaje_estatico_NoVA], backgroundColor: '#ffffff', borderColor: '#ffffff', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Tiempo desplazamiento', data: [porcentaje_tiempo_distancia_total], backgroundColor: '#7374cc', borderColor: '#7374cc', borderWidth: 1, stack: 'Stack 0' }
-                    ]
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
                     plugins: {
                         legend: {
-                            position: 'top',
+                            display: false, // Ocultar la leyenda
                             labels: {
-                                color: '#ffffff'
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                stepSize: 20,
-                                color: '#ffffff',
-                                callback: value => `${value}%`
+                                color: '#ffffff', // Leyenda en blanco
+                                font: {
+                                    size: 11 // Tamaño de la fuente de la leyenda
+                                },
+                                textAlign: 'center',
+                                boxWidth: 20 // Tamaño del cuadro de color
                             }
                         },
+                        tooltip: {
+                            callbacks: {
+                                label: context => `${context.dataset.label}: ${context.raw}%`
+                            }
+                        },
+                    },
+                    scales: {
                         x: {
+                            stacked: true, // Apilar las barras en el eje X
                             ticks: {
-                                color: '#ffffff'
+                                color: '#ffffff' // Color de los valores del eje X
+                            }
+                        },
+                        y: {
+                            stacked: true, // Apilar las barras en el eje Y
+                            beginAtZero: true,
+                            max: 100, // El porcentaje no puede superar el 100%
+                            title: {
+                                display: true,
+                                text: 'Porcentaje (%)', // Título para el eje Y
+                                color: '#ffffff' // Color del título del eje Y
+                            },
+                            ticks: {
+                                color: '#ffffff' // Color de los valores del eje Y
                             }
                         }
                     }

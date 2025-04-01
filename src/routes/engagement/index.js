@@ -1905,7 +1905,7 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
         }
 
         //Almacenamos en una variable la consulta SQL
-        const query = `
+        /*const query = `
             SELECT 
                 c.id_puesto,
                 SUM(c.dinamico_VA) AS dinamico_VA,
@@ -1916,6 +1916,22 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
             FROM chimenea c
             WHERE c.id_puesto = ?
             GROUP BY c.id_puesto;
+        `;*/
+
+        const query = `
+            SELECT 
+                EN.id_puesto AS id, 
+                FS.name AS nombre, 
+                SUM(nuevo_picadas) AS minutos
+            FROM 
+                EN_IFM_STANDARD AS EN 
+            INNER JOIN 
+                FStandard_Name AS FS 
+            ON 
+                EN.F = FS.FStandard 
+            WHERE 
+                EN.id_puesto = ?
+            GROUP BY EN.F, EN.id_puesto;
         `;
 
         //Ejecutamos la consulta

@@ -30,7 +30,7 @@
                     value="" onclick="mostrarModalSeleccionPlanta()">
                 </button>
 
-                <!-- Contenedor para visualizar la fecha de la toma de datos 
+                <!-- Contenedor para visualizar la fecha de la toma de datos
                 <div id="contenedorTomaDatos"
                     class="bg-[#1f2937] p-4 rounded-lg shadow-md space-y-4 w-full animate-fadeInFromLeft animate-delay-200">
                     <h3 id="tomaDeDatosTitle" class="text-lg font-semibold text-center text-white">Toma de datos</h3>
@@ -152,6 +152,28 @@
 
                         <button class="btn btn-primary" onclick="graficoPrueba()"><i
                                 class="bi bi-bar-chart"></i></button>
+
+                        <!-- Contenedor de Glide (carrusel) -->
+                        <div class="glide" id="graficos-wrapper">
+                            <div class="glide__track" data-glide-el="track">
+                                <ul class="glide__slides" id="graficos-container">
+                                    <!-- Aquí se añaden los puestos -->
+                                </ul>
+                            </div>
+
+                            <!-- Botones de navegación -->
+                            <div class="glide__arrows" data-glide-el="controls">
+                                <button class="glide__arrow glide__arrow--left" data-glide-dir="<"
+                                    style="color: white;"><i class="bi bi-arrow-left-short"></i></button>
+                                <button class="glide__arrow glide__arrow--right" data-glide-dir=">"
+                                    style="color: white;"><i class="bi bi-arrow-right-short"></i></button>
+                            </div>
+
+                            <!-- Indicadores de posición -->
+                            <div class="glide__bullets" data-glide-el="controls[nav]">
+
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Parte inferior del contenido principal -->
