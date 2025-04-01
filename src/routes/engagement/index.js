@@ -1807,6 +1807,7 @@ router.get('/obtenerPuestos', (req, res) => {
         const query = `
             SELECT
                 DISTINCT(p.id), p.numero_puesto, p.numero_operarios, p.nombre_puesto,
+                ROUND((COALESCE(SUM(eis.actividad_en_minutos + eis.nuevo_picadas), 0) / 442) * 100, 2) AS saturacion,
                 t.turno
             FROM
                 puestos p
@@ -1814,6 +1815,15 @@ router.get('/obtenerPuestos', (req, res) => {
                 turnos t
             ON
                 p.id_turno = t.id
+            LEFT JOIN 
+                EN_IFM_STANDARD eis 
+            ON 
+                p.id = eis.id_puesto
+            GROUP BY 
+                p.id,
+                p.nombre_puesto 
+            ORDER BY 
+                p.numero_puesto ASC
         `;
 
         //Ejecutamos la consulta
@@ -1828,7 +1838,7 @@ router.get('/obtenerPuestos', (req, res) => {
             }
 
             //En cualquier otro caso...
-            console.log("> Resultados: ", results);
+            console.log("> Resultados PUESTOS: ", results);
 
             //Enviamos la información y el estado
             return res.status(200).json(results);
