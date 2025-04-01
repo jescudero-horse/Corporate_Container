@@ -51,8 +51,6 @@ async function fetchData() {
         //Almacenamos los puestos obtenidos
         const data = await response.json();
 
-        console.log("DATAAA -> ", data)
-
         //Llamamos al método para disponer los puestos en el panel superior
         gestionarPuesto(data);
 
@@ -100,6 +98,7 @@ function gestionarPuesto(data) {
     //Iteramos por los datos del puesto
     data.forEach(item => {
         console.log("PUESTOS -> ", item.saturacion, item.id)
+        
         //Almacenamos en el array la información necesarias
         conteosPorPuesto.push({
             id: item.id,
@@ -242,340 +241,89 @@ function gestionarGraficoChimenea(data) {
 }
 
 /**
- * Función para representar los gráficos
+ * Función para renderizar el gráfico principal
  */
 function renderizarGrafico() {
-    //Almacenamos la instancia del contenedor de gráficos
+    //Creamos una instancia del contenedor principal
     const graficosContainer = document.getElementById('graficos-container');
-    graficosContainer.innerHTML = '';
+    graficosContainer.innerHTML = ''; 
 
-    console.log("------------------------")
+    //Creamos el contenedor del gráfico
+    const graficoContainer = document.createElement('div');
+    graficoContainer.style.display = 'flex';
+    graficoContainer.style.justifyContent = 'center';
+    graficoContainer.style.alignItems = 'center';
+    graficoContainer.style.flexDirection = 'column';
+    graficoContainer.style.padding = '20px';
+    graficoContainer.style.borderRadius = '12px';
+    graficoContainer.style.backgroundColor = '#2c3e50';
+    graficoContainer.style.boxShadow = '0px 4px 10px rgba(0, 0, 0, 0.2)';
+    graficoContainer.style.width = '100%';
+    graficoContainer.style.height = '100%';
+    graficoContainer.style.margin = '0';
 
-    //Iteramos sobre los datos del puesto
-    conteosPorPuesto.forEach((puesto, index) => {
-        //Creamos un div para el gráfico del puesto
-        const graficoContainer = document.createElement('li');
+    //Creamos el lienzo para el gráfico
+    const canvasBarras = document.createElement('canvas');
+    canvasBarras.style.width = '100%';
+    canvasBarras.style.height = '100%';
+    graficoContainer.appendChild(canvasBarras);
 
-        //Añadimos la clase de Glide
-        graficoContainer.classList.add('glide__slide');
+    //Añadimos el contenedor del gráfico al DOM
+    graficosContainer.appendChild(graficoContainer);
 
-        //Aplicamos estilos al contenedor del gráfico del puesto
-        graficoContainer.style.display = 'flex';
-        graficoContainer.style.flexDirection = 'column';
-        graficoContainer.style.alignItems = 'center';
-        graficoContainer.style.margin = '10px';
-        graficoContainer.style.border = '1px solid #ddd';
-        graficoContainer.style.padding = '15px';
-        graficoContainer.style.borderRadius = '8px';
-        graficoContainer.style.backgroundColor = '#496183';
+    //Extraemos los datos para el gráfico
+    const nombresPuestos = conteosPorPuesto.map(puesto => puesto.nombre);
+    const conteos = conteosPorPuesto.map(puesto => puesto.conteo);
 
-        //Añadimos el ID del puesto al contenedor
-        graficoContainer.setAttribute('data-id', puesto.id);
-
-        //Añadimos el turno al contenedor
-        graficoContainer.setAttribute('data-turno', puesto.turno);
-
-        //Añadimos el gráfico al contenedor de gráficos principales
-        graficosContainer.appendChild(graficoContainer);
-
-        //Creamos el lienzo para el gráfico de la saturación
-        const canvasSaturacion = document.createElement('canvas');
-        canvasSaturacion.width = 200;
-        graficoContainer.appendChild(canvasSaturacion);
-
-        /*//Almacenamos en una variable la jornada laboral
-        const jornadaTotal = 442;
-
-        //Almacenamos la saturación del puesto
-        const saturacion = (puesto.conteo / jornadaTotal) * 100;*/
-
-        console.log("Puesto conteo: ", puesto.conteo, "\nSaturacion: ", puesto.conteo, "\tNombre del puesto: ", puesto.nombre);
-
-        /** Inicializamos la gráfica de la saturación */
-        new Chart(canvasSaturacion, {
-            type: 'doughnut',
-            data: {
-                labels: ['Tiempo Utilizado', 'Tiempo Libre'],
-                datasets: [{
-                    data: [puesto.conteo, (100 - puesto.conteo)],
-                    backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(211, 211, 211, 0.3)'],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                plugins: {
-                    title: {
-                        display: true,
-                        text: `Puesto: ${puesto.nombre}`,
-                        font: { size: 13 },
-                        color: '#ffffff',
-                        padding: { top: 5, bottom: 10 }
-                    },
-                    legend: {
-                        labels: {
-                            color: '#ffffff'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: context => ` ${context.raw}%`
-                        }
-                    },
-                    centerText: {
-                        display: true,
-                        text: `${puesto.conteo}%`,
-                        color: '#ffffff',
-                        font: {
-                            size: 15,
-                            weight: 'bold'
-                        }
-                    }
-                },
-                responsive: false,
-                cutout: '70%',
-                rotation: -90
-            },
-            plugins: [{
-                id: 'centerText',
-                beforeDraw: chart => {
-                    const ctx = chart.ctx;
-                    const width = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
-                    const height = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
-                    const text = chart.config.options.plugins.centerText.text;
-                    const color = chart.config.options.plugins.centerText.color;
-                    const fontSize = chart.config.options.plugins.centerText.font.size;
-                    const fontWeight = chart.config.options.plugins.centerText.font.weight;
-
-                    ctx.save();
-                    ctx.font = `${fontWeight} ${fontSize}px Arial`;
-                    ctx.fillStyle = color;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(text, width, height);
-                    ctx.restore();
-                }
+    //Inicializamos el gráfico con Chart.js
+    new Chart(canvasBarras, {
+        type: 'bar',
+        data: {
+            labels: nombresPuestos,
+            datasets: [{
+                label: 'Cantidad por Puesto',
+                data: conteos,
+                backgroundColor: 'rgba(41, 128, 185, 0.7)',
+                borderColor: 'rgba(41, 128, 185, 1)',
+                borderWidth: 1,
+                borderRadius: 5,
+                barPercentage: 0.7,
+                categoryPercentage: 0.7
             }]
-        });
-
-        //Creamos el lienzo para el gráfico de las actividades
-        const canvasChimenea = document.createElement('canvas');
-        canvasChimenea.height = 250;
-        graficoContainer.appendChild(canvasChimenea);
-
-        //Almacenamos en una variable los datos del puesto
-        const datosChimenea = conteoGraficoChimenea.find(c => c.id === puesto.id);
-
-        //En caso de que haya datos
-        if (datosChimenea) {
-            /** Almacenamos en variables los datos necesarios */
-            const dinamico_NoVA = datosChimenea.dinamico_NoVA || 0;
-            const dinamico_VA = datosChimenea.dinamico_VA || 0;
-            const estatico_VA = datosChimenea.estatico_VA || 0;
-            const estatico_NoVA = datosChimenea.estatico_NoVA || 0;
-            const tiempo_distancia_total = datosChimenea.tiempo_distancia_total || 0;
-            const total = 442;
-            const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / total) * 100).toFixed(2) : 0;
-            const porcentaje_VA = total > 0 ? ((dinamico_VA / total) * 100).toFixed(2) : 0;
-            const porcentaje_estatico_VA = total > 0 ? ((estatico_VA / total) * 100).toFixed(2) : 0;
-            const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / total) * 100).toFixed(2) : 0;
-            const porcentaje_tiempo_distancia_total = total > 0 ? ((tiempo_distancia_total / total) * 100).toFixed(2) : 0;
-
-
-            /** Inicializamos la gráfica de la actividad */
-            new Chart(canvasChimenea, {
-                type: 'bar',
-                data: {
-                    labels: ['Actividades'],
-                    datasets: [
-                        { label: 'Dinamico NoVA', data: [porcentaje_NoVA], backgroundColor: '#024d7e', borderColor: '#024d7e', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Dinamico VA', data: [porcentaje_VA], backgroundColor: '#0493f2', borderColor: '#0493f2', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Estático VA', data: [porcentaje_estatico_VA], backgroundColor: '#67adea', borderColor: '#67adea', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Estático NoVA', data: [porcentaje_estatico_NoVA], backgroundColor: '#ffffff', borderColor: '#ffffff', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Tiempo desplazamiento', data: [porcentaje_tiempo_distancia_total], backgroundColor: '#7374cc', borderColor: '#7374cc', borderWidth: 1, stack: 'Stack 0' }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                color: '#ffffff'
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                stepSize: 20,
-                                color: '#ffffff',
-                                callback: value => `${value}%`
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                color: '#ffffff'
-                            }
-                        }
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#ecf0f1'
                     }
                 }
-            });
-        }
-
-        /** Creamos el contenedor para los botones */
-        const botonesContainer = document.createElement('div');
-        botonesContainer.id = "botonesContainer";
-        botonesContainer.style.display = 'flex';
-        botonesContainer.style.justifyContent = 'center';
-        botonesContainer.style.gap = '8px';
-        botonesContainer.style.marginTop = '10px';
-
-        /** Botón para visualizar las etapas de un puesto */
-        const { botonInformeDetallado, botonEntrePuestos, button, botonEliminarPuesto } = creacionBotones();
-
-        //En caso de que haya un puesto
-        if (puesto.nombre !== "" || puesto.nombre !== null) {
-            //Añadimos los botones al contenedor
-            graficoContainer.appendChild(botonesContainer);
-        }
-
-        //Funcionalidad para visualizar la información del puesto de forma detallada
-        botonInformeDetallado.addEventListener('click', () => {
-            //Llamamos a la función para disponer el modal
-            modalPuestoDetallado(botonInformeDetallado.getAttribute('data-id'), botonInformeDetallado.getAttribute('data-nombre-puesto'));
-        });
-
-        botonInformeDetallado.setAttribute('hidden', 'true');
-
-        //Funcionalidad para crear el desplazamiento entre puestos
-        botonEntrePuestos.addEventListener('click', () => {
-            const idPuesto = botonEntrePuestos.getAttribute('data-id');
-            const rowData = [idPuesto, null, null];
-            const rowDataJson = encodeURIComponent(JSON.stringify(rowData));
-            window.open(`/film/visualizarPlano?data=${rowDataJson}`, "_blank");
-        });
-
-        //Funcionalidad para visualizar las etapas
-        button.addEventListener('click', () => {
-            //Llamos a la función para inicializar el botón de las etapas
-            inicializarBotonEtapas(button);
-
-            //Quitamos el resaltado de otros elementos
-            document.querySelectorAll('.resaltado').forEach(el => el.classList.remove('resaltado'));
-
-            //Buscar el <li> del contenedor del botón presionado
-            const li_elemento = event.target.closest('li');
-
-            //En caso de que lo encuentre
-            if (li_elemento) {
-                //Agregamos la clase
-                li_elemento.classList.add('resaltado');
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#ecf0f1',
+                        stepSize: 5
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#ecf0f1'
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
             }
-        });
-
-        //Funcionalidad para eliminar un puesto
-        botonEliminarPuesto.addEventListener('click', () => {
-            //Llamamos al método para disponer la alerta de confirmación de elemento
-            const idPuesto = botonEliminarPuesto.getAttribute('data-id');
-            confirmarEliminar("question", "Vas a eliminar este puesto... ¿Estas seguro de lo que vas hacer?", idPuesto, "puestos");
-        });
-
-        //Funcionalidad para ocultar el puesto
-        botonOcultarPuesto.addEventListener('click', () => {
-            //Creamos una instancia del LI
-            const li_elemento = event.target.closest('li');
-
-            //En caso de que se haya encontrado el elemento LI
-            if (li_elemento) {
-                //Agregamos la animación de ocultar el puesto
-                li_elemento.classList.add('ocultarElemento');
-
-                //Añadimos el elemento al array de puestos ocultos
-                puesto_ocultos.push(li_elemento);
-                setTimeout(() => {
-                    li_elemento.style.display = 'none';
-                }, 500);
-            }
-        });
-
-        /**
-         * Función para crear los botones y disponerlos en el puesto
-         * @returns Devuelve los botones formateados
-         */
-        function creacionBotones() {
-            /** Botón para visualizar las etapas */
-            const button = document.createElement('button');
-            button.innerHTML = '<i class="bi bi-eye"></i>';
-            button.className = "bg-blue-600 text-white py-1 px-2 rounded hover:bg-blue-500 transition duration-300";
-            button.setAttribute('data-id', puesto.id);
-            button.setAttribute('data-nombre-puesto', puesto.nombre);
-            botonesContainer.appendChild(button);
-
-            /** Botón para eliminar un puesto */
-            const botonEliminarPuesto = document.createElement('button');
-            botonEliminarPuesto.innerHTML = '<i class="bi bi-trash3"></i>';
-            botonEliminarPuesto.className = "bg-red-600 text-white py-1 px-2 rounded hover:bg-red-500 transition duration-300";
-            botonEliminarPuesto.setAttribute('data-id', puesto.id);
-            botonesContainer.appendChild(botonEliminarPuesto);
-
-            /** Botón para crear un desplazamiento entre puestos */
-            const botonEntrePuestos = document.createElement('button');
-            botonEntrePuestos.innerHTML = '<i class="bi bi-person-walking"></i>';
-            botonEntrePuestos.className = "bg-yellow-500 text-white py-1 px-2 rounded hover:bg-yellow-400 transition duration-300";
-            botonEntrePuestos.setAttribute('data-id', puesto.id);
-            botonesContainer.appendChild(botonEntrePuestos);
-
-            /**Botón para visualizar la información del puesto de forma detallada */
-            const botonInformeDetallado = document.createElement('button');
-            botonInformeDetallado.innerHTML = '<i class="bi bi-clipboard2-data-fill"></i>';
-            botonInformeDetallado.className = "bg-green-600 text-white py-1 px-2 rounded hover:bg-green-500 transition duration-300";
-            botonInformeDetallado.setAttribute('data-id', puesto.id);
-            botonInformeDetallado.setAttribute('data-nombre-puesto', puesto.nombre);
-            botonesContainer.appendChild(botonInformeDetallado);
-
-            /**Botón para ocultar el puesto */
-            botonOcultarPuesto = document.createElement('button');
-            botonOcultarPuesto.innerHTML = '<i class="bi bi-eye-slash-fill"></i>';
-            botonOcultarPuesto.className = "bg-gray-600 text-white py-1 px-2 rounded hover:bg-gray-500 transition duration-300 bg-gray-700";
-            botonOcultarPuesto.setAttribute('data-id', puesto.id);
-            botonesContainer.appendChild(botonOcultarPuesto);
-
-            //Devolvemos los botones
-            return { botonInformeDetallado, botonEntrePuestos, button, botonEliminarPuesto, botonOcultarPuesto };
         }
     });
-
-    //Creamos un contenedor vacio para añadirlo al final del slider
-    const dummySlide = document.createElement('li');
-    dummySlide.classList.add('glide__slide');
-    dummySlide.style.visibility = 'hidden';
-    graficosContainer.appendChild(dummySlide);
-
-    //Inicializamos Glide.js
-    const glide = new Glide('.glide', {
-        //Especificamos el tipo
-        type: 'slider',
-
-        //El número de elementos que se mostrarán al mismo tiempo
-        perView: 4,
-
-        //Espacio entre los elementos
-        gap: 20,
-
-        //Centramos la vista en el primer puesto
-        focusAt: 0,
-
-        //Configuramos los puntos de interrupción dependiendo de tipo de pantallas
-        breakpoints: {
-            1024: { perView: 2 },
-            768: { perView: 1 }
-        }
-    });
-
-    //Montamos el carrusel
-    glide.mount();
 }
 
 /**
