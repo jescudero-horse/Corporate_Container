@@ -297,7 +297,8 @@ function renderizarGrafico() {
         console.log("Puesto conteo: ", puesto.conteo, "\nSaturacion: ", puesto.conteo, "\tNombre del puesto: ", puesto.nombre);
 
         const conteoReal = puesto.conteo;
-        const conteoAjustado = Math.min(puesto.conteo, 100);
+        const conteoUtilizado = conteoReal;  // Usa el valor real para el tiempo utilizado
+        const conteoLibre = conteoReal > 100 ? 0 : 100 - conteoReal;  // Si el conteo es mayor a 100, no mostramos tiempo libre
 
         /** Inicializamos la gráfica de la saturación */
         new Chart(canvasSaturacion, {
@@ -305,7 +306,7 @@ function renderizarGrafico() {
             data: {
                 labels: ['Tiempo Utilizado', 'Tiempo Libre'],
                 datasets: [{
-                    data: [conteoAjustado, (100 - conteoAjustado).toFixed(2)],
+                    data: [conteoUtilizado, conteoLibre],  // Usamos los valores calculados
                     backgroundColor: ['rgba(217, 41, 41, 0.5)', 'rgba(34, 196, 74, 0.5)'],
                     borderColor: '#5b5b5b',
                     borderWidth: 0.5
@@ -323,7 +324,9 @@ function renderizarGrafico() {
                     },
                     tooltip: {
                         callbacks: {
-                            label: context => ` ${conteoReal}%`
+                            // Mostrar el valor real en el tooltip
+                            label: context => ` ${context.dataset.data[context.dataIndex]}%`  // Muestra el valor del segmento
+                            
                         }
                     },
                     centerText: {
