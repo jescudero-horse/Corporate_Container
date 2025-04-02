@@ -3168,34 +3168,36 @@ function graficoPrueba() {
     //Datos del gráfico
     const ctx = document.getElementById('graficoCanvas').getContext('2d');
 
-    //Creamos una variable para contener los datos
-    const datos = {
-        labels: ['7', '9', '11', '13'],
-        datasets: [
-            {
-                type: 'bar',
-                label: 'Porcentaje de Uso',
-                data: [40, 55, 30, 80],
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            },
-            {
-                type: 'line',
-                label: 'Tendencia',
-                data: [50, 50, 50, 50],
-                borderColor: 'rgba(255, 99, 132, 1)',
-                //backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderWidth: 2,
-                fill: true
-            }
-        ]
-    };
+    // Datos del gráfico
+    const data = [40, 55, 30, 80];
+    // Calcular la media
+    const suma = data.reduce((a, b) => a + b, 0);
+    const media = suma / data.length;
 
-    //Configuramos el gráfico
-    const config = {
+    //Inicializamos el gráfico
+    new Chart(ctx, {
         type: 'bar',
-        data: datos,
+        data: {
+            labels: ['7', '9', '11', '13'],
+            datasets: [
+                {
+                    type: 'line',
+                    label: `Media: (${media.toFixed(2)}%)`,
+                    data: data.map(() => media),
+                    borderColor: 'rgba(255, 99, 174, 1)',
+                    borderWidth: 2,
+                    pointRadius: 0
+                },
+                {
+                    type: 'bar',
+                    label: 'Porcentaje de Uso',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
         options: {
             responsive: true,
             plugins: {
@@ -3203,7 +3205,7 @@ function graficoPrueba() {
                     position: 'top',
                     labels: {
                         color: '#ffffff'
-                    }
+                    },
                 }
             },
             scales: {
@@ -3231,10 +3233,73 @@ function graficoPrueba() {
                 }
             }
         }
-    };
+    });
+    /*new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['7', '9', '11', '13'],
+            datasets: [{
+                label: 'Porcentaje de Uso',
+                data: data,
+                backgroundColor: 'rgba(243, 96, 216, 0.5)',
+                borderColor: 'rgba(241, 99, 234, 0.85)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#FFFFFF',
+                        generateLabels: (chart) => {
+                            const originalLabels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                            originalLabels.push({
+                                text: `Media: (${media.toFixed(2)}%)`,
+                                fillStyle: 'rgb(99, 120, 255)',
+                                strokeStyle: 'rgb(99, 120, 255)',
+                                lineWidth: 1,
+                                hidden: false
+                            });
+                            return originalLabels;
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            // Solo mostramos el valor de las barras en los tooltips
+                            return `Valor: ${tooltipItem.raw}`;
+                        }
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                intersect: false,
+            }
+        },
+        plugins: [{
+            id: 'lineaMedia',
+            afterDraw: function(chart) {
+                const { ctx, chartArea: { left, right }, scales: { y } } = chart;
+                const yPos = y.getPixelForValue(media);
 
-    //Inicializamos el gráfico
-    new Chart(ctx, config);
+                // Dibujar la línea de la media
+                ctx.save();
+                ctx.strokeStyle = 'rgb(99, 120, 255)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(left, yPos);
+                ctx.lineTo(right, yPos);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }]
+    });*/
 }
 
 /**
