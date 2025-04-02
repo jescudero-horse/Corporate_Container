@@ -1352,7 +1352,7 @@ router.get('/obtenerEtapasAgrupadasPuesto/:id_puesto', (req, res) => {
     
         const query = `
             SELECT 
-                EN.id_puesto, FS.name, SUM(cantidad_a_mover) AS cantidad_a_mover, COALESCE(SUM(distancia_total), 0) AS distancia_total, SUM(PS14) AS PS14, 
+                EN.id_puesto, FS.name, SUM(cantidad_a_mover) AS cantidad_a_mover, COALESCE(distancia_total, 0) AS distancia_total, SUM(PS14) AS PS14, 
                 SUM(DS10) AS DS10, SUM(CDL) AS CDL, SUM(CDC) AS CDC, SUM(M1) AS M1, SUM(PS15) AS PS15, SUM(DI21) AS DI21, SUM(DC113) AS DC113, numero_picadas, 
                 SUM(DS14) AS DS14, SUM(DS15) AS DS15, SUM(DC) AS DC, SUM(D1) AS D1, SUM(W5) AS W5, SUM(TT) AS TT, SUM(AL) AS AL, SUM(L2) AS L2, SUM(G1) AS G1, 
                 SUM(P5) AS P5, SUM(G1_1) AS G1_1, SUM(P2_1) AS P2_1, SUM(W5_2) AS W5_2, SUM(E2) AS E2, SUM(TT_1) AS TT_1, SUM(M2) AS M2, SUM(PP11) AS PP11, 
@@ -1823,14 +1823,15 @@ router.post('/anyadirDesplazamientoZona/:id_puesto/:distancia_total/:numero_curv
 /**
  * End point para actualizar la información del plano usando el ID del puesto y la informacion
  */
-router.post('/actualizarInformacionMapa/:id_etapa/:totalDistanceMeters/:curveCount/:puntosJSON/:numero_cruces/:numero_puertas/', (req, res) => {
+router.post('/actualizarInformacionMapa/:id_puesto/:totalDistanceMeters/:curveCount/:puntosJSON/:numero_cruces/:numero_puertas/:etapa_nombre', (req, res) => {
     //Almacenamos la informacion en las variables
-    let { id_etapa, totalDistanceMeters, curveCount, puntosJSON, numero_cruces, numero_puertas } = req.params;
+    let { id_puesto, totalDistanceMeters, curveCount, puntosJSON, numero_cruces, numero_puertas, etapa_nombre } = req.params;
 
+    //Variable para almacenar la consulta
     let query;
 
     //Controlamos los valores de los campos necesarios
-    if (!id_etapa || !totalDistanceMeters || !curveCount || !numero_cruces || !numero_puertas) {
+    if (!id_puesto || !totalDistanceMeters || !curveCount || !numero_cruces || !numero_puertas || !etapa_nombre) {
         return res.status(400).send("Faltan campos en la solicitud");
     }
 
@@ -1859,11 +1860,11 @@ router.post('/actualizarInformacionMapa/:id_etapa/:totalDistanceMeters/:curveCou
                 numero_cruces = ?,
                 numero_puertas = ?
             WHERE
-                id = ?
+                id_puesto = ? AND F = ?
             `;
 
         //Ejecutamos la consulta
-        connection.query(query, [totalDistanceMeters, curveCount, puntosJSON, numero_cruces, numero_puertas, id_etapa], (error, results) => {
+        connection.query(query, [totalDistanceMeters, curveCount, puntosJSON, numero_cruces, numero_puertas, id_puesto, etapa_nombre], (error, results) => {
             //Liberamos la conexion
             connection.release();
 
@@ -2783,7 +2784,7 @@ router.post('/actualizarInformacionEtapa/:puestoID/:distance_empty_zone/:number_
 /**
  * End point para eliminar un registros en especifico
  */
-router.delete('/eliminarRegistro/:id_elemento/:tabla/:id_etapa', (req, res) => {
+router.delete('/eliminarRegistro/:id_elemento/:tabla/:id_puesto', (req, res) => {
     /** Almacenamos las variables de los parámetros */
     const { id_elemento, tabla, id_puesto } = req.params;
 
@@ -2795,18 +2796,45 @@ router.delete('/eliminarRegistro/:id_elemento/:tabla/:id_etapa', (req, res) => {
         if (err) {
             res.status(500).send()
         }
+        
+        let control = Number(id_elemento), query, array_argumetos;
 
-        //Almacenamos en una variable la consulta SQL
-        const query = `
-            DELETE 
-            FROM
-                ${tabla}
-            WHERE
-                id = ?
-        `;
+        if (tabla === "EN_IFM_STANDARD") {
+            if(!isNaN(control)){
+                query = `
+                    DELETE 
+                    FROM
+                        ${tabla}
+                    WHERE
+                        id = ?
+                `;
+                array_argumetos = [id_elemento];
+            } else if(isNaN(control)){
+                query = `
+                    DELETE 
+                    FROM
+                        ${tabla}
+                    WHERE
+                        F = ?
+                    AND 
+                        id_puesto = ?
+                `;
+                array_argumetos = [id_elemento, id_puesto]
+            }
+        } else if (tabla === "puestos") {
+            query = `
+                DELETE 
+                FROM
+                    ${tabla}
+                WHERE
+                    id = ?
+            `;
+            array_argumetos = [id_elemento];
+        }
 
         //Ejecutamos la consulta
-        connection.query(query, [id_elemento], (error, results) => {
+        connection.query(query, array_argumetos, (error, results) => {
+            console.log("ELIMINAR!!!!!!!!!!!", connection.format(query, array_argumetos))
             //En caso de que falle
             if (error) {
                 console.error("> Error: ", error);

@@ -1,5 +1,5 @@
 //Creamos una variab le global para almacenar el ID de la etapa, la distancia total en metros y el numero de curvas
-let id_etapa, totalDistanceMeters, curveCount, points, ruta_plano, numero_cruces, numero_puertas, frecuencia_recorrido, maquina_usada, velocidad, descripcion;
+let id_etapa, totalDistanceMeters, curveCount, points, ruta_plano, numero_cruces, numero_puertas, frecuencia_recorrido, maquina_usada, velocidad, descripcion, etapa_nombre;
 
 /**
  * Función para obtener el plano
@@ -29,7 +29,7 @@ async function fetchData() {
     /** OBTENEMOS LOS DATOS DEL PLANO */
     try {
         //Llamamos al end point para obtener la información del plano
-        const response = await fetch(`/film/api/obtenerInformacionPlano/${id_etapa}`);
+        const response = await fetch(`/film/api/obtenerInformacionPlano/${id_puesto}`);
 
         //Controlamos la respuesta
         if (!response.ok) throw new Error('Error fetching data');
@@ -69,23 +69,10 @@ async function fetchData() {
         } else {
             if (rowData[2] === null || rowData[2] === undefined) {
                 //Almacenamos en la variable global el ID del puesto
-                id_etapa = rowData[0];
+                id_puesto = rowData[0];
 
                 //Inicializamos el mapa sin datos y mostramos el campo extra para la frecuencia del recorrido
                 inicializarMapa();
-
-                //Mostramos el input de la frecuencia del recorrido
-                document.getElementById('contenedorFrecuenciaRecorrido').removeAttribute('style');
-
-                /** Mostramos el input de la máquina uasada y la velocidad */
-                document.getElementById('contenedorMaquinaUsada').style.display = 'block';
-                document.getElementById('contenedorVelocidad').style.display = 'block';
-
-                //Mostrarmos el input de la descripción
-                document.getElementById('contenedorDescripcion').style.display = 'block';
-
-                //Llamamos a la función para disponer el botón de añadir la unióin entre etapas
-                inicializarBotonAnyadirUnion();
             }
         }
     } catch (error) {
@@ -121,7 +108,7 @@ function inicializarBotonAnyadirUnion() {
         const puntos = JSON.stringify(points);
 
         //Preparamos la solicitud POST para insertar el desplazamiento
-        fetch(`/film/api/anyadirDesplazamientoZona/${id_etapa}/${totalDistanceMeters}/${curveCount}/${puntos}/${numero_cruces}/${numero_puertas}/${frecuencia_recorrido}/${maquina_usada}/${velocidad}/${descripcion}`, {
+        fetch(`/film/api/anyadirDesplazamientoZona/${id_puesto}/${totalDistanceMeters}/${curveCount}/${puntos}/${numero_cruces}/${numero_puertas}/${frecuencia_recorrido}/${maquina_usada}/${velocidad}/${descripcion}`, {
             method: "POST"
         })
             //Controlamos la respuesta
@@ -298,8 +285,10 @@ function obtenerInformacionURL() {
     //Almacenamos los valores de los parámetros de la URL
     const rowData = JSON.parse(decodeURIComponent(rowDataJSON));
 
-    //Almacenamos en la variable global el ID de la etapa
-    id_etapa = rowData[1];
+    console.log("ROW DATA: ", rowData);
+
+    //Almacenamos en la variable global el ID de la etapa y el nombre de la etapa
+    id_puesto = rowData[0], etapa_nombre = rowData[1];
 
     //Devolvemos el ID del puesto
     return rowData;
@@ -329,14 +318,14 @@ function actualizarInformacionPlano() {
     const puntosJSON = JSON.stringify(points);
 
     //Comprobamos la información de las variables necesarias
-    if (!id_etapa || !totalDistanceMeters || !curveCount || totalDistanceMeters === 0 || numero_cruces === '' || numero_puertas == '') {
+    if (!id_puesto || !totalDistanceMeters || !curveCount || totalDistanceMeters === 0 || numero_cruces === '' || numero_puertas == '') {
         //Llamamos a la funcion para disponer la alerta de error
         mostrarAlertaMapa('Error', 'La información no puede estar vacía', 'error', 0);
 
         //En otro caso...
     } else {
         //Iniciamos la solicitud POST para actualizar la informacion del mapa
-        fetch(`/film/api/actualizarInformacionMapa/${id_etapa}/${totalDistanceMeters}/${curveCount}/${puntosJSON}/${numero_cruces}/${numero_puertas}`, {
+        fetch(`/film/api/actualizarInformacionMapa/${id_puesto}/${totalDistanceMeters}/${curveCount}/${puntosJSON}/${numero_cruces}/${numero_puertas}/${etapa_nombre}`, {
             method: "POST"
         })
 
@@ -503,7 +492,7 @@ function mostrarAlertaMapa(titulo, mensaje, icono, opcion) {
  */
 function desbloquearPlano() {
     //Inicializamos la solicitud POST para eliminar los datos del plano usando el ID de la etapa
-    fetch(`/film/api/actualizarInformacionMapa/${id_etapa}/${null}/${null}/${null}/${null}/${null}`, {
+    fetch(`/film/api/actualizarInformacionMapa/${id_puesto}/${null}/${null}/${null}/${null}/${null}`, {
         method: "POST"
     })
 
