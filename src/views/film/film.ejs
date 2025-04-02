@@ -20,31 +20,15 @@
         <div class="flex h-screen">
             <!-- Panel lateral izquierdo -->
             <div
-                class="w-full md:w-1/6 bg-[#212f4d] text-white p-6 rounded-lg shadow-lg flex flex-col items-center space-y-6 animate-slideInLeft">
-                <h2 class="text-2xl font-semibold tracking-wider mb-6 border-b-2 border-gray-600 pb-2">Panel de opciones
-                </h2>
+            class="bg-[#212f4d] text-white p-6 rounded-lg shadow-lg flex flex-col items-center space-y-6 animate-slideInLeft"
+            style="max-width: 480px !important; width: 400px !important;">
+            <h2 class="text-2xl font-semibold tracking-wider mb-6 border-b-2 border-gray-600 pb-2">Panel de opciones</h2>
 
                 <!-- Botón para mostrar la planta seleccionada -->
                 <button id="plantaSeleccionada"
                     class="flex items-center w-full justify-center bg-[#1f2937] hover:bg-[#4a6b8c] text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 hover:scale-110 hover:shadow-2xl space-x-3 animate-fadeInFromLeft focus:outline-none focus:ring-2 focus:ring-[#1f2937] focus:ring-opacity-50"
                     value="" onclick="mostrarModalSeleccionPlanta()">
                 </button>
-
-                <!-- Contenedor para visualizar la fecha de la toma de datos 
-                <div id="contenedorTomaDatos"
-                    class="bg-[#1f2937] p-4 rounded-lg shadow-md space-y-4 w-full animate-fadeInFromLeft animate-delay-200">
-                    <h3 id="tomaDeDatosTitle" class="text-lg font-semibold text-center text-white">Toma de datos</h3>
-                    <div class="flex justify-between text-white text-2xl font-bold">
-                        <div class="flex flex-col items-center">
-                            <span class="block">Inicio:</span>
-                            <span id="fechaInicio" class="block text-lg"></span>
-                        </div>
-                        <div class="flex flex-col items-center">
-                            <span class="block">Fin:</span>
-                            <span id="fechaFinal" class="block text-lg"></span>
-                        </div>
-                    </div>
-                </div> -->
 
                 <!-- Botón para visualizar la saturación total -->
                 <button id="visualizarInformeSaturacion"
@@ -59,7 +43,6 @@
                     onclick="generarInforme()">
                     <span><i class="bi bi-filetype-pdf"></i> Generar informe PDF</span>
                 </button>
-
 
                 <!-- Contenedor para visualizar la leyenda de colores -->
                 <div id="visualizarLeyenda"
@@ -83,10 +66,10 @@
 
                 <!-- Contenedor para visualizar el turno de la etapa -->
                 <div id="visualizarTurno"
-                    class="bg-[#1f2937] p-4 rounded-lg shadow-md space-y-4 w-full hidden animate-fadeInFromLeft animate-delay-200">
-                    <h3 id="jornadaLaboralTitle" class="text-lg font-semibold text-center text-white">Jornada Laboral
-                    </h3>
-                    <div class="flex justify-between text-white text-2xl font-bold">
+                    class="bg-[#1f2937] p-4 rounded-lg shadow-md space-y-4 max-w-[300px] hidden animate-fadeInFromLeft animate-delay-200">
+                    <h3 id="jornadaLaboralTitle" class="text-[14px] font-semibold text-center text-white">Jornada
+                        Laboral</h3>
+                    <div class="flex justify-between text-white text-[14px] font-bold">
                         <div class="flex flex-col items-center">
                             <span class="block">Inicio:</span>
                             <span id="jornadaInicio" class="block"></span>
@@ -98,17 +81,21 @@
                     </div>
                 </div>
 
-                <!-- Botón para añadir un puesto -->
-                <button id="anyadirPuesto"
-                    class="flex items-center w-full justify-center bg-[#2563eb] hover:bg-[#3b82f6] text-white font-semibold py-3 px-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105 hover:shadow-lg space-x-2 animate-fadeInFromLeft resaltadoBotones">
-                    <span><i class="bi bi-plus-square-fill"></i> Añadir puesto</span>
-                </button>
 
-                <!-- Botón para añadir una etapa-->
-                <button id="anyadirEtapa" style="display: none;"
-                    class="flex items-center w-full justify-center bg-[#2563eb] hover:bg-[#3b82f6] text-white font-semibold py-3 px-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105 hover:shadow-lg space-x-2 animate-fadeInFromLeft animate-delay-200 resaltadoBotones">
-                    <span><i class="bi bi-plus-square-fill"></i> Añadir etapa</span>
-                </button>
+                <!-- Contenedor para los botones en la misma línea -->
+                <div class="flex space-x-4">
+                    <!-- Botón para añadir un puesto -->
+                    <button id="anyadirPuesto"
+                        class="flex items-center w-full sm:w-auto justify-center bg-[#2563eb] hover:bg-[#3b82f6] text-white font-semibold py-3 px-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105 hover:shadow-lg space-x-2 animate-fadeInFromLeft resaltadoBotones">
+                        <span><i class="bi bi-plus-square-fill"></i> Añadir puesto</span>
+                    </button>
+
+                    <!-- Botón para añadir una etapa -->
+                    <button id="anyadirEtapa" style="display: none;"
+                        class="flex items-center w-full sm:w-auto justify-center bg-[#2563eb] hover:bg-[#3b82f6] text-white font-semibold py-3 px-4 rounded-lg shadow-md transform transition duration-300 hover:scale-105 hover:shadow-lg space-x-2 animate-fadeInFromLeft animate-delay-200 resaltadoBotones">
+                        <span><i class="bi bi-plus-square-fill"></i> Añadir etapa</span>
+                    </button>
+                </div>
 
                 <!-- Buscador de etapas -->
                 <input id="buscadorEtapa" type="search" name="q" style="display: none;"
@@ -132,6 +119,7 @@
                         <i class="bi bi-eye-fill"></i>
                         <span id="conteoPuestosOcultos"></span>
                     </button>
+
                     <!-- Parte superior del contenido principal -->
                     <div class="flex-1 bg-white p-4 mb-4 rounded-lg shadow">
                         <div class="flex items-center justify-between">
@@ -150,13 +138,15 @@
                             </div>
                         </div>
 
-                        <button class="btn btn-primary" onclick="graficoPrueba()"><i
+                        <button class="btn btn-primary" onclick="graficoPrueba()" hidden><i
                                 class="bi bi-bar-chart"></i></button>
 
-                                <div id="graficos-container" class="flex justify-center items-center mt-6" style="height: 500px; width: 100%;">
-                                    <!-- El gráfico se renderizará aquí -->
-                                </div>
-                                
+                        <div id="graficos-container" class="flex justify-center items-center mt-6"
+                            style="height: 500px; width: 100%;">
+                            <!-- El gráfico se renderizará aquí -->
+                        </div>
+
+                        <br>
                     </div>
 
                     <!-- Parte inferior del contenido principal -->

@@ -1907,15 +1907,18 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
         //Almacenamos en una variable la consulta SQL
         const query = `
             SELECT 
-                c.id_puesto,
-                SUM(c.dinamico_VA) AS dinamico_VA,
-                SUM(c.dinamico_NoVA) AS dinamico_NoVA,
-                SUM(c.estatico_VA) AS estatico_VA,
-                SUM(c.estatico_NoVA) AS estatico_NoVA,
-                (SELECT (SUM(tiempo_distancia_total))/numero_picadas FROM EN_IFM_STANDARD WHERE id_puesto = c.id_puesto) AS tiempo_distancia_total
-            FROM chimenea c
-            WHERE c.id_puesto = ?
-            GROUP BY c.id_puesto;
+                EN.id_puesto AS id, 
+                FS.name AS nombre, 
+                SUM(nuevo_picadas) AS minutos
+            FROM 
+                EN_IFM_STANDARD AS EN 
+            INNER JOIN 
+                FStandard_Name AS FS 
+            ON 
+                EN.F = FS.FStandard 
+            WHERE 
+                EN.id_puesto = ?
+            GROUP BY EN.F, EN.id_puesto
         `;
 
         //Ejecutamos la consulta
@@ -1938,7 +1941,6 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
         });
     });
 });
-
 /**
  * End point para obtener la cantidad de UM a mover usando la referencia del componente
  */
@@ -4049,6 +4051,107 @@ router.put('/actualizarOrden/:array_ordenado', (req, res) => {
                 }
             });
         }
+    });
+});
+
+/**
+ * End ponint para obtener los datos para subir la etapa a un puesto
+ */
+router.get('/obtenerDatos/:tipo_carga/:planta/:referencia/:tipo_operacion/:puesto_id', (req, res) => {
+    //Almacenamos los datos de los parámetros
+    const { tipo_carga, planta, referencia, tipo_operacion, puesto_id } = req.params;
+
+    //Almacenamos las referencias separadas por ","
+    const referenciasArray = referencia.split(',');
+
+    //Variables para almacenar los datos necesarios
+    let jornada_inicio, jornada_final, columna_hora, columna_fabrica, columna_fabrica2, columna_2, columna_valor_carga;
+
+    //Consulta SQL para obtener el inicio y fin de la jornada
+    const query_jornada = `
+        SELECT t.jornada_inicio, t.jornada_fin 
+        FROM puestos p 
+        INNER JOIN turnos t ON p.id_turno = t.id 
+        WHERE p.id = ?;
+    `;
+
+    //Añadimos un control por tipo dè operación para obtener el nombre de las columnas
+    if (tipo_operacion === 'Programa_Recepcion') {
+        columna_hora = 'heure_de_la_periode';
+        columna_fabrica = 'compte_client';
+        columna_fabrica2 = columna_fabrica;
+        columna_2 = 'quantite_calculee_par_GPI';
+    } else if (tipo_operacion === 'Programa_Expedicion_Forklift') {
+        columna_hora = 'heure_expedition';
+        columna_fabrica = 'compte_fournisseur';
+        columna_fabrica2 = columna_fabrica;
+        columna_2 = 'quantitea_a_expedir';
+    } else if (tipo_operacion === 'Programa_Fabricacion') {
+        columna_hora = "horodate_debut_periode";
+        columna_fabrica = "cpte_usine";
+        columna_fabrica2 = "compte_client";
+        columna_2 = "besoin";
+    }
+
+    //Operación ternaría para saber la columna de valor de carga
+    columna_valor_carga = tipo_carga === 'UM' ? 'nb_pieces_par_um' : 'nb_pieces_par_uc';
+
+    //Conexión a la BD
+    getDBConnection((err, connection) => {
+        if (err) {
+            console.error("> Error de conexión: ", err);
+            return res.status(500).send('Error al conectar con la base de datos');
+        }
+
+        //Obtenemos la jornada de trabajo
+        connection.query(query_jornada, [puesto_id], (errorJornada, resultJornada) => {
+            if (errorJornada || resultJornada.length === 0) {
+                console.error("> Error obteniendo jornada: ", errorJornada);
+                connection.release();
+                return res.status(500).send('Error al obtener la jornada');
+            }
+
+            //Almacenamos las jornadas correspondientes
+            jornada_inicio = resultJornada[0].jornada_inicio;
+            jornada_final = resultJornada[0].jornada_fin;
+
+            //Consulta SQL
+            const query = `
+                SELECT 
+                    t.reference, 
+                    SUM(t.??)/15 AS cantidad_expedir, 
+                    p.?? AS valor_carga
+                FROM ?? t
+                JOIN 
+                    POE p 
+                ON 
+                    t.reference = p.reference
+                    AND t.${columna_fabrica} = p.${columna_fabrica2}
+                WHERE 
+                    t.?? = ? 
+                    AND t.reference IN (?) 
+                    AND t.?? >= ? 
+                    AND t.?? <= ?
+                GROUP BY t.reference;
+            `;
+
+            //Ejecutamos consulta combinada
+            connection.query(query, [columna_2, columna_valor_carga, tipo_operacion, columna_fabrica, planta, referenciasArray, columna_hora, jornada_inicio, columna_hora, jornada_final], (error, result) => {
+                console.log(">>>>> QUERY FINAL:\n", connection.format(query, [columna_2, columna_valor_carga, tipo_operacion, columna_fabrica, planta, referenciasArray, columna_hora, jornada_inicio, columna_hora, jornada_final]));
+
+                connection.release();
+
+                if (error) {
+                    console.error("> Error ejecutando la consulta: ", error);
+                    return res.status(500).send('Error al obtener los datos');
+                }
+
+                console.log("Datos obtenidos:", result);
+
+                //Devolvemos los datos
+                res.json(result);
+            });
+        });
     });
 });
 

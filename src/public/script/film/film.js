@@ -13,6 +13,9 @@ let cantidad_referencias = 0;
 //Variable que contiene los datos para el gráfico de chimenea
 let conteoGraficoChimenea = [];
 
+//Variable de control para gráfico del puesto
+let chartPuesto = null;
+
 //Creamos un array donde contendrá la información para representar los gráficos
 let peticionesFinalizadas = {
     puestos: false,
@@ -98,7 +101,7 @@ function gestionarPuesto(data) {
     //Iteramos por los datos del puesto
     data.forEach(item => {
         console.log("PUESTOS -> ", item.saturacion, item.id)
-        
+
         //Almacenamos en el array la información necesarias
         conteosPorPuesto.push({
             id: item.id,
@@ -211,11 +214,8 @@ function gestionarGraficoChimenea(data) {
                     //Almacenamos en el array los datos que necesitamos para generar el gráfico de chimenea
                     conteoGraficoChimenea.push({
                         id: item.id,
-                        dinamico_NoVA: itemChimenea.dinamico_NoVA,
-                        dinamico_VA: itemChimenea.dinamico_VA,
-                        estatico_VA: itemChimenea.estatico_VA,
-                        estatico_NoVA: itemChimenea.estatico_NoVA,
-                        tiempo_distancia_total: itemChimenea.tiempo_distancia_total
+                        nombre: itemChimenea.nombre,
+                        minutos: itemChimenea.minutos,
                     });
                 });
 
@@ -241,54 +241,154 @@ function gestionarGraficoChimenea(data) {
 }
 
 /**
- * Función para renderizar el gráfico principal
+ * Función para renderizar los gráficos
  */
 function renderizarGrafico() {
-    //Creamos una instancia del contenedor principal
+    //Contendor de los gráficos
     const graficosContainer = document.getElementById('graficos-container');
-    graficosContainer.innerHTML = ''; 
+    graficosContainer.innerHTML = '';
 
-    //Creamos el contenedor del gráfico
-    const graficoContainer = document.createElement('div');
-    graficoContainer.style.display = 'flex';
-    graficoContainer.style.justifyContent = 'center';
-    graficoContainer.style.alignItems = 'center';
-    graficoContainer.style.flexDirection = 'column';
-    graficoContainer.style.padding = '20px';
-    graficoContainer.style.borderRadius = '12px';
-    graficoContainer.style.backgroundColor = '#2c3e50';
-    graficoContainer.style.boxShadow = '0px 4px 10px rgba(0, 0, 0, 0.2)';
-    graficoContainer.style.width = '100%';
-    graficoContainer.style.height = '100%';
-    graficoContainer.style.margin = '0';
+    //Configuramos el contenedor de los gráficos
+    graficosContainer.style.display = 'flex';
+    graficosContainer.style.justifyContent = 'center';
+    graficosContainer.style.alignItems = 'center';
+    graficosContainer.style.gap = '15px';
+    graficosContainer.style.width = '100%';
+    graficosContainer.style.transition = 'all 0.3s ease-in-out';
 
-    //Creamos el lienzo para el gráfico
-    const canvasBarras = document.createElement('canvas');
-    canvasBarras.style.width = '100%';
-    canvasBarras.style.height = '100%';
-    graficoContainer.appendChild(canvasBarras);
+    //Contenedor para el gráfico de puesto
+    const contenedor_grafico_puesto = document.createElement('div');
+    contenedor_grafico_puesto.style.flex = '0';
+    contenedor_grafico_puesto.style.maxWidth = '0';
+    contenedor_grafico_puesto.style.padding = '15px';
+    contenedor_grafico_puesto.style.borderRadius = '10px';
+    contenedor_grafico_puesto.style.backgroundColor = '#34495e';
+    contenedor_grafico_puesto.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.2)';
+    contenedor_grafico_puesto.style.display = 'flex';
+    contenedor_grafico_puesto.style.flexDirection = 'column';
+    contenedor_grafico_puesto.style.alignItems = 'center';
+    contenedor_grafico_puesto.style.justifyContent = 'center';
+    contenedor_grafico_puesto.style.overflow = 'hidden';
+    contenedor_grafico_puesto.style.transition = 'all 0.3s ease-in-out';
 
-    //Añadimos el contenedor del gráfico al DOM
-    graficosContainer.appendChild(graficoContainer);
+    //Lienzo para el gráfico de la saturación
+    const lienzo_grafico_puesto = document.createElement('canvas');
+    lienzo_grafico_puesto.width = 200;
+    lienzo_grafico_puesto.height = 200;
+    contenedor_grafico_puesto.appendChild(lienzo_grafico_puesto);
 
-    //Extraemos los datos para el gráfico
-    const nombresPuestos = conteosPorPuesto.map(puesto => puesto.nombre);
-    const conteos = conteosPorPuesto.map(puesto => puesto.conteo);
+    //Lienzo para el gráfico de chimenea
+    const lienzo_grafico_chimenea_canvas = document.createElement('canvas');
+    lienzo_grafico_chimenea_canvas.width = 250;
+    lienzo_grafico_chimenea_canvas.height = 200;
+    contenedor_grafico_puesto.appendChild(lienzo_grafico_chimenea_canvas);
 
-    //Inicializamos el gráfico con Chart.js
-    new Chart(canvasBarras, {
+    //Contenedor para los botones
+    const contenedor_botones = document.createElement('div');
+    contenedor_grafico_puesto.appendChild(contenedor_botones);
+
+    //Contenedor para el gráfico principal
+    const contenedor_grafico_principal = document.createElement('div');
+    contenedor_grafico_principal.style.flex = '1';
+    contenedor_grafico_principal.style.maxWidth = '100%';
+    contenedor_grafico_principal.style.height = '545px';
+    contenedor_grafico_principal.style.padding = '15px';
+    contenedor_grafico_principal.style.borderRadius = '10px';
+    contenedor_grafico_principal.style.backgroundColor = '#2c3e50';
+    contenedor_grafico_principal.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.2)';
+    contenedor_grafico_principal.style.display = 'flex';
+    contenedor_grafico_principal.style.alignItems = 'center';
+    contenedor_grafico_principal.style.justifyContent = 'center';
+    contenedor_grafico_principal.style.transition = 'all 0.3s ease-in-out';
+
+    //Gráfico principal
+    const grafico_principal = document.createElement('canvas');
+    grafico_principal.style.width = '100%';
+    grafico_principal.style.height = '100%';
+    contenedor_grafico_principal.appendChild(grafico_principal);
+
+    //Agregamos los contenedores al principal
+    graficosContainer.appendChild(contenedor_grafico_puesto);
+    graficosContainer.appendChild(contenedor_grafico_principal);
+
+    //Variables necesarias para enviar al gráfico de puesto
+    const nombre_puestos = conteosPorPuesto.map(puesto => puesto.nombre),
+        conteos = conteosPorPuesto.map(puesto => puesto.conteo),
+        id_puestos = conteosPorPuesto.map(puesto => puesto.id);
+
+    //Instancia de los gráficos
+    const ctxBarras = grafico_principal.getContext('2d'),
+        ctxPuesto = lienzo_grafico_puesto.getContext('2d'),
+        ctxChimenea = lienzo_grafico_chimenea_canvas.getContext('2d');
+
+    //Gráfic chimenea
+    const chartChimenea = new Chart(ctxChimenea, {
         type: 'bar',
         data: {
-            labels: nombresPuestos,
+            labels: ['Label1'],
+            datasets: []
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#ffffff',
+                        font: {
+                            size: 11
+                        },
+                        textAlign: 'center',
+                        boxWidth: 20 
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: context => `${context.dataset.label}: ${context.raw}%`
+                    }
+                },
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    ticks: {
+                        color: '#ffffff'
+                    }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Porcentaje (%)',
+                        color: '#ffffff'
+                    },
+                    ticks: {
+                        color: '#ffffff'
+                    }
+                }
+            }
+        },
+        //plugins: [ChartDataLabels]
+    });
+
+    //Gráfico principal
+    const chartBarras = new Chart(ctxBarras, {
+        type: 'bar',
+        data: {
+            labels: nombre_puestos,
             datasets: [{
-                label: 'Cantidad por Puesto',
+                label: 'Puestos',
                 data: conteos,
                 backgroundColor: 'rgba(41, 128, 185, 0.7)',
                 borderColor: 'rgba(41, 128, 185, 1)',
-                borderWidth: 1,
-                borderRadius: 5,
-                barPercentage: 0.7,
-                categoryPercentage: 0.7
+                borderWidth: 2,
+                borderRadius: 8,
+                barPercentage: 0.8,
+                categoryPercentage: 0.8,
+                hoverBackgroundColor: 'rgba(41, 128, 185, 1)',
+                hoverBorderColor: 'rgba(41, 128, 185, 1)',
+                hoverBorderWidth: 2
             }]
         },
         options: {
@@ -298,8 +398,16 @@ function renderizarGrafico() {
                 legend: {
                     display: true,
                     labels: {
-                        color: '#ecf0f1'
+                        color: '#ecf0f1',
+                        font: { size: 14 }
                     }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderRadius: 8,
+                    boxPadding: 10
                 }
             },
             scales: {
@@ -307,23 +415,217 @@ function renderizarGrafico() {
                     beginAtZero: true,
                     ticks: {
                         color: '#ecf0f1',
-                        stepSize: 5
+                        stepSize: 5,
+                        font: { size: 12 }
                     },
                     grid: {
-                        color: 'rgba(255, 255, 255, 0.1)'
+                        color: 'rgba(255, 255, 255, 0.2)',
+                        borderDash: [5, 5]
                     }
                 },
                 x: {
                     ticks: {
-                        color: '#ecf0f1'
+                        color: '#ecf0f1',
+                        font: { size: 12 },
+                        autoSkip: true, 
+                        maxRotation: 45,
+                        minRotation: 30
                     },
-                    grid: {
-                        display: false
-                    }
+                    grid: { display: false }
+                }
+            },
+            /**
+             * Función para desplegar los gráficos detallados del puesto
+             * @param {*} event Evento click
+             * @param {*} elements Barra del gráfico principal
+             */
+            onClick: (event, elements) => {
+                //En  caso de que haya puestos
+                if (elements.length > 0) {
+                    //Almacenamos las variables necesarias
+                    const index = elements[0].index,
+                        id_puesto = id_puestos[index],
+                        nombre_puesto = nombre_puestos[index],
+                        conteoSeleccionado = conteos[index];
+    
+                    //Array con los colores para la leyenda
+                    const colores = [
+                        'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)', 'rgba(75, 192, 132, 0.7)',
+                        'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)'
+                    ];
+    
+                    //Variable donde almacenará los datos para la disposición del gráfico de chimenea
+                    const datasets = conteoGraficoChimenea.map((item, index) => ({
+                        label: item.nombre,
+                        data: [item.minutos],
+                        backgroundColor: colores[index % colores.length],
+                        id_puesto: item.id
+                    }));
+    
+                    //Configuramos el contenedor del gráfico del puesto
+                    contenedor_grafico_puesto.style.flex = '0.3';
+                    contenedor_grafico_puesto.style.maxWidth = '30%';
+                    contenedor_grafico_principal.style.flex = '0.7';
+                    contenedor_grafico_principal.style.maxWidth = '70%';
+    
+                    //Creamos una instancia del botón para añadir una etapa
+                    const boton_anyadir_etapa = document.getElementById('anyadirEtapa');
+    
+                    //Aplicamos el estilo de resaltado
+                    boton_anyadir_etapa.classList.add('resaltadoBotones');
+    
+                    //Aplicamos el atributo 'onclick'
+                    boton_anyadir_etapa.setAttribute('onclick', `anyadirEtapa(${id_puesto})`);
+    
+                    //Mostramos el botón
+                    boton_anyadir_etapa.style.display = 'block';
+    
+                    //Creamos una instancia del buscador
+                    const buscador_etapas = document.getElementById('buscadorEtapa');
+    
+                    //Mostramos el buscador
+                    buscador_etapas.style.display = 'block';
+    
+                    //Añadimos el título al encabezado de la sección de las etapas
+                    document.getElementById('tituloPrincipalEtapasDisponibles').textContent = "Etapas disponibles para el puesto: " + nombre_puesto;
+    
+                    //Llamamos a la función para disponer los gráficos del puesto
+                    actualizarGraficoPuesto(chartPuesto, chartChimenea, nombre_puesto, conteoSeleccionado, id_puesto, datasets);
+    
+                    //Llamamos a la función para disponer las etapas del puesto
+                    obtenerEtapas(id_puesto);
+    
+                    //Llamamos a la función para disponer el turno
+                    obtenerTurno(id_puesto);
                 }
             }
         }
     });
+    
+
+    //En caso de que el puesto exista
+    if (chartPuesto) {
+        //Lo destruimos
+        chartPuesto.destroy();
+    }
+
+    //Configuramos el gráfico del puesto
+    chartPuesto = new Chart(ctxPuesto, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [0, 0],
+                backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(211, 211, 211, 0.3)'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    font: { size: 13 },
+                    color: '#ffffff',
+                    padding: { top: 5, bottom: 10 }
+                },
+                legend: {
+                    labels: { color: '#ffffff' }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: context => ` ${context.raw}%`
+                    }
+                },
+                centerText: {
+                    text: ''
+                }
+            },
+            responsive: false,
+            cutout: '70%',
+            rotation: -90
+        },
+        plugins: [centerTextPlugin]
+    });
+}
+
+//Variable para la saturación central del puesto
+const centerTextPlugin = {
+    id: 'centerText',
+    beforeDraw: (chart) => {
+        const { width, height, ctx } = chart;
+        const text = chart.options.plugins.centerText.text;
+
+        if (!text) return; 
+
+        ctx.save();
+
+        //Calculamos el radio de la gráfica
+        const chartArea = chart.chartArea;
+        const doughnutRadius = (chartArea.right - chartArea.left) / 3;
+
+        //Configuramos el texto
+        const fontSize = doughnutRadius / 4.5;
+        ctx.font = `bold ${fontSize}px Arial`;
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        //Calculamos la posición del texto en el centro de la gráfica
+        const centerX = (chartArea.left + chartArea.right) / 2;
+        const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+        //Establecemos el texto dentro de la gráfica
+        ctx.fillText(text, centerX, centerY);
+
+        ctx.restore();
+    }
+};
+
+/**
+ * Función para disponer los datos en el gráfico del puesto
+ * @param {chart} chartPuesto Argumento que contiene la instancia del gráfico del puesto
+ * @param {chart} chartChimenea Argumento que contiene la instancia del gráfico de chimenea
+ * @param {String} nombre Argumento que contiene el nombre del puesto
+ * @param {int} conteo Argumento que contiene la saturación
+ * @param {int} id_puesto Argumento que contiene el ID del puesto
+ * @param {Array} datasets Argumento que contiene los datos de las etapas con sus tiempos
+ * @returns NA
+ */
+function actualizarGraficoPuesto(chartPuesto, chartChimenea, nombre, conteo, id_puesto, datasets) {
+    //Comprobamos si los gráficos del puesto estan bien instanciados
+    if (!chartPuesto || !chartChimenea) return;
+
+    //Almacenamos en una variables los datos depurados
+    const datasets_depurados = datasets.map(dataset => ({
+        ...dataset,
+        data: dataset.data.map(d => (typeof d === 'number' && !isNaN(d)) ? d : 0)
+    }));
+
+    //Almacenamos en una variable los datos del puesto en cuestión
+    const datos_filtrados = datasets_depurados.filter(data => data.id_puesto === id_puesto);
+
+    //Almacenamos en variable los datos
+    const valores = datos_filtrados.map(data => data.data[0]), etiquetas = datos_filtrados.map(data => data.label), colores = datos_filtrados.map(data => data.backgroundColor);
+
+    //Actualizamos el gráfico donut
+    chartPuesto.data.labels = ['Tiempo Utilizado', 'Tiempo Libre'];
+    chartPuesto.data.datasets[0].data = [conteo, 100 - conteo];
+    chartPuesto.data.datasets[0].backgroundColor = ['rgba(231, 76, 60, 0.7)', 'rgba(46, 204, 113, 0.7)'];
+    chartPuesto.options.plugins.title.text = `Puesto: ${nombre}`;
+    chartPuesto.options.plugins.centerText.text = `${conteo}%`;
+    chartPuesto.update();
+
+    //Actualizamos el gráfico de chimenea
+    chartChimenea.data.labels = ['Actividades'];
+    chartChimenea.data.datasets = datos_filtrados.map((data, index) => ({
+        label: data.label,
+        data: [valores[index]],
+        backgroundColor: colores[index % colores.length],
+        borderColor: 'rgba(0, 0, 0, 0.3)',
+        borderWidth: 1
+    }));
+
+    chartChimenea.update();
 }
 
 /**
@@ -343,7 +645,7 @@ function inicializarBotonEtapas(button) {
     //Establecemos color al fondo del botón
     button.style.backgroundColor = "#7b8f8f";
 
-    //ALmacenamos el último botón pulsado
+    //Almacenamos el último botón pulsado
     ultimoBotonPulsado = button;
 
     //Almacenamos el ID del puesto de los atributos del botón
@@ -448,6 +750,9 @@ function disponerTurno(turno, jornadaInicio, jornadaFin) {
     if (turno || jornadaInicio || jornadaFin) {
         //Establecemos el título del modal
         document.getElementById('jornadaLaboralTitle').innerHTML = `Jornada Laboral: ${turno_final} ${icono}`;
+
+        //Configuramos el tamaño de la fuente del título
+        document.getElementById('jornadaLaboralTitle').style.fontSize = '17px';
 
         //Establecemos el inicio de la jornada
         document.getElementById('jornadaInicio').innerText = jornadaInicio.split('T')[1].split('.')[0];
@@ -2330,15 +2635,15 @@ function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
     //Mostramos el modal antes de añadir el gráfico
     $('#modalInforme').fadeIn(() => {
         //Creamos una instancia del contenedor del gráfico
-        const graficoContainer = document.getElementById('modal-grafico-container');
-        graficoContainer.innerHTML = '';
+        const grafico_principal = document.getElementById('modal-grafico-container');
+        grafico_principal.innerHTML = '';
 
         //Creamos el lienzo para el gráfico
         const canvas = document.createElement('canvas');
-        graficoContainer.appendChild(canvas);
+        grafico_principal.appendChild(canvas);
 
         //Llamamos a la función para establecer las fechas dentro del gráfico
-        obtenerTomaDatos(graficoContainer);
+        obtenerTomaDatos(grafico_principal);
 
         //Calculamos la saturación total
         const saturacionTotal = calcularSaturacionTotal(conteosPorPuesto);
@@ -3053,9 +3358,6 @@ function mostrarModalEtapas(opcion) {
     subirEtapa(opcion);
 }
 
-/**
- * Función para añadir una etapa al puesto
- */
 function subirEtapa(opcion) {
     //Añadimos la funcionalidad al formulario de añadir la etapa
     $("#formulario_anyadirEtapa").on('submit', function (e) {
@@ -3144,30 +3446,30 @@ function subirEtapa(opcion) {
         fetch(`/film/api/obtenerDatos/${tipo_carga}/${planta}/${referenciasQuery}/${tipo_operacion}/${puestoID}`, {
             method: "GET"
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error fetching data');
-            }
-            return response.json();
-        })
-        .then(data => {
-            let referencia_embalaje_datos = {};
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error fetching data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                let referencia_embalaje_datos = {};
 
-            data.forEach(item => {
-                let cantidad_a_expedir = item.cantidad_expedir || 0;
-                let valor_carga = item.valor_carga || 1;
-                let numero_embalajes = Math.ceil(cantidad_a_expedir / valor_carga);
+                data.forEach(item => {
+                    let cantidad_a_expedir = item.cantidad_expedir || 0;
+                    let valor_carga = item.valor_carga || 1;
+                    let numero_embalajes = Math.ceil(cantidad_a_expedir / valor_carga);
 
-                referencia_embalaje_datos[item.reference] = numero_embalajes;
+                    referencia_embalaje_datos[item.reference] = numero_embalajes;
+                });
+
+                referencia_embalaje = referencia_embalaje_datos;
+                anyadirEtapaFinal();
+            })
+            .finally(() => {
+                mostrarAlerta("Etapa/s creada/s", null, null, 1);
             });
 
-            referencia_embalaje = referencia_embalaje_datos;
-            anyadirEtapaFinal();
-        })
-        .finally(() => {
-            mostrarAlerta("Etapa/s creada/s", null, null, 1);
-        });
-    
     });
 }
 
@@ -3580,7 +3882,7 @@ function gestionarEtapa(id_etapa) {
                     </div>
                 </form>
             `);
-            
+
             //Aplicamos la funcionalidad al formulario
             $('#gestionarEtapa').on('submit', async function (e) {
                 //Paramos la propagación
@@ -3588,7 +3890,7 @@ function gestionarEtapa(id_etapa) {
 
                 /** Almacenamos en variables las opciones elegidas */
                 const id_puesto = document.getElementById('puesto').value, gestion = document.getElementById('gestion').value;
-              
+
                 //Preparamos la solicitud POST para llamar al end point para gestionar la etapa
                 fetch(`/film/api/gestionarEtapa/${id_etapa}/${id_puesto}/${gestion}`, {
                     method: "POST"
@@ -3750,9 +4052,9 @@ function configurarLinea() {
 
 /**
  * Función para disponer la fecha de inicio y la fecha de fin de los datos disponibles
- * @param {HTMLElement} graficoContainer Argumento que contiene el contenedor del gráfico 
+ * @param {HTMLElement} grafico_principal Argumento que contiene el contenedor del gráfico 
  */
-function obtenerTomaDatos(graficoContainer) {
+function obtenerTomaDatos(grafico_principal) {
     //Preparamos la peticion GET para obtener las fechas 
     fetch('/film/api/fechaTomaDatos', {
         method: "GET"
@@ -3779,8 +4081,8 @@ function obtenerTomaDatos(graficoContainer) {
             fecha_final.textContent = `Fecha de toma de datos:\n ${data.fecha_fin.split('T')[0]}`;
 
             /**Añadimos ambas fechas al contenedor */
-            graficoContainer.append(fecha_actual);
-            graficoContainer.append(fecha_final);
+            grafico_principal.append(fecha_actual);
+            grafico_principal.append(fecha_final);
         });
 }
 
