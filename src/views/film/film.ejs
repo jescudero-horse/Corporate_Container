@@ -152,6 +152,28 @@
 
                         <button class="btn btn-primary" onclick="graficoPrueba()"><i
                                 class="bi bi-bar-chart"></i></button>
+
+                        <!-- Contenedor de Glide (carrusel) -->
+                        <div class="glide" id="graficos-wrapper">
+                            <div class="glide__track" data-glide-el="track">
+                                <ul class="glide__slides" id="graficos-container">
+                                    <!-- Aquí se añaden los puestos -->
+                                </ul>
+                            </div>
+
+                            <!-- Botones de navegación -->
+                            <div class="glide__arrows" data-glide-el="controls">
+                                <button class="glide__arrow glide__arrow--left" data-glide-dir="<"
+                                    style="color: white;"><i class="bi bi-arrow-left-short"></i></button>
+                                <button class="glide__arrow glide__arrow--right" data-glide-dir=">"
+                                    style="color: white;"><i class="bi bi-arrow-right-short"></i></button>
+                            </div>
+
+                            <!-- Indicadores de posición -->
+                            <div class="glide__bullets" data-glide-el="controls[nav]">
+
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Parte inferior del contenido principal -->
@@ -159,7 +181,8 @@
                         <h2 class="text-xl font-bold text-black" id="tituloPrincipalEtapasDisponibles">Etapas
                             disponibles</h2>
 
-                        <div id="tablaEtapas"></div>
+                        <div id="tablaEtapasGlobal"></div>
+                        
                     </div>
                 </main>
             </div>

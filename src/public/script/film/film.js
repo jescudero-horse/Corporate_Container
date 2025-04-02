@@ -51,6 +51,8 @@ async function fetchData() {
         //Almacenamos los puestos obtenidos
         const data = await response.json();
 
+        console.log("DATAAA -> ", data)
+
         //Llamamos al método para disponer los puestos en el panel superior
         gestionarPuesto(data);
 
@@ -98,7 +100,6 @@ function gestionarPuesto(data) {
     //Iteramos por los datos del puesto
     data.forEach(item => {
         console.log("PUESTOS -> ", item.saturacion, item.id)
-        
         //Almacenamos en el array la información necesarias
         conteosPorPuesto.push({
             id: item.id,
@@ -238,14 +239,12 @@ function gestionarGraficoChimenea(data) {
 }
 
 /**
- * Función para renderizar el gráfico principal
+ * Función para representar los gráficos
  */
 function renderizarGrafico() {
-    //Creamos una instancia del contenedor principal
+    //Almacenamos la instancia del contenedor de gráficos
     const graficosContainer = document.getElementById('graficos-container');
     graficosContainer.innerHTML = '';
-
-    console.log("------------------------")
 
     //Iteramos sobre los datos del puesto
     conteosPorPuesto.forEach((puesto, index) => {
@@ -309,7 +308,7 @@ function renderizarGrafico() {
                     },
                     legend: {
                         labels: {
-                            color: '#ffffff'
+                            color: '#ffffff',
                         }
                     },
                     tooltip: {
@@ -359,60 +358,77 @@ function renderizarGrafico() {
         graficoContainer.appendChild(canvasChimenea);
 
         //Almacenamos en una variable los datos del puesto
-        const datosChimenea = conteoGraficoChimenea.find(c => c.id === puesto.id);
+        const datosChimenea = conteoGraficoChimenea.filter(c => c.id === puesto.id);
+
+        console.log(datosChimenea)
 
         //En caso de que haya datos
         if (datosChimenea) {
-            /** Almacenamos en variables los datos necesarios */
-            const dinamico_NoVA = datosChimenea.dinamico_NoVA || 0;
-            const dinamico_VA = datosChimenea.dinamico_VA || 0;
-            const estatico_VA = datosChimenea.estatico_VA || 0;
-            const estatico_NoVA = datosChimenea.estatico_NoVA || 0;
-            const tiempo_distancia_total = datosChimenea.tiempo_distancia_total || 0;
+            //Almacenamos en variables los datos necesarios 
             const total = 442;
-            const porcentaje_NoVA = total > 0 ? ((dinamico_NoVA / total) * 100).toFixed(2) : 0;
-            const porcentaje_VA = total > 0 ? ((dinamico_VA / total) * 100).toFixed(2) : 0;
-            const porcentaje_estatico_VA = total > 0 ? ((estatico_VA / total) * 100).toFixed(2) : 0;
-            const porcentaje_estatico_NoVA = total > 0 ? ((estatico_NoVA / total) * 100).toFixed(2) : 0;
-            const porcentaje_tiempo_distancia_total = total > 0 ? ((tiempo_distancia_total / total) * 100).toFixed(2) : 0;
+            const porcentajes = datosChimenea.map(item => ((item.minutos / total) * 100).toFixed(2));
+            //const porcentaje = total > 0 ? ((datosChimenea.minutos / total) * 100).toFixed(2) : 0;
+
+            // Array de colores para las actividades
+            const colores = [
+                'rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)', 'rgba(75, 192, 132, 0.8)',
+                'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)'
+            ];
+
+            // Crear el dataset del gráfico
+            const datasets = datosChimenea.map((item, index) => ({
+                label: item.nombre,
+                data: [porcentajes[index]],
+                backgroundColor: colores[index % colores.length]
+            }));
 
 
-            /** Inicializamos la gráfica de la actividad */
+            // Inicializamos la gráfica de la actividad
             new Chart(canvasChimenea, {
                 type: 'bar',
                 data: {
                     labels: ['Actividades'],
-                    datasets: [
-                        { label: 'Dinamico NoVA', data: [porcentaje_NoVA], backgroundColor: '#024d7e', borderColor: '#024d7e', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Dinamico VA', data: [porcentaje_VA], backgroundColor: '#0493f2', borderColor: '#0493f2', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Estático VA', data: [porcentaje_estatico_VA], backgroundColor: '#67adea', borderColor: '#67adea', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Estático NoVA', data: [porcentaje_estatico_NoVA], backgroundColor: '#ffffff', borderColor: '#ffffff', borderWidth: 1, stack: 'Stack 0' },
-                        { label: 'Tiempo desplazamiento', data: [porcentaje_tiempo_distancia_total], backgroundColor: '#7374cc', borderColor: '#7374cc', borderWidth: 1, stack: 'Stack 0' }
-                    ]
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
                     plugins: {
                         legend: {
-                            position: 'top',
+                            display: false, // Ocultar la leyenda
                             labels: {
-                                color: '#ffffff'
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: {
-                                stepSize: 20,
-                                color: '#ffffff',
-                                callback: value => `${value}%`
+                                color: '#ffffff', // Leyenda en blanco
+                                font: {
+                                    size: 11 // Tamaño de la fuente de la leyenda
+                                },
+                                textAlign: 'center',
+                                boxWidth: 20 // Tamaño del cuadro de color
                             }
                         },
+                        tooltip: {
+                            callbacks: {
+                                label: context => `${context.dataset.label}: ${context.raw}%`
+                            }
+                        },
+                    },
+                    scales: {
                         x: {
+                            stacked: true, // Apilar las barras en el eje X
                             ticks: {
-                                color: '#ffffff'
+                                color: '#ffffff' // Color de los valores del eje X
+                            }
+                        },
+                        y: {
+                            stacked: true, // Apilar las barras en el eje Y
+                            beginAtZero: true,
+                            max: 100, // El porcentaje no puede superar el 100%
+                            title: {
+                                display: true,
+                                text: 'Porcentaje (%)', // Título para el eje Y
+                                color: '#ffffff' // Color del título del eje Y
+                            },
+                            ticks: {
+                                color: '#ffffff' // Color de los valores del eje Y
                             }
                         }
                     }
@@ -747,7 +763,7 @@ function confirmarEliminar(icono, titulo, id, tabla, id_puesto) {
  */
 function obtenerEtapas(puestoID) {
     //Iniciamos la solicitud GET para obtener las etapas de un puesto
-    fetch(`/film/api/obtenerEtapas_Puesto/${puestoID}`, {
+    fetch(`/film/api/obtenerEtapasAgrupadasPuesto/${puestoID}`, {
         method: "GET"
     })
         //Controlamos la respuesta
@@ -763,9 +779,11 @@ function obtenerEtapas(puestoID) {
 
         //Controlamos los datos
         .then(data => {
+            generarEtapaGlobal(data);
+            //generarTablasPorEtapa(data);
             data.sort((a, b) => a.orden - b.orden); // Asegurar orden correcto
             //Llammos al método para mostrar las etapas de un puesto
-            generarTablasPorEtapa(data);
+            //generarTablasPorEtapa(data);
         });
 }
 
@@ -877,9 +895,143 @@ function configurarModalInformeDetallado(data) {
  * Función para representar las etapas por puesto
  * @param {Array} etapas Argumento que contiene la información de las etapas
  */
-function generarTablasPorEtapa(etapas) {
+function generarEtapaGlobal(etapas) {
+    let contenedorTablas = document.getElementById('tablaEtapasGlobal');
+    contenedorTablas.innerHTML = '';
+
+    etapas.forEach((etapa, index) => {
+        let color_etapa;
+        const f = etapa.name
+
+        var {nombre_etapa, id_etapa, id_puesto, distancia_total, nuevo_picadas,} = inicializarVariablesEtapas(etapa);
+
+        //Creamos un if para controlar la distancia total de la etapa y asi poder modificar el color de la misma... en caso de la distancia sea de 0 a 49
+        if (distancia_total >= 0 && distancia_total <= 49) {
+            //Asignamos el color verde
+            color_etapa = 'bg-green-300';
+
+            //En caso de que la distancia sea entre de 50 a 100
+        } else if (distancia_total >= 50 && distancia_total <= 99) {
+            //Asignamos el color amarillo
+            color_etapa = 'bg-yellow-300';
+
+            //En caso de que la distancia sea más de 100
+        } else if (distancia_total >= 100) {
+            //Asignamos el color rojo
+            color_etapa = 'bg-red-300';
+
+            //En cualquier otro caso
+        } else {
+            //Asignamos el color azul
+            color_etapa = 'bg-blue-300';
+        }
+
+        id_puesto = etapa.id_puesto;
+
+        //Generamos el HTML de la tabla para la etapa
+        const tablaHTML = `
+            <div id="etapa-${id_puesto}-${nombre_etapa}" class="mb-4" data-id-etapa="${id_etapa}">
+                <h3 id="encabezadoEtapa-${nombre_etapa}"
+                    class="text-lg font-semibold mb-2 flex items-center space-x-4 justify-between p-2 rounded-lg animate-fadeIn 
+                        ${f === 'X' ? 'bg-stone-200 text-black' : color_etapa} text-black"
+                    ${f !== 'X' ? `onclick="toggleEtapas(${id_puesto}, '${nombre_etapa}')"` : ''}>
+
+                    <span cla-ss="min-w-[150px]">Etapa: <strong>${nombre_etapa}</strong></span>
+                    <span class="min-w-[150px]">Distancia (metros): <strong>${distancia_total}</strong></span>
+                    <span class="min-w-[150px]">Tiempo (minutos): <strong>${nuevo_picadas}</strong></span>
+
+                    ${f !== 'X' ? `
+                        <button id="botonVisualizarEtapa" type="button" class="text-blue-500 ml-2" 
+                            onclick="visualizarEtapa('${nombre_etapa}', '${id_etapa}')">
+                            <i class="bi bi-compass-fill"></i>
+                        </button>`
+                : ''}
+
+                    <button id="botonEliminarEtapa" type="button" class="text-red-500 ml-2" 
+                        onclick="eliminarRegistro('${id_etapa}', 'EN_IFM_STANDARD', ${id_puesto})">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+
+                    <button id="botonActualizarEtapa" hidden type="button" class="text-red-500 ml-2" 
+                        onclick="actualizarEtapa('${id_etapa}', 'EN_IFM_STANDARD')">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+
+                    ${f !== 'X' ? `
+                        <button id="botonGestionarEtapa" type="button" class="text-gray-500 ml-2" 
+                            onclick="gestionarEtapa('${id_etapa}')">
+                            <i class="bi bi-arrows-move"></i>
+                        </button>`
+                : ''}
+                </h3>
+            </div>
+        `;
+        contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
+    })
+}
+
+function toggleEtapas(id_puesto, nombre_etapa) {
+    let subEtapasContainer = document.getElementById(`subEtapas-${nombre_etapa}`);
+
+    console.log(nombre_etapa)
+
+    if (!subEtapasContainer) {
+        // Si no existe, creamos el contenedor y lo insertamos después del elemento de la etapa global
+        let etapaGlobal = document.getElementById(`etapa-${id_puesto}-${nombre_etapa}`);
+        subEtapasContainer = document.createElement("div");
+        subEtapasContainer.id = `subEtapas-${nombre_etapa}`;
+        subEtapasContainer.classList.add("ml-4", "hidden");
+        etapaGlobal.insertAdjacentElement("afterend", subEtapasContainer);
+    }
+
+    if (subEtapasContainer.classList.contains('hidden')) {
+        // Si está oculto, lo mostramos y cargamos las etapas por puesto
+        generarTablasPorPuesto(id_puesto, nombre_etapa, subEtapasContainer);
+        subEtapasContainer.classList.remove('hidden');
+    } else {
+        // Si ya está visible, lo ocultamos
+        subEtapasContainer.classList.add('hidden');
+    }
+}
+
+
+/**
+ * Función para obtener las etapas asociadas a un puesto usando el ID del mismo
+ * @param {int} puestoID Argumento que contiene el ID del puesto seleccioonado
+ */
+function generarTablasPorPuesto(puestoID, nombre_etapa){
+    console.log("puesto: ", puestoID, nombre_etapa)
+    //Iniciamos la solicitud GET para obtener las etapas de un puesto
+    fetch(`/film/api/obtenerEtapas_Puesto/${puestoID}/${nombre_etapa}`, {
+        method: "GET"
+    })
+        //Controlamos la respuesta
+        .then(response => {
+            //En caso de que se produzca un error
+            if (!response.ok) {
+                throw new Error('Error fetching data');
+            }
+    
+            //Devolvemos la información formateada
+            return response.json();
+        })
+    
+        //Controlamos los datos
+        .then(data => {
+            data.sort((a, b) => a.orden - b.orden); // Asegurar orden correcto
+            //Llammos al método para mostrar las etapas de un puesto
+            generarTablasPorEtapa(data, nombre_etapa);
+        });
+}
+
+
+/**
+ * Función para representar las etapas por puesto
+ * @param {Array} etapas Argumento que contiene la información de las etapas
+ */
+function generarTablasPorEtapa(etapas, nombre_etapa) {
     //Obtenemos el contenedor donde se agregarán las tablas
-    let contenedorTablas = document.getElementById('tablaEtapas');
+    let contenedorTablas = document.getElementById(`subEtapas-${nombre_etapa}`);
     contenedorTablas.innerHTML = '';
 
     //Creamos un mapa para agrupar las etapas por el valor "F"
@@ -893,7 +1045,7 @@ function generarTablasPorEtapa(etapas) {
 
     // Ordenar cada grupo al final
     Object.keys(agrupadoPorF).forEach(key => {
-        agrupadoPorF[key].sort((a, b) => a.id - b.id);
+        agrupadoPorF[key].sort((a, b) => a.orden - b.orden);
     });
 
     //Iteramos sobre cada grupo de "F" para crear una tabla por cada uno
@@ -962,22 +1114,22 @@ function generarTablasPorEtapa(etapas) {
                             //Creamos un if para controlar la distancia total de la etapa y asi poder modificar el color de la misma... en caso de la distancia sea de 0 a 49
                             if (distancia_total >= 0 && distancia_total <= 49) {
                                 //Asignamos el color verde
-                                color_etapa = 'bg-green-300';
+                                color_etapa = 'bg-green-200';
 
                                 //En caso de que la distancia sea entre de 50 a 100
                             } else if (distancia_total >= 50 && distancia_total <= 99) {
                                 //Asignamos el color amarillo
-                                color_etapa = 'bg-yellow-300';
+                                color_etapa = 'bg-yellow-200';
 
                                 //En caso de que la distancia sea más de 100
                             } else if (distancia_total >= 100) {
                                 //Asignamos el color rojo
-                                color_etapa = 'bg-red-300';
+                                color_etapa = 'bg-red-200';
 
                                 //En cualquier otro caso
                             } else {
                                 //Asignamos el color azul
-                                color_etapa = 'bg-blue-300';
+                                color_etapa = 'bg-blue-200';
                             }
 
                             //Generamos el HTML de la tabla para la etapa
@@ -1251,7 +1403,7 @@ function generarTablasPorEtapa(etapas) {
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" rowspan="2">Distancia</td>
                                                     <td class="px-4 py-2 border font-semibold">Metros<br>${distancia_total}</td>
-                                                    <td class="px-4 py-2 border font-semibold">Velocidad<br>${valor}</td>
+                                                    <td class="px-4 py-2 border font-semibold">Velocidad<br>${2}</td>
                                                     <td class="px-4 py-2 border font-semibold">${etapaDeF.cantidad_a_mover}</td>
                                                     <td class="px-4 py-2 border">${tiempo_distancia_total}</td>
                                                 </tr>

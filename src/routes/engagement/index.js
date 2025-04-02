@@ -91,24 +91,55 @@ router.post('/anyadirPuesto/:numero_puesto/:nombre_puesto/:numero_operarios/:map
             //Almacenamos en la variable el ID del turno
             const id_turno = resultTurno[0].turno_id;
 
-            //Almacenamos en una nueva variable la consulta SQL para añadir el puesto
-            const queryPuesto = `
-                INSERT INTO
-                    puestos(numero_puesto, nombre_puesto, numero_operarios, mapa, id_turno)
-                VALUES
-                    (?, ?, ?, ?, ?)
-            `;
+            // Verificamos si el numero_puesto ya existe
+            const queryVerificarPuesto = `SELECT COUNT(*) AS count FROM puestos WHERE numero_puesto = ?`;
 
-            //Ejecutamos la consulta para añadir el puesto
-            connection.query(queryPuesto, [numero_puesto, nombre_puesto, numero_operarios, ruta_mapa, id_turno], (errorPuesto, resultPuesto) => {
-                if (errorPuesto) {
-                    console.error('> Error a la hora de añadir el puesto: ', errorPuesto);
-                    return res.status(500).send('Error a la hora de añadir el puesto');
+            connection.query(queryVerificarPuesto, [numero_puesto], (errorVerificar, resultVerificar) => {
+                if (errorVerificar) {
+                    console.error('> Error al verificar si el número de puesto ya existe: ', errorVerificar);
+                    return res.status(500).send('Error al verificar si el número de puesto ya existe');
                 }
 
-                //Enviamos el status
-                res.status(201).send('Puesto añadido');
+                // Si el número de puesto ya existe, desplazamos los demás números de puesto
+                if (resultVerificar[0].count > 0) {
+                    // Desplazamos los puestos con número mayor o igual al nuevo
+                    const queryDesplazar = `UPDATE puestos SET numero_puesto = numero_puesto + 1 WHERE numero_puesto >= ?`;
+
+                    connection.query(queryDesplazar, [numero_puesto], (errorDesplazar) => {
+                        if (errorDesplazar) {
+                            console.error('> Error al desplazar los puestos: ', errorDesplazar);
+                            return res.status(500).send('Error al desplazar los puestos');
+                        }
+
+                        // Ahora insertamos el nuevo puesto
+                        insertarPuesto();
+                    });
+                } else {
+                    // Si el número de puesto no existe, lo insertamos directamente
+                    insertarPuesto();
+                }
             });
+
+            function insertarPuesto(){
+                //Almacenamos en una nueva variable la consulta SQL para añadir el puesto
+                const queryPuesto = `
+                    INSERT INTO
+                        puestos(numero_puesto, nombre_puesto, numero_operarios, mapa, id_turno)
+                    VALUES
+                        (?, ?, ?, ?, ?)
+                `;
+
+                //Ejecutamos la consulta para añadir el puesto
+                connection.query(queryPuesto, [numero_puesto, nombre_puesto, numero_operarios, ruta_mapa, id_turno], (errorPuesto, resultPuesto) => {
+                    if (errorPuesto) {
+                        console.error('> Error a la hora de añadir el puesto: ', errorPuesto);
+                        return res.status(500).send('Error a la hora de añadir el puesto');
+                    }
+
+                    //Enviamos el status
+                    res.status(201).send('Puesto añadido');
+                });
+            }
         });
     });
 });
@@ -1304,11 +1335,71 @@ router.put('/actualizarOrden/:array_ordenado', (req, res) => {
 });
 
 /**
- * End point para obtener las etapas de un puesto
+ * End point para obtener las etapas agrupadas de un puesto
  */
-router.get('/obtenerEtapas_Puesto/:id_puesto', (req, res) => {
+router.get('/obtenerEtapasAgrupadasPuesto/:id_puesto', (req, res) => {
     //Almacenamos el ID del puesto
     const id_puesto = req.params.id_puesto;
+
+    //Creamos la conexión a la base de datos
+    getDBConnection((err, connection) => {
+        //En caso de que se produzaca un error...
+        if (err) {
+            return res.status(400).send('Error al conectar con la base de datos');
+        }
+
+        //Almacenamos en una variable la consulta SQL
+    
+        const query = `
+            SELECT 
+                EN.id_puesto, FS.name, SUM(cantidad_a_mover) AS cantidad_a_mover, COALESCE(SUM(distancia_total), 0) AS distancia_total, SUM(PS14) AS PS14, 
+                SUM(DS10) AS DS10, SUM(CDL) AS CDL, SUM(CDC) AS CDC, SUM(M1) AS M1, SUM(PS15) AS PS15, SUM(DI21) AS DI21, SUM(DC113) AS DC113, numero_picadas, 
+                SUM(DS14) AS DS14, SUM(DS15) AS DS15, SUM(DC) AS DC, SUM(D1) AS D1, SUM(W5) AS W5, SUM(TT) AS TT, SUM(AL) AS AL, SUM(L2) AS L2, SUM(G1) AS G1, 
+                SUM(P5) AS P5, SUM(G1_1) AS G1_1, SUM(P2_1) AS P2_1, SUM(W5_2) AS W5_2, SUM(E2) AS E2, SUM(TT_1) AS TT_1, SUM(M2) AS M2, SUM(PP11) AS PP11, 
+                SUM(G1_2) AS G1_2, SUM(P2_2) AS P2_2, SUM(P2_3) AS P2_3, SUM(nuevo_picadas) AS nuevo_picadas, SUM(tiempo_distancia_total) AS tiempo_distancia_total,
+                SUM(M1_2) AS M1_2, COALESCE(SUM(TT_2), 0) AS TT_2, SUM(DS15_2) AS DS15_2, SUM(CDL_2) AS CDL_2, SUM(CDC_2) AS CDC_2, SUM(CDL_3) AS CDL_3
+            FROM
+                EN_IFM_STANDARD AS EN
+            INNER JOIN
+                FStandard_Name AS FS
+            ON 
+                EN.F = FS.FStandard
+            WHERE 
+                EN.id_puesto = ?
+            GROUP BY 
+                EN.F, EN.id_puesto
+        `;
+        
+
+        //Ejecutamos la consulta
+        connection.query(query, [id_puesto], (error, results) => {
+            //Liberamos la conexión
+            connection.release();
+
+            //En caso de que se produzca un error...
+            if (error) {
+                console.error("> Error: ", error);
+
+                //Enviamos el status
+                return res.status(500).send('Error en la consulta');
+
+                //En otro caso...
+            } else {
+                console.log("> Resultados ETAPAS GRUPO: ", results);
+
+                //Enviamos la información
+                res.json(results);
+            }
+        })
+    });
+});
+
+/**
+ * End point para obtener las etapas de un puesto
+ */
+router.get('/obtenerEtapas_Puesto/:id_puesto/:nombre_etapa', (req, res) => {
+    //Almacenamos el ID del puesto
+    let { id_puesto, nombre_etapa } = req.params;
 
     //Creamos la conexión a la base de datos
     getDBConnection((err, connection) => {
@@ -1328,11 +1419,13 @@ router.get('/obtenerEtapas_Puesto/:id_puesto', (req, res) => {
                 FStandard_Name AS FS
             ON 
                 EN.F = FS.FStandard
-            WHERE EN.id_puesto = ?
+            WHERE EN.id_puesto = ? AND EN.F = ?
+            ORDER BY EN.orden;
         `;
+        
 
         //Ejecutamos la consulta
-        connection.query(query, [id_puesto], (error, results) => {
+        connection.query(query, [id_puesto, nombre_etapa], (error, results) => {
             //Liberamos la conexión
             connection.release();
 
@@ -1345,7 +1438,7 @@ router.get('/obtenerEtapas_Puesto/:id_puesto', (req, res) => {
 
                 //En otro caso...
             } else {
-                console.log("> Resultados: ", results);
+                console.log("> Resultados ETAPAS: ", results);
 
                 //Enviamos la información
                 res.json(results);
@@ -1475,7 +1568,7 @@ router.get(`/obtenerEtapas/:Fstandard`, (req, res) => {
 
                 //En otro caso...
             } else {
-                console.log("> Resultados: ", results);
+                console.log("> Resultados ETAPAS F: ", results);
 
                 //Enviamos la información
                 res.json(results);
