@@ -292,7 +292,7 @@ function renderizarGrafico() {
             data: {
                 labels: ['Tiempo Utilizado', 'Tiempo Libre'],
                 datasets: [{
-                    data: [puesto.conteo, (100 - puesto.conteo)],
+                    data: [puesto.conteo, (100 - puesto.conteo).toFixed(2)],
                     backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(211, 211, 211, 0.3)'],
                     borderWidth: 1
                 }]
@@ -3121,6 +3121,7 @@ function anyadirEtapa(id) {
                         //Paramos la propagación
                         return;
                     }
+                    console.log("NUM: ", data.validReferences.length, "REF: ", referencia_componente.length)
 
                     //Creamos un switch para controlar el tipo de operación
                     switch (tipo_operacion) {
