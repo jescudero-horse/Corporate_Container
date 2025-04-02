@@ -381,16 +381,18 @@ function renderizarGrafico() {
 
             // Array de colores para las actividades
             const colores = [
-                'rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)',
-                'rgba(255, 206, 86, 0.8)', 'rgba(75, 192, 132, 0.8)',
-                'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)'
+                'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 132, 0.6)',
+                'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'
             ];
 
             // Crear el dataset del gráfico
             const datasets = datosChimenea.map((item, index) => ({
                 label: item.nombre,
                 data: [porcentajes[index]],
-                backgroundColor: colores[index % colores.length]
+                backgroundColor: colores[index % colores.length],
+                borderColor: colores[index % colores.length].replace('0.6', '0.9'),  // Mismo color, pero con opacidad 1
+                borderWidth: 1.3
             }));
 
 
@@ -1696,7 +1698,7 @@ function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
                 labels: ['Saturación Total', 'Tiempo Libre'],
                 datasets: [{
                     data: [saturacionTotal, (100 - saturacionTotal)],
-                    backgroundColor: ['rgba(75, 192, 192, 0.8)', 'rgba(211, 211, 211, 0.5)'],
+                    backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(211, 211, 211, 0.5)'],
                     hoverBackgroundColor: ['rgba(75, 192, 192, 1)', 'rgba(211, 211, 211, 0.7)'],
                     borderWidth: 2,
                     borderColor: '#ffffff'
