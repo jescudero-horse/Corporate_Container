@@ -306,7 +306,7 @@ function renderizarGrafico() {
             data: {
                 labels: ['Tiempo Utilizado', 'Tiempo Libre'],
                 datasets: [{
-                    data: [conteoUtilizado, conteoLibre],  // Usamos los valores calculados
+                    data: [conteoUtilizado, conteoLibre.toFixed(2)],  // Usamos los valores calculados
                     backgroundColor: ['rgba(217, 41, 41, 0.5)', 'rgba(34, 196, 74, 0.5)'],
                     borderColor: '#5b5b5b',
                     borderWidth: 0.5
@@ -381,10 +381,16 @@ function renderizarGrafico() {
 
             // Array de colores para las actividades
             const colores = [
-                'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)',
-                'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 132, 0.6)',
-                'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'
+                'rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 205, 0.6)', 
+                'rgba(255, 206, 86, 0.6)', 'rgba(61, 193, 153, 0.6)',
+                'rgba(255, 159, 64, 0.6)', 'rgba(148, 59, 226, 0.6)',
+                'rgba(173, 224, 53, 0.6)', 'rgba(57, 30, 233, 0.6)', 
+                'rgba(67, 203, 198, 0.6)', 'rgba(255, 176, 144, 0.6)', 
+                'rgba(255, 160, 225, 0.6)', 'rgba(153, 102, 255, 0.6)', 
+                'rgba(0, 160, 225, 0.6)', 'rgba(201, 59, 226, 0.6)', 
+                'rgba(0, 128, 128, 0.6)', 'rgba(20, 23, 255, 0.6)'
             ];
+            
 
             // Crear el dataset del gráfico
             const datasets = datosChimenea.map((item, index) => ({
@@ -956,12 +962,12 @@ function generarEtapaGlobal(etapas) {
                     <span class="min-w-[150px]">Distancia (metros): <strong>${distancia_total}</strong></span>
                     <span class="min-w-[150px]">Tiempo (minutos): <strong>${nuevo_picadas}</strong></span>
 
-                    ${f !== 'X' ? `
-                        <button id="botonVisualizarEtapa" type="button" class="text-blue-500 ml-2" 
-                            onclick="visualizarEtapa('${nombre_etapa}', '${id_puesto}')">
-                            <i class="bi bi-compass-fill"></i>
-                        </button>`
-                : ''}
+
+                    <button id="botonAnyadirEtapa" type="button" class="text-blue-500 ml-2" 
+                        onclick="visualizarEtapa('${nombre_etapa}', '${id_puesto}')">
+                        <i class="bi bi-plus-circle-fill" style="font-size: 20px;"></i>
+                    </button>
+
 
                     <button id="botonEliminarEtapa" type="button" class="text-red-500 ml-2" 
                         onclick="eliminarRegistro('etapa_global', '${nombre_etapa}', 'EN_IFM_STANDARD', ${id_puesto})">
@@ -972,6 +978,14 @@ function generarEtapaGlobal(etapas) {
                         onclick="actualizarEtapa('${id_etapa}', 'EN_IFM_STANDARD')">
                         <i class="bi bi-trash-fill"></i>
                     </button>
+
+                    ${f !== 'X' ? `
+                        <button id="botonVisualizarEtapa" type="button" class="text-yellow-500 ml-2" 
+                            onclick="visualizarEtapa('${nombre_etapa}', '${id_puesto}')">
+                            <i class="bi bi-map-fill"></i>
+                        </button>`
+                : ''}
+
 
                     ${f !== 'X' ? `
                         <button id="botonGestionarEtapa" type="button" class="text-gray-500 ml-2" 
