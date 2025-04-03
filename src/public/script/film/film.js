@@ -5,7 +5,7 @@ let cantidad_a_mover = [], referencia_componente = "", categoria_seleccionada, o
 let referencia_embalaje = {};
 
 //Declaramos las variables gloables necesarias para controlar las etapas
-let id_puesto, comment, distance_empty_zone, loading_type, engins, number_of_packages_loaded_at_once, engines, code_mtm3, correspondence, speed;
+let id_etapa, comment, distance_empty_zone, loading_type, engins, number_of_packages_loaded_at_once, engines, code_mtm3, correspondence, speed;
 
 //Variable global para almacenar la cantidad de referencias
 let cantidad_referencias = 0;
@@ -549,6 +549,38 @@ function renderizarGrafico() {
     });
 }
 
+//Variable para la saturación central del puesto
+const centerTextPlugin = {
+    id: 'centerText',
+    beforeDraw: (chart) => {
+        const { width, height, ctx } = chart;
+        const text = chart.options.plugins.centerText.text;
+
+        if (!text) return;
+
+        ctx.save();
+
+        //Calculamos el radio de la gráfica
+        const chartArea = chart.chartArea;
+        const doughnutRadius = (chartArea.right - chartArea.left) / 3;
+
+        //Configuramos el texto
+        const fontSize = doughnutRadius / 4.5;
+        ctx.font = `bold ${fontSize}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        //Calculamos la posición del texto en el centro de la gráfica
+        const centerX = (chartArea.left + chartArea.right) / 2;
+        const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+        //Establecemos el texto dentro de la gráfica
+        ctx.fillText(text, centerX, centerY);
+
+        ctx.restore();
+    }
+};
+
 /**
  * Función para crear los botones y disponerlos en el puesto
  * @returns Devuelve los botones formateados
@@ -835,8 +867,6 @@ function disponerTurno(turno, jornadaInicio, jornadaFin) {
  * @param {int} id_puesto Argumento que contiene el ID del puesto
  */
 function confirmarEliminar(icono, titulo, id, tabla, id_puesto) {
-    console.log("BORRAR", titulo, "//", icono);
-
     //Configuramos y mostramos la alerta
     Swal.fire({
         title: titulo,
@@ -848,17 +878,12 @@ function confirmarEliminar(icono, titulo, id, tabla, id_puesto) {
     }).then(result => {
         //En caso de que el usuario haya pulsado sobre el confirmar
         if (result.isConfirmed) {
-            console.log("BORRAR", titulo);
             //Llamamos a la función para eliminar el elemento
-            eliminarRegistro('puesto', id, tabla, id_puesto);
+            eliminarRegistro(id, tabla, id_puesto);
         }
     });
 }
 
-/**
- * Función para obtener las etapas de un puesto en concreto
- * @param {int} puestoID Argumento que contiene el ID de la etapa
- */
 function obtenerEtapas(puestoID) {
     //Iniciamos la solicitud GET para obtener las etapas de un puesto
     fetch(`/film/api/obtenerEtapasAgrupadasPuesto/${puestoID}`, {
@@ -878,65 +903,6 @@ function obtenerEtapas(puestoID) {
         //Controlamos los datos
         .then(data => {
             generarEtapaGlobal(data);
-        });
-}
-
-/**
- * Función para calcular el número de la semana actual
- * @param {*} [fecha=new Date()] Argumento que contiene la fecha actual
- */
-function obtenerNumeroSemana(fecha = new Date()) {
-    //Creamos una copia del argumento
-    const fecha_copia = new Date(fecha.getTime());
-
-    //Establecemos el primero día como lunea
-    const diaSemana = fecha_copia.getUTCDay() || 7;
-    fecha_copia.setUTCDate(fecha_copia.getUTCDate() + 4 - diaSemana);
-
-    //Creamos una variable con el primer día del año
-    const inicioAño = new Date(Date.UTC(fecha_copia.getUTCFullYear(), 0, 1));
-
-    //Calculamos el número de la semana
-    const numeroSemana = Math.ceil(((fecha_copia - inicioAño) / 86400000 + 1) / 7);
-
-    //Devolvemos el día de la semana
-    return numeroSemana;
-}
-
-/**
- * Función para disponer la información detalla del puesto
- * @param {*} puesto_id Argumento que contiene el ID del puesto
- * @param {*} nombre_puesto Argumento que contiene el nombre del puesto
- */
-function modalPuestoDetallado(puesto_id, nombre_puesto) {
-    //Eliminamos el contenido del cuerpo del modal
-    $('#modalDetalle .modal-body').html(``);
-
-    //Configuramos el título del modal
-    $('#modalDetalle .modal-title').text("Detalles del puesto: ", nombre_puesto);
-
-    //Almacenamos en auna variable la semana actual
-    const semana_actual = obtenerNumeroSemana();
-
-    //Preparamos la petición GET para obtener las referencias asociadas al puesto
-    fetch(`/film/api/obtenerReferencias-puesto/${puesto_id}`, {
-        method: "GET"
-    })
-        //Controlamos la respuesta
-        .then(response => {
-            //En caso de que no sea válida
-            if (!response.ok) {
-                throw new Error('Error fetching data');
-            }
-
-            //Devolvemos los datos
-            return response.json();
-        })
-
-        //Controlamos los datos
-        .then(data => {
-            //Llamamos a la función para obtener las fechas de las referencias
-            obtenerFechas_Referencias(puesto_id, data);
         });
 }
 
@@ -1204,7 +1170,7 @@ function generarTablasPorEtapa(etapas, nombre_etapa) {
 
     // Ordenar cada grupo al final
     Object.keys(agrupadoPorF).forEach(key => {
-        agrupadoPorF[key].sort((a, b) => a.id - b.id);
+        agrupadoPorF[key].sort((a, b) => a.orden - b.orden);
     });
 
     //Iteramos sobre cada grupo de "F" para crear una tabla por cada uno
@@ -1212,9 +1178,6 @@ function generarTablasPorEtapa(etapas, nombre_etapa) {
         //Almacenamos en una variable las etapas del grupo "F"
         const etapasDeF = agrupadoPorF[FKey];
         console.log(`ETAPA: ${etapasDeF[0].F} -> ${etapasDeF[0].orden}`)
-
-
-        console.log("Etapas DEF: ", etapasDeF)
 
         //Almacenamos en variables la información básica de la etapa
         const id_etapa1 = etapasDeF[0].id;
@@ -1556,13 +1519,12 @@ function generarTablasPorEtapa(etapas, nombre_etapa) {
                                         <td class="px-4 py-2 border">${tiempoCalculado}</td>
                                     </tr>
                                 `;
-                                    }).join('')}${console.log("Tiempo desplazamiento: ", tiempoDesplazamiento)}
-}
+                                    }).join('')}
                             
                                                 <tr>
                                                     <td class="px-4 py-2 border font-semibold" rowspan="2">Distancia</td>
                                                     <td class="px-4 py-2 border font-semibold">Metros<br>${distancia_total}</td>
-                                                    <td class="px-4 py-2 border font-semibold">Velocidad<br>${valor}</td>
+                                                    <td class="px-4 py-2 border font-semibold">Velocidad<br>${0.6}</td>
                                                     <td class="px-4 py-2 border font-semibold">${etapaDeF.cantidad_a_mover}</td>
                                                     <td class="px-4 py-2 border">${tiempo_distancia_total}</td>
                                                 </tr>
@@ -1653,6 +1615,931 @@ function ordernarEtapa(array) {
 }
 
 /**
+ * Función para disponer el modal general
+ * @param {Array} data Argumento que contiene los datos
+ */
+function confifurarModal_general(data) {
+    //Configuramos el cuerpo del modal
+    $('#modal .modal-body').html(`
+        <div class="container mx-auto p-4">
+            <div class="mt-6 flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
+            </div>
+        </div>
+    `);
+
+    //Llamamos a la función para configurar el footer del modal
+    configurarFooterModal_Etapa(data[0].id, data[0].F);
+
+    //Mostramos el modal
+    $('#modal').modal('show');
+}
+
+/**
+ * Función para condfigurar los datos de la etapa Colocacion carros manualmente
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarModal_colocacionCarrosManualmente(data) {
+    //Configuramos el cuerpo del modal
+    $('#modal .modal-body').html(`
+        <div class="container mx-auto p-4">
+            <div class="mt-6 flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
+            </div>
+        </div>
+    `);
+
+    //Llamamos a la función para configurar el footer del modal
+    configurarFooterModal_Etapa(data[0].id, data[0].F);
+
+    //Mostramos el modal
+    $('#modal').modal('show');
+}
+
+/**
+ * Función para configurar los datos de la etapa Coger bac y colocar en carro/estanteria
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarModal_carga_cassette_nacelle_J_22_bacs(data) {
+    //Configuramos el cuerpo del modal
+    $('#modal .modal-body').html(`
+        <div class="container mx-auto p-4">
+            <div class="mt-6 flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
+            </div>
+        </div>
+    `);
+
+    //Llamamos a la función para configurar el footer del modal
+    configurarFooterModal_Etapa(data[0].id, data[0].F);
+
+    //Mostramos el modal
+    $('#modal').modal('show');
+}
+
+
+/**
+ * Función para configurar los datos de la etapa Coger bac y colocar en carro/estanteria
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarModal_Coger_bac_colocar_en_carro_estanteria(data) {
+    //Configuramos el cuerpo del modal
+    $('#modal .modal-body').html(`
+        <div class="container mx-auto p-4">
+            <div class="mt-6 flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
+            </div>
+        </div>
+    `);
+
+    //Llamamos a la función para configurar el footer del modal
+    configurarFooterModal_Etapa(data[0].id, data[0].F);
+
+    //Mostramos el modal
+    $('#modal').modal('show');
+}
+
+/**
+ * Función para disoner los datos de la etapa Coger UC/UM y dejar en stock altura media
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarModal_Coger_UC_UM_dejar_stock_altura_media(data) {
+    //Configuramos el cuerpo del modal
+    $('#modal .modal-body').html(`
+        <div class="container mx-auto p-4">
+            <div class="mt-6 flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
+            </div>
+        </div>
+    `);
+
+    //Llamamos a la función para configurar el footer del modal
+    configurarFooterModal_Etapa(data[0].id, data[0].F);
+
+    //Mostramos el modal
+    $('#modal').modal('show');
+}
+
+/**
+ * Función para disoner los datos de la etapa F29
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarModal_F12(data) {
+    //Configuramos el cuerpo del modal
+    $('#modal .modal-body').html(`
+        <div class="container mx-auto p-4">
+            <!--CONTENEDOR COMENTARIO-->
+            <h4 class="text-xl font-semibold mb-4">Comentario</h4>
+            <div class="mb-6">
+                <textarea id="comentario" name="comentario" class="w-full h-24 p-2 border border-gray-300 rounded-md" disabled></textarea>
+            </div>
+
+            <hr class="my-4">
+
+            <!--CONTENEDOR AJUSTES-->
+            <!--Distancia-->
+            <div class="mb-4" hidden>
+                <label class="block text-gray-700 font-medium mb-2">Distancia GR <i class="bi bi-arrow-right"></i> tienda</label>
+                <input type="number" id="distancia" name="distancia" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Distancia GR --> tienda" value="1">
+            </div>
+            <!--Número de bultos-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Número de bultos por pila en GR</label>
+                <input type="number" id="numero_bultos" name="numero_bultos" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Número de bultos por pila en GR" value="1">
+            </div>
+            <!--Altura del embalaje-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Altura del embalaje</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="altura_embalaje" name="altura_embalaje">
+                    <option value="40m<-H<-0">40m<-H<-0</option>
+                    <option value="65m">65m</option>
+                    <option value="66m<-H<-0">66m<-H<-0</option>
+                    <option value="95m">95m</option>
+                    <option value="H->0">H->0</option>
+                    <option value="96m">96m</option>
+                </select>
+            </div>
+            <!--Almacenamiento de embalajes mediante-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Almacenamiento de embalajes mediante</label>
+                <input type="number" id="almacenamiento_embalajes" name="almacenamiento_embalajes" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Almacenamiento de embaajes mediante" value="1">
+            </div>
+
+            <hr class="my-4">
+
+            <!--CONTENEDOR CONDICIONES-->
+            <h4 class="text-xl font-semibold mb-4">Condiciones</h4>
+            <!--Equipo utilizado-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Equipo utilizado</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="maquina_usada" name="maquina_usada">
+                    <option value="Carretilla elevadora eléctrica acompañada">Carretilla elevadora eléctrica acompañada</option>
+                    <option value="Carretilla elevadora eléctrica con conductor sentado">Carretilla elevadora eléctrica con conductor sentado</option>
+                    <option value="Carretilla elevadora eléctrica con apilador acompañante">Carretilla elevadora eléctrica con apilador acompañante</option>
+                    <option value="Apilador eléctrico delantero">Apilador eléctrico delantero</option>
+                    <option value="Apilador eléctrico con mástil retráctil">Apilador eléctrico con mástil retráctil</option>
+                    <option value="Apilador térmico delantero">Apilador térmico delantero</option>
+                    <option value="Tractor eléctrico de 200 a 500 daN">Tractor eléctrico de 200 a 500 daN</option>
+                    <option value="Tractor eléctrico de 1500 daN">Tractor eléctrico de 1500 daN</option>
+                    <option value="Tractor térmico (agrícola)">Tractor térmico (agrícola)</option>
+                    <option value="Ninguno">Ninguno</option>
+                </select>
+            </div>
+            <!--Velocidad-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Velocidad de la máquina usada</label>
+                <input type="text" id="velocidad_maquina_usada" name="velocidad_maquina_usada" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Speed machine used" disabled>
+            </div>
+            <!--Código MTM3-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Código MTM3</label>
+                <input type="text" id="codigo_mtm3" name="codigo_mtm3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Código MTM3" disabled>
+            </div>
+            <!--Velocidad de la máquina-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Velocidad</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="velocidad" name="velocidad">
+                    <option value="10" ${speed === "10" ? "selected" : ""}>10 km/h</option>
+                    <option value="12" ${speed === "12" ? "selected" : ""}>12 km/h</option>
+                    <option value="15" ${speed === "15" ? "selected" : ""}>15 km/h</option>
+                    <option value="20" ${speed === "20" ? "selected" : ""}>20 km/h</option>
+                </select>
+            </div>
+            <!--Correspondencia-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Correspondencia</label>
+                <input type="text" id="correspondencia" name="correspondencia" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Correspondencia" disabled>
+            </div>
+            <!--En la tienda pila de-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">En pila de</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="en_pila_de" name="en_pila_de">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+            <!--Soporte embalaje-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Soporte embalaje</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="soporte_embalaje" name="soporte_embalaje">
+                    <option value="Unitario">Unitario</option>
+                    <option value="Doble">Doble</option>
+                </select>
+            </div>
+
+            <div class="mt-6 flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
+            </div>
+        </div>
+    `);
+
+    //Llamamos a la función para establecer la información de la etapa dentro del cuerpo del modal
+    configurarEtapaF12(data);
+
+    //Llamamos a la función para configurar el footer del modal
+    configurarFooterModal_Etapa(data[0].id, data[0].F);
+
+    //Mostramos el modal
+    $('#modal').modal('show');
+}
+
+/**
+ * Función para disponer la información los datos de la etapa F12
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarEtapaF12(data) {
+    ///Delcaramos las variables necesarias
+    let comentario, distancia, numero_bultos, altura_embalaje, almacenamiento_embalaje, equipo_utilizado, codigo_mtm3, correspondencia, en_pila_de, soporte_embalaje;
+
+    //Iteramos sobre el array
+    data.forEach(item => {
+        comentario = item.comments;
+        distancia = item.distancia;
+        numero_bultos = item.numero_bultos_por_pila;
+        altura_embalaje = item.altura_embalaje;
+        almacenamiento_embalaje = item.almacenamiento_emlabajes_mediante;
+        equipo_utilizado = item.engins;
+        codigo_mtm3 = item.code_MTM3;
+        correspondencia = item.correspondance;
+        en_pila_de = item.en_la_tienda_pila;
+        soporte_embalaje = item.soporte_embalaje;
+    });
+
+    //Llamamos a la función para dar funcionalidad al campo de la velocidad
+    funcionalidadVelocidad();
+
+    /**Añadimos la información a los campos */
+    //Categoria de los comentarios
+    document.getElementById('comentario').value = comentario;
+
+    //Categoria de los ajustes
+    document.getElementById('distancia').value = distancia;
+    document.getElementById('numero_bultos').value = numero_bultos;
+    document.getElementById('altura_embalaje').value = altura_embalaje;
+    document.getElementById('almacenamiento_embalajes').value = almacenamiento_embalaje;
+    document.getElementById('maquina_usada').value = equipo_utilizado;
+    document.getElementById('codigo_mtm3').value = codigo_mtm3;
+    document.getElementById('correspondencia').value = correspondencia;
+    document.getElementById('en_pila_de').value = en_pila_de;
+    document.getElementById('soporte_embalaje').value = soporte_embalaje;
+}
+
+/**
+ * Función para disponer los datos de la etapa F10
+ * @param {Array} Argumento que contiene los datos de la etapa
+ */
+function configurarModal_F27(data) {
+    //Configuramos el cuerpo del modal
+    $('#modal .modal-body').html(`
+        <div class="container mx-auto p-4">
+            <!--CONTENEDOR COMENTARIO-->
+            <h4 class="text-xl font-semibold mb-4">Comentario</h4>
+            <div class="mb-6">
+                <textarea id="comentario" name="comentario" class="w-full h-24 p-2 border border-gray-300 rounded-md" disabled></textarea>
+            </div>
+
+            <hr class="my-4">
+
+            <!--CONTENEDOR AJUSTES-->
+            <!--Distancia del remolque-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Distancia del remolque <i class="bi bi-arrow-right"></i> zona GE vacia</label>
+                <input type="number" id="distancia_remolque" name="distancia_remolque" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Distancia del remolque --> zona GE vacia" value="1">
+            </div>
+            <!--Altura del paquete-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Altura del paquete</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="altura_paquete" name="altura_paquete">
+                    <option value="0,40m<h<0,65m">0,40m<h<0,65m</option>
+                    <option value="0,66m<h<0,95m">0,66m<h<0,95m</option>
+                    <option value="h>0,96m">h>0,96m</option>
+                </select>
+            </div>
+            <!--Número de paquetes por pila-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Número de paquetes por pila en el área de almacenamiento</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="numero_paquetes_pila" name="numero_paquetes_pila">
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                </select>
+            </div>
+            <!--Número UC por UM-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Cantidad de UC por palé</label>
+                <input type="number" id="cantidad_uc_por_pallet" name="cantidad_uc_por_pallet" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Cantidad de UC por palé" disabled>
+            </div>
+
+            <hr class="my-4">
+
+            <!--CONTENEDOR CONDICIONES-->
+            <h4 class="text-xl font-semibold mb-4">Condiciones</h4>
+            <!--Equipo utilizado-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Equipo utilizado</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="maquina_usada" name="maquina_usada">
+                    <option value="Carretilla elevadora eléctrica acompañada">Carretilla elevadora eléctrica acompañada</option>
+                    <option value="Carretilla elevadora eléctrica con conductor sentado">Carretilla elevadora eléctrica con conductor sentado</option>
+                    <option value="Carretilla elevadora eléctrica con apilador acompañante">Carretilla elevadora eléctrica con apilador acompañante</option>
+                    <option value="Apilador eléctrico delantero">Apilador eléctrico delantero</option>
+                    <option value="Apilador eléctrico con mástil retráctil">Apilador eléctrico con mástil retráctil</option>
+                    <option value="Apilador térmico delantero">Apilador térmico delantero</option>
+                    <option value="Tractor eléctrico de 200 a 500 daN">Tractor eléctrico de 200 a 500 daN</option>
+                    <option value="Tractor eléctrico de 1500 daN">Tractor eléctrico de 1500 daN</option>
+                    <option value="Tractor térmico (agrícola)">Tractor térmico (agrícola)</option>
+                    <option value="Ninguno">Ninguno</option>
+                </select>
+            </div>
+            <!--Velocidad-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Velocidad de la máquina usada</label>
+                <input type="text" id="velocidad_maquina_usada" name="velocidad_maquina_usada" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Speed machine used" disabled>
+            </div>
+            <!--Código MTM3-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Código MTM3</label>
+                <input type="text" id="codigo_mtm3" name="codigo_mtm3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Código MTM3" disabled>
+            </div>
+            <!--Velocidad de la máquina-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Velocidad</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="velocidad" name="velocidad">
+                    <option value="10" ${speed === "10" ? "selected" : ""}>10 km/h</option>
+                    <option value="12" ${speed === "12" ? "selected" : ""}>12 km/h</option>
+                    <option value="15" ${speed === "15" ? "selected" : ""}>15 km/h</option>
+                    <option value="20" ${speed === "20" ? "selected" : ""}>20 km/h</option>
+                </select>
+            </div>
+            <!--Correspondencia-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Correspondencia</label>
+                <input type="text" id="correspondencia" name="correspondencia" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Correspondencia" disabled>
+            </div>
+            <!--Soporte embalaje-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Soporte embalaje</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="soporte_embalaje" name="soporte_embalaje">
+                    <option value="Unitario">Unitario</option>
+                    <option value="Doble">Doble</option>
+                </select>
+            </div>
+
+            <div class="mt-6 flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
+            </div>
+        </div>
+    `);
+
+    //Llamamos a la función para estabecer la información de la etapa dentro del cuerpo del modal
+    configuarEtapaF27(data);
+
+
+    //Llamamos a la función para configurar el footer del modal
+    configurarFooterModal_Etapa(data[0].id, data[0].F);
+
+    //Mostramos el modal
+    $('#modal').modal('show');
+}
+
+/**
+ * Función para configurar la etapa F27
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configuarEtapaF27(data) {
+    //Declaramos las variables necesarias
+    let comentario, distancia_remolque, altura_embalaje, numero_paquetes_pila, equipo_utilizado, codigo_mtm3, correspondencia, soporte_embalaje;
+
+    //Iteramos sobre el array
+    data.forEach(item => {
+        comentario = item.comments;
+        distancia_remolque = item.distancia;
+        altura_embalaje = item.altura_embalaje;
+        numero_paquetes_pila = item.numero_bultos_por_pila;
+        equipo_utilizado = item.engins;
+        codigo_mtm3 = item.code_MTM3;
+        correspondencia = item.correspondance;
+        soporte_embalaje = item.soporte_embalaje
+    });
+
+    //Llamamos a la función para dar funcionalidad al campo de la velocidad
+    funcionalidadVelocidad();
+
+    /**Añadimos la información a los campos */
+    //Categoria de los comentarios
+    document.getElementById('comentario').value = comentario;
+
+    //Categoria de los ajustes
+    document.getElementById('distancia_remolque').value = distancia_remolque;
+    document.getElementById('altura_paquete').value = altura_embalaje;
+    document.getElementById('numero_paquetes_pila').value = numero_paquetes_pila;
+
+    //Llamamos a la función para disponer la cantidad de UC por pallet
+    obtenerConteosUM(data[0].referencia_componente);
+
+    //Categoria de las condiciones
+    document.getElementById('maquina_usada').value = equipo_utilizado;
+    document.getElementById('correspondencia').value = correspondencia;
+    document.getElementById('soporte_embalaje').value = soporte_embalaje;
+    document.getElementById('codigo_mtm3').value = codigo_mtm3;
+}
+
+/**
+ * Función para disponer los datos de la etapa F10
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarModal_F10(data) {
+    //Configuramos el cuerpo del modal
+    $('#modal .modal-body').html(`
+        <div class="container mx-auto p-4">
+            <!--CONTENEDOR COMENTARIO-->
+            <h4 class="text-xl font-semibold mb-4">Comentario</h4>
+            <div class="mb-6">
+                <textarea id="comentario" name="comentario" class="w-full h-24 p-2 border border-gray-300 rounded-md" disabled></textarea>
+            </div>
+
+            <hr class="my-4">
+
+            <!--CONTENEDOR AJUSTES-->
+            <!--Distancia GR-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Distancia GR <i class="bi bi-arrow-right"></i> tienda</label>
+                <input type="number" id="distancia" name="distancia" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Distancia GR tienda" value="1">
+            </div>
+            <!--Número de bultos por pila en GR-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Número de bultos por pila en GR</label>
+                <input type="number" id="numero_bultos" name="numero_bultos" class="w-full p-2 border border-gray-300 rounded-mdl" placeholder="Número de bultos por pila en GR" value="1">
+            </div>
+            <!--Altura del embalaje-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Altura del embalaje</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="altura_embalaje" name="altura_embalaje">
+                    <option value ="0.40 X 0.65">0.40 X 0.65</option>
+                    <option value ="0.66 X 0.95">0.66 X 0.95</option>
+                    <option value="0.96 X 1.35">0.96 X 1.35</option>
+                    <option value="1.36 X 1.80">1.36 X 1.80</option>
+                </select>
+            </div>
+            <!--Almacenamiento de embalajes mediante-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Almacenamiento de embalajes mediante</label>
+                <input type="number" id="almacenamiento_embalaje" name="almacenamiento_embalaje" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Almacenamiento de embalajes" value="1">
+            </div>
+            <!--Número UC por UM-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Cantidad de UC por palé</label>
+                <input type="number" id="cantidad_uc_por_pallet" name="cantidad_uc_por_pallet" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Cantidad de UC por palé" disabled>
+            </div>
+
+            <hr class="my-4">
+
+            <!--CONTENEDOR CONDICIONES-->
+            <h4 class="text-xl font-semibold mb-4">Condiciones</h4>
+            <!--Equipo utilizado-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Equipo utilizado</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="maquina_usada" name="maquina_usada">
+                    <option value="Carretilla elevadora eléctrica acompañada">Carretilla elevadora eléctrica acompañada</option>
+                    <option value="Carretilla elevadora eléctrica con conductor sentado">Carretilla elevadora eléctrica con conductor sentado</option>
+                    <option value="Carretilla elevadora eléctrica con apilador acompañante">Carretilla elevadora eléctrica con apilador acompañante</option>
+                    <option value="Apilador eléctrico delantero">Apilador eléctrico delantero</option>
+                    <option value="Apilador eléctrico con mástil retráctil">Apilador eléctrico con mástil retráctil</option>
+                    <option value="Apilador térmico delantero">Apilador térmico delantero</option>
+                    <option value="Tractor eléctrico de 200 a 500 daN">Tractor eléctrico de 200 a 500 daN</option>
+                    <option value="Tractor eléctrico de 1500 daN">Tractor eléctrico de 1500 daN</option>
+                    <option value="Tractor térmico (agrícola)">Tractor térmico (agrícola)</option>
+                    <option value="Ninguno">Ninguno</option>
+                </select>
+            </div>
+            <!--Velocidad-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Velocidad de la máquina usada</label>
+                <input type="text" id="velocidad_maquina_usada" name="velocidad_maquina_usada" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Speed machine used" disabled>
+            </div>
+            <!--Código MTM3-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Código MTM3</label>
+                <input type="text" id="codigo_mtm3" name="codigo_mtm3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Código MTM3" disabled>
+            </div>
+            <!--Velocidad de la máquina-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Velocidad</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="velocidad" name="velocidad">
+                    <option value="10" ${speed === "10" ? "selected" : ""}>10 km/h</option>
+                    <option value="12" ${speed === "12" ? "selected" : ""}>12 km/h</option>
+                    <option value="15" ${speed === "15" ? "selected" : ""}>15 km/h</option>
+                    <option value="20" ${speed === "20" ? "selected" : ""}>20 km/h</option>
+                </select>
+            </div>
+            <!--Correspondencia-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Correspondencia</label>
+                <input type="text" id="correspondencia" name="correspondencia" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Correspondencia" disabled>
+            </div>
+            <!--Número de paquetes-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Número de paquetes</label>
+                <input type="text" id="numero_paquetes" name="numero_paquetes" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Número de paquetes" disabled>
+            </div>
+            <!--En la tienda pila de-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">En pila de</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="en_pila_de" name="en_pila_de">
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+            <!--Soporte embalaje-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Soporte embalaje</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="soporte_embalaje" name="soporte_embalaje">
+                    <option value="Unitario">Unitario</option>
+                    <option value="Doble">Doble</option>
+                </select>
+            </div>
+
+            <div class="mt-6 flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
+            </div>
+        </div>
+    `);
+
+    //Llamamos a la función para establecer la información de la etapa dentro del cuerpo del modal
+    configurarEtapaF10(data);
+
+    //Llamamos a la función para configurar el footer del modal
+    configurarFooterModal_Etapa(data[0].id, data[0].F);
+
+    //Mostramos el modal
+    $('#modal').modal('show');
+}
+
+/**
+ * Función para disponer los datos de la etyapa F14
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarModal_F14(data) {
+    //Configuramos el cuerpo del modal
+    $('#modal .modal-body').html(`
+        <div class="container mx-auto p-4">
+            <!--CONTENEDOR COMENTARIO-->
+            <h4 class="text-xl font-semibold mb-4">Comentario</h4>
+            <div class="mb-6">
+                <textarea id="comentario" name="comentario" class="w-full h-24 p-2 border border-gray-300 rounded-md" disabled></textarea>
+            </div>
+
+            <hr class="my-4">
+
+            <!--CONTENEDOR AJUSTES-->
+            <!--Distancia del tren-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Distancia del tren <i class="bi bi-arrow-right"></i> zona de entrega vacía</label>
+                <input type="number" id="distancia_tren" name="distancia_tren" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Distancia del tren --> zona de entrega vacia" value="1">
+            </div>
+            <!--Distancia de la zona de entrega vacía-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Distancia de la zona de entrega vacía <i class="bi bi-arrow-right"></i> tienda</label>
+                <input type="number" id="distancia_zona_entrega" name="distancia_zona_entrega" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Distancia de la zona de entrega vacía --> tienda" value="1">
+            </div>
+            <!--Distancia de almacenamiento-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Distancia de almacenamiento <i class="bi bi-arrow-right"></i> tren base rodante</label>
+                <input type="number" id="distancia_almacenamiento" name="distancia_almacenamiento" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Distancia de almacenamiento --> tren base rodante" value="1">
+            </div>
+            <!--Número bases rodantes-->
+                <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Número de bases rodantes por tren</label>
+                <input type="number" id="numero_bases_rodantes" name="numero_bases_rodantes" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Número bases rodantes" value="1">
+            </div>
+            <!--Número UC por UM-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Cantidad de UC por palé</label>
+                <input type="number" id="cantidad_uc_por_pallet" name="cantidad_uc_por_pallet" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Cantidad de UC por palé" disabled>
+            </div>
+
+            <hr class="my-4">
+
+            <!--CONTENEDOR CONDICIONES-->
+            <h4 class="text-xl font-semibold mb-4">Condiciones</h4>
+            <!--Equipo utilizado-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Equipo utilizado</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="maquina_usada" name="maquina_usada">
+                    <option value="Carretilla elevadora eléctrica acompañada">Carretilla elevadora eléctrica acompañada</option>
+                    <option value="Carretilla elevadora eléctrica con conductor sentado">Carretilla elevadora eléctrica con conductor sentado</option>
+                    <option value="Carretilla elevadora eléctrica con apilador acompañante">Carretilla elevadora eléctrica con apilador acompañante</option>
+                    <option value="Apilador eléctrico delantero">Apilador eléctrico delantero</option>
+                    <option value="Apilador eléctrico con mástil retráctil">Apilador eléctrico con mástil retráctil</option>
+                    <option value="Apilador térmico delantero">Apilador térmico delantero</option>
+                    <option value="Tractor eléctrico de 200 a 500 daN">Tractor eléctrico de 200 a 500 daN</option>
+                    <option value="Tractor eléctrico de 1500 daN">Tractor eléctrico de 1500 daN</option>
+                    <option value="Tractor térmico (agrícola)">Tractor térmico (agrícola)</option>
+                    <option value="Ninguno">Ninguno</option>
+                </select>
+            </div>
+            <!--Velocidad-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Velocidad de la máquina usada</label>
+                <input type="text" id="velocidad_maquina_usada" name="velocidad_maquina_usada" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Speed machine used" disabled>
+            </div>
+            <!--Código MTM3-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Código MTM3</label>
+                <input type="text" id="codigo_mtm3" name="codigo_mtm3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Código MTM3" disabled>
+            </div>
+            <!--Velocidad de la máquina-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Velocidad</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="velocidad" name="velocidad">
+                    <option value="10" ${speed === "10" ? "selected" : ""}>10 km/h</option>
+                    <option value="12" ${speed === "12" ? "selected" : ""}>12 km/h</option>
+                    <option value="15" ${speed === "15" ? "selected" : ""}>15 km/h</option>
+                    <option value="20" ${speed === "20" ? "selected" : ""}>20 km/h</option>
+                </select>
+            </div>
+            <!--Correspondencia-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Correspondencia</label>
+                <input type="text" id="correspondencia" name="correspondencia" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Correspondencia" disabled>
+            </div>
+
+            <div class="mt-6 flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
+            </div>
+        </div>
+    `);
+
+    //Llamamos a la función para establecer la información de la etapa dentro del cuerpo del modal
+    configurarEtapaF14(data);
+
+    //Llamamos a la función para configurar el footer del modal
+    configurarFooterModal_Etapa(data[0].id, data[0].F);
+
+    //Mostramos el modal
+    $('#modal').modal('show');
+}
+
+/**
+ * Función para configurar la etapa F14
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarEtapaF14(data) {
+    //Declaramos las variables necesarias
+    let comentario, distancia_tren, distance_empty_zone, distancia_almacenamiento, numero_bases_rodantes, equipo_utilizado, codigo_mtm3, correspondencia;
+
+    //Iteramos sobre el array
+    data.forEach(item => {
+        comentario = item.comments;
+        distancia_tren = item.distancia_tren;
+        distance_empty_zone = item.distance_empty_zone;
+        distancia_almacenamiento = item.distancia_almacenamiento;
+        numero_bases_rodantes = item.numero_bases_rodantes;
+        equipo_utilizado = item.engins;
+        codigo_mtm3 = item.code_MTM3;
+        correspondencia = item.correspondance;
+    });
+
+    //Llamamos a la función para dar funcionalidad al campo de la velocidad
+    funcionalidadVelocidad();
+
+    /**Añadimos la informacion a los campos */
+    //Categoria de los comentarios
+    document.getElementById('comentario').value = comentario;
+
+    //Categoria de los ajustes
+    document.getElementById('distancia_tren').value = distancia_tren;
+    document.getElementById('distancia_zona_entrega').value = distance_empty_zone;
+    document.getElementById('distancia_almacenamiento').value = distancia_almacenamiento;
+    document.getElementById('numero_bases_rodantes').value = numero_bases_rodantes;
+
+    //Llamamos a la función para disponer la cantidad de UC por pallet
+    obtenerConteosUM(data[0].referencia_componente);
+
+    //Categoria de las condiciones
+    document.getElementById('maquina_usada').value = equipo_utilizado;
+    document.getElementById('codigo_mtm3').value = codigo_mtm3;
+    document.getElementById('correspondencia').value = correspondencia;
+}
+
+/**
+ * Función para disponer los datos de la etapa F29
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarModal_F29(data) {
+    //Configuramos el cuerpo del modal
+    $('#modal .modal-body').html(`
+        <div class="container mx-auto p-4">
+            <!--CONTENEDOR COMENTARIO-->
+            <h4 class="text-xl font-semibold mb-4">Comentario</h4>
+            <div class="mb-6">
+                <textarea id="comentario" name="comentario" class="w-full h-24 p-2 border border-gray-300 rounded-md" disabled></textarea>
+            </div>
+
+            <hr class="my-4">
+
+            <!--CONTENEDOR AJUSTES-->
+            <h4 class="text-xl font-semibold mb-4">Ajustes</h4>
+            <!--Distancia de la zona vacia -->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Distancia de la zona vacía => camión</label>
+                <input type="number" id="distancia" name="distancia" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Distancia de la zona vacía" value="0">
+            </div>
+            <!--Número de paquetes cargados a la vez-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Número de paquetes cargados a la vez (pila)</label>
+                <input type="number" id="numero_paquetes_cargados" name="numero_paquetes_cargados" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Número de paquetes cargados a la vez (pila)" value="0">
+            </div>
+            <!--Tipo de carga-->
+            <div class="mb-4" hidden>
+                <label class="block text-gray-700 font-medium mb-2">Tipo de carga</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="tipo_carga" name="tipo_carga">
+                    <option value="Muelle">Muelle</option>
+                    <option value="Avion">Avión</option>
+                </select>
+            </div>
+            <!--Número UC por UM-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Cantidad de UC por palé</label>
+                <input type="number" id="cantidad_uc_por_pallet" name="cantidad_uc_por_pallet" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Cantidad de UC por palé" disabled>
+            </div>
+
+            <hr class="my-4">
+
+            <!--CONTENEDOR CONDICIONES-->
+            <h4 class="text-xl font-semibold mb-4">Condiciones</h4>
+            <!--Equipo utilizado-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Equipo utilizado</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="maquina_usada" name="maquina_usada">
+                    <option value="Carretilla elevadora eléctrica acompañada">Carretilla elevadora eléctrica acompañada</option>
+                    <option value="Carretilla elevadora eléctrica con conductor sentado">Carretilla elevadora eléctrica con conductor sentado</option>
+                    <option value="Carretilla elevadora eléctrica con apilador acompañante">Carretilla elevadora eléctrica con apilador acompañante</option>
+                    <option value="Apilador eléctrico delantero">Apilador eléctrico delantero</option>
+                    <option value="Apilador eléctrico con mástil retráctil">Apilador eléctrico con mástil retráctil</option>
+                    <option value="Apilador térmico delantero">Apilador térmico delantero</option>
+                    <option value="Tractor eléctrico de 200 a 500 daN">Tractor eléctrico de 200 a 500 daN</option>
+                    <option value="Tractor eléctrico de 1500 daN">Tractor eléctrico de 1500 daN</option>
+                    <option value="Tractor térmico (agrícola)">Tractor térmico (agrícola)</option>
+                    <option value="Ninguno">Ninguno</option>
+                </select>
+            </div>
+            <!--Velocidad-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Velocidad de la máquina usada</label>
+                <input type="text" id="velocidad_maquina_usada" name="velocidad_maquina_usada" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Speed machine used" disabled>
+            </div>
+            <!--Código MTM3-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Código MTM3</label>
+                <input type="text" id="codigo_mtm3" name="codigo_mtm3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Código MTM3" disabled>
+            </div>
+            <!--Velocidad de la máquina-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Velocidad</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="velocidad" name="velocidad">
+                    <option value="10" ${speed === "10" ? "selected" : ""}>10 km/h</option>
+                    <option value="12" ${speed === "12" ? "selected" : ""}>12 km/h</option>
+                    <option value="15" ${speed === "15" ? "selected" : ""}>15 km/h</option>
+                    <option value="20" ${speed === "20" ? "selected" : ""}>20 km/h</option>
+                </select>
+            </div>
+            <!--Correspondencia-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Correspondencia</label>
+                <input type="text" id="correspondencia" name="correspondencia" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Correspondencia" disabled>
+            </div>
+            <!--Número de paquetes-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Número de paquetes</label>
+                <input type="number" id="numero_paquetes" name="numero_paquetes" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Número de paquetes" disabled>
+            </div>
+
+            <div class="mt-6 flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
+            </div>
+        </div>
+    `);
+
+    //Llamamos a la función para establecer la información de la etapa dentro del cuerpo de modal
+    configurarEtapaF29(data);
+
+    //Llamamos a la función para configurar el footer del modal
+    configurarFooterModal_Etapa(data[0].id, data[0].F);
+
+    //Mostramos el modal
+    $('#modalLarge').modal('show');
+}
+
+/**
+ * Función para disponer los datos de la etapa F5
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarModal_F5(data) {
+    //Configuramos el cuerpo del modal
+    $('#modal .modal-body').html(`
+        <div class="container mx-auto p-4">
+            <!--CONTENEDOR COMENTARIO-->
+            <h4 class="text-xl font-semibold mb-4">Comentario</h4>
+            <div class="mb-6">
+                <textarea id="comentario" name="comentario" class="w-full h-24 p-2 border border-gray-300 rounded-md" disabled></textarea>
+            </div>
+            <!--Distancia-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Distancia</label>
+                <input type="number" id="distancia" name="distancia" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Empaque descargado por" value="1">
+            </div>
+
+            <hr class="my-4">
+
+            <!--CONTENEDOR AJUSTES-->
+            <h4 class="text-xl font-semibold mb-4">Ajustes</h4>
+            <!--Acceso al camión por-->
+            <div class="mb-4">  
+                <label class="block text-gray-700 font-medium mb-2">Acceso al caminón por el lado</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="acceso_camion" name="acceso_camion">
+                    <option value="1">1 (Descarga por muelle)</option>
+                    <option value="2">2 (Descarga lateral)</option>
+                </select>
+            </div>
+            <!--Empaque descargado por-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Número de contenedores (UM) por picada</label>
+                <input type="number" id="empaque_descargado" name="empaque_descargado" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Empaque descargado por" value="1">
+            </div>
+            <!--Número UC por UM-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Cantidad de UC por palé</label>
+                <input type="number" id="cantidad_uc_por_pallet" name="cantidad_uc_por_pallet" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Cantidad de UC por palé" disabled>
+            </div>
+
+            <hr class="my-4">
+
+            <!--CONTENEDOR CONDICIONES-->
+            <h4 class="text-xl font-semibold mb-4">Condiciones</h4>
+            <!--Equipo utilizado-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Equipo utilizado</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="maquina_usada" name="maquina_usada">
+                    <option value="Apilador eléctrico delantero">Apilador eléctrico delantero</option>
+                    <option value="Apilador eléctrico con mástil retráctil">Apilador eléctrico con mástil retráctil</option>
+                    <option value="Apilador térmico delantero">Apilador térmico delantero</option>
+                    <option value="Tractor eléctrico de 200 a 500 daN">Tractor eléctrico de 200 a 500 daN</option>
+                    <option value="Tractor eléctrico de 1500 daN">Tractor eléctrico de 1500 daN</option>
+                    <option value="Tractor térmico (agrícola)">Tractor térmico (agrícola)</option>
+                    <option value="Ninguno">Ninguno</option>
+                </select>
+            </div>
+            <!--Velocidad-->
+            <div class="mb-4" hidden>
+                <label class="block text-gray-700 font-medium mb-2">Velocidad de la máquina usada</label>
+                <input type="text" id="velocidad_maquina_usada" name="velocidad_maquina_usada" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Speed machine used" disabled>
+            </div>
+            <!--Código MTM3-->
+            <div class="mb-4" hidden>
+                <label class="block text-gray-700 font-medium mb-2">Código MTM3</label>
+                <input type="text" id="codigo_mtm3" name="codigo_mtm3" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Código MTM3" disabled>
+            </div>
+            <!--Velocidad de la máquina-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Velocidad</label>
+                <select class="w-full p-2 border border-gray-300 rounded-md" id="velocidad" name="velocidad">
+                    <option value="10" ${speed === "10" ? "selected" : ""}>10 km/h</option>
+                    <option value="12" ${speed === "12" ? "selected" : ""}>12 km/h</option>
+                    <option value="15" ${speed === "15" ? "selected" : ""}>15 km/h</option>
+                    <option value="20" ${speed === "20" ? "selected" : ""}>20 km/h</option>
+                </select>
+            </div>
+            <!--Correspondencia-->
+            <div class="mb-4" hidden>
+                <label class="block text-gray-700 font-medium mb-2">Correspondencia</label>
+                <input type="text" id="correspondencia" name="correspondencia" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Correspondencia" disabled>
+            </div>
+            <!--Número de paquetes-->
+            <div class="mb-4">
+                <label class="block text-gray-700 font-medium mb-2">Número de paquetes</label>
+                <input type="number" id="numero_paquetes" name="numero_paquetes" class="w-full p-2 border border-gray-300 rounded-md" placeholder="Número de paquetes" disabled>
+            </div>
+
+            <div class="mt-6 flex justify-center">
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded" id="botonVisualizarPlano" onclick="visualizarPlano('${puestoID}', '${data[0].id}')">Visualizar plano</button>
+            </div>
+        </div>
+    `)
+
+    //Llamamos a la función para establecer la información de la etapa dentro del cuerpo del modal
+    configurarEtapaF5(data);
+
+    //Llamamos a la función para configurar el footer del modal
+    configurarFooterModal_Etapa(data[0].id, data[0].F);
+
+    //Mostramos el modal
+    $('#modal').modal('show');
+}
+
+/**
  * Función que actualiza el campo de la velocidad (speed)
  * @param {String} value Argumento que contiene el valor de la velocidad 
  */
@@ -1676,6 +2563,133 @@ function updateSpeedMachine(value) {
                 velocidad_maquina_usada.value = "";
         }
     }
+}
+
+/**
+ * Función para la etapa F29
+ * @param {Array} data Argumemento que contiene los datos de la etapa
+ */
+function configurarEtapaF29(data) {
+    //Declaramos las variables necesarias
+    let comentario, distancia_entra_zonas, numero_paquetes_cargados, tipo_carga, cantidad_UC, equipo_utilizado, velocidad_maquina_usada, velocidad, codigo_mtm3, correspondencia, numero_paquetes;
+
+    //Iteramos sobre el array
+    data.forEach(item => {
+        comentario = item.comments;
+        distancia_entra_zonas = item.distance_empty_zone;
+        numero_paquetes_cargados = item.number_of_packages_loaded_at_once;
+        tipo_carga = item.loading_type;
+        equipo_utilizado = item.engins;
+        codigo_mtm3 = item.id_MTM3;
+        correspondencia = item.correspondance;
+    });
+
+    //Llamamos a la función para dar funcionalidad al campo de la velocidad
+    funcionalidadVelocidad();
+
+    /**Añadimos la información a los campos */
+    //Categoria del comentario
+    document.getElementById('comentario').value = comentario;
+
+    //Categoria de los ajustes
+    document.getElementById('distancia').value = distancia_entra_zonas;
+    document.getElementById('numero_paquetes_cargados').value = numero_paquetes_cargados;
+    document.getElementById('tipo_carga').value = tipo_carga;
+
+    //Llamamos a la función para disponer la cantidad de UC por pallet
+    obtenerConteosUM(data[0].referencia_componente);
+
+    //Categoria de las condiciones
+    document.getElementById('maquina_usada').value = equipo_utilizado;
+    document.getElementById('codigo_mtm3').value = codigo_mtm3;
+    document.getElementById('correspondencia').value = correspondencia
+}
+
+/**
+ * Función para configurar la etapa F10
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarEtapaF10(data) {
+    //Declaramos las variables necesarias
+    let comentario, distancia, numero_bultos, altura_embalaje, almacenamiento_embalaje, cantidad_UC, equipo_utilizado, velociddad_maquina_usada, codigo_mtm3, correspondencia, numero_paquetes, en_pila_de, soporte_embalaje;
+
+    //Iteramos sobre el array
+    data.forEach(item => {
+        comentario = item.comments;
+        distancia = item.distancia;
+        numero_bultos = item.numero_bultos_por_pila;
+        altura_embalaje = item.altura_embalaje;
+        almacenamiento_embalaje = item.almacenamiento_embalajes_mediante;
+        equipo_utilizado = item.engins;
+        codigo_mtm3 = item.code_MTM3;
+        correspondencia = item.correspondance;
+        en_pila_de = item.en_la_tienda_pila;
+        soporte_embalaje = item.soporte_embalaje;
+    });
+
+    //Llamamos a la función para dar funcionalidad al campo de la velocidad
+    funcionalidadVelocidad();
+
+    /**Añadimos la información a los campos */
+    //Categoria de los comentarios
+    document.getElementById('comentario').value = comentario;
+
+    //Categoria de los ajustes
+    document.getElementById('distancia').value = distancia;
+    document.getElementById('numero_bultos').value = numero_bultos;
+    document.getElementById('altura_embalaje').value = altura_embalaje;
+
+    //Llamamos a la función para disponer la cantidad de UC por pallet
+    obtenerConteosUM(data[0].referencia_componente);
+
+    //Categoria de las condiciones
+    document.getElementById('maquina_usada').value = equipo_utilizado;
+    document.getElementById('codigo_mtm3').value = codigo_mtm3;
+    document.getElementById('correspondencia').value = correspondencia;
+    document.getElementById('en_pila_de').value = en_pila_de;
+    document.getElementById('soporte_embalaje').value = soporte_embalaje;
+}
+
+/**
+ * Función para configurar la etapa F5
+ * @param {Array} data Argumento que contiene los datos de la etapa
+ */
+function configurarEtapaF5(data) {
+    //Declaramos las variables necesarias
+    let comentario, distancia, acceso_camion, empaque_descargado, codigo_mtm3, cantidad_UC, equipo_utilizado, velocidad_maquina_usada, velocidad, correspondencia, numero_paquetes;
+
+    //Iteramos por el array de los datos
+    data.forEach(item => {
+        id_etapa = item.id;
+        distancia = item.distancia_F5;
+        comentario = item.comments;
+        acceso_camion = item.acceso_al_camion_F5;
+        empaque_descargado = item.embalaje_descargado_F5;
+        equipo_utilizado = item.engins;
+        codigo_mtm3 = item.id_MTM3;
+        correspondencia = item.correspondance;
+    });
+
+    //Llamamos a la función par dar funcionalidad al campo de la velocidad
+    funcionalidadVelocidad();
+
+    /**Añadimos la información a los campos */
+    //Categoria del comentario
+    document.getElementById('comentario').value = comentario;
+    document.getElementById('distancia').value = distancia;
+
+    //Categoria de los ajustes
+    document.getElementById('acceso_camion').value = acceso_camion;
+    document.getElementById('empaque_descargado').value = empaque_descargado;
+
+
+    //Categoria de las condiciones
+    document.getElementById('maquina_usada').value = equipo_utilizado;
+    document.getElementById('codigo_mtm3').value = codigo_mtm3;
+    document.getElementById('correspondencia').value = correspondencia;
+
+    //Llamamos a la función para disponer la cantidad de UC por pallet
+    obtenerConteosUM(data[0].referencia_componente);
 }
 
 /**
@@ -1849,7 +2863,7 @@ function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
                 labels: ['Saturación Total', 'Tiempo Libre'],
                 datasets: [{
                     data: [saturacionTotal, (100 - saturacionTotal)],
-                    backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(211, 211, 211, 0.5)'],
+                    backgroundColor: ['rgba(75, 192, 192, 0.8)', 'rgba(211, 211, 211, 0.5)'],
                     hoverBackgroundColor: ['rgba(75, 192, 192, 1)', 'rgba(211, 211, 211, 0.7)'],
                     borderWidth: 2,
                     borderColor: '#ffffff'
@@ -2779,6 +3793,7 @@ function mostrarAlerta(titulo, mensaje, icono, opcion) {
 /**
  * Función para visualizar la información de una etapa
  * @param {String} etapa Argumento que contiene el nombre de la etapa
+ * @param {String} referencia_componente Argumento que contiene la referencia del componenten
  * @param {int} id_etapa Argumento que contiene el ID de la etapa
  */
 function visualizarEtapa(etapa, id_etapa) {
@@ -2980,8 +3995,7 @@ function visualizarPlano(puesto_id, etapa_nombre) {
  * @param {String} tabla Argumento que contiene el nombre de la tabla del elemento a eliminar
  * @param {int} id_puesto Argumento que contiene el ID del puesto
  */
-function eliminarRegistro(tipo, id_elemento, tabla, id_puesto) {
-    console.log("BORRAR", id_elemento);
+function eliminarRegistro(id_elemento, tabla, id_puesto) {
     //Preparamos la solicitud DELETE
     fetch(`/film/api/eliminarRegistro/${id_elemento}/${tabla}/${id_puesto}`, {
         method: "DELETE"
@@ -2990,33 +4004,15 @@ function eliminarRegistro(tipo, id_elemento, tabla, id_puesto) {
         .then(response => {
             //En caso de que todo haya salido bien
             if (response.status === 201) {
-                switch(tipo){
-                    case "puesto":
-                        mostrarAlerta("Eliminando puesto", null, null, 1);
-                        break;
-                    case "etapa_global":
-                        mostrarAlerta("Eliminando etapas", null, null, 1);
-                        break;
-                    case "etapa_referencia":
-                        mostrarAlerta("Eliminando etapa", null, null, 1);
-                        break;
-                }
+                mostrarAlerta("Puesto eliminado", null, null, 1);
+
                 //En caso de que falle
             } else if (response.status === 501) {
-                switch(tipo){
-                    case "puesto":
-                        mostrarAlerta("Error en la eliminación del puesto", "Se ha producido un error a la hora de eliminar el puesto", "error", 0);
-                        break;
-                    case "etapa_global":
-                        mostrarAlerta("Error en la eliminación de las etapas", "Se ha producido un error a la hora de eliminar las etapas", "error", 0);
-                        break;
-                    case "etapa_referencia":
-                        mostrarAlerta("Error en la eliminación de la etapa", "Se ha producido un error a la hora de eliminar la etapa", "error", 0);
-                        break;
-                }
+                mostrarAlerta("Error en la creación del puesto", "Se ha producido un error a la hora de crear el puesto", "error", 0);
+
                 //En casos no controlados
             } else {
-                mostrarAlerta("Estado no controlado", "No se ha sido capaz de controlar el estado de la eliminación", "question", null);
+                mostrarAlerta("Estado no controlado", "No se ha sido capaz de controlar el estado de la creación del puesto", "question", null);
             }
         });
 }
@@ -3330,36 +4326,34 @@ function graficoPrueba() {
     //Datos del gráfico
     const ctx = document.getElementById('graficoCanvas').getContext('2d');
 
-    // Datos del gráfico
-    const data = [40, 55, 30, 80];
-    // Calcular la media
-    const suma = data.reduce((a, b) => a + b, 0);
-    const media = suma / data.length;
+    //Creamos una variable para contener los datos
+    const datos = {
+        labels: ['7', '9', '11', '13'],
+        datasets: [
+            {
+                type: 'bar',
+                label: 'Porcentaje de Uso',
+                data: [40, 55, 30, 80],
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            },
+            {
+                type: 'line',
+                label: 'Tendencia',
+                data: [50, 50, 50, 50],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                //backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderWidth: 2,
+                fill: true
+            }
+        ]
+    };
 
-    //Inicializamos el gráfico
-    new Chart(ctx, {
+    //Configuramos el gráfico
+    const config = {
         type: 'bar',
-        data: {
-            labels: ['7', '9', '11', '13'],
-            datasets: [
-                {
-                    type: 'line',
-                    label: `Media: (${media.toFixed(2)}%)`,
-                    data: data.map(() => media),
-                    borderColor: 'rgba(255, 99, 174, 1)',
-                    borderWidth: 2,
-                    pointRadius: 0
-                },
-                {
-                    type: 'bar',
-                    label: 'Porcentaje de Uso',
-                    data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }
-            ]
-        },
+        data: datos,
         options: {
             responsive: true,
             plugins: {
@@ -3367,7 +4361,7 @@ function graficoPrueba() {
                     position: 'top',
                     labels: {
                         color: '#ffffff'
-                    },
+                    }
                 }
             },
             scales: {
@@ -3395,73 +4389,10 @@ function graficoPrueba() {
                 }
             }
         }
-    });
-    /*new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['7', '9', '11', '13'],
-            datasets: [{
-                label: 'Porcentaje de Uso',
-                data: data,
-                backgroundColor: 'rgba(243, 96, 216, 0.5)',
-                borderColor: 'rgba(241, 99, 234, 0.85)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true }
-            },
-            plugins: {
-                legend: {
-                    labels: {
-                        color: '#FFFFFF',
-                        generateLabels: (chart) => {
-                            const originalLabels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
-                            originalLabels.push({
-                                text: `Media: (${media.toFixed(2)}%)`,
-                                fillStyle: 'rgb(99, 120, 255)',
-                                strokeStyle: 'rgb(99, 120, 255)',
-                                lineWidth: 1,
-                                hidden: false
-                            });
-                            return originalLabels;
-                        }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            // Solo mostramos el valor de las barras en los tooltips
-                            return `Valor: ${tooltipItem.raw}`;
-                        }
-                    }
-                }
-            },
-            interaction: {
-                mode: 'nearest',
-                intersect: false,
-            }
-        },
-        plugins: [{
-            id: 'lineaMedia',
-            afterDraw: function(chart) {
-                const { ctx, chartArea: { left, right }, scales: { y } } = chart;
-                const yPos = y.getPixelForValue(media);
+    };
 
-                // Dibujar la línea de la media
-                ctx.save();
-                ctx.strokeStyle = 'rgb(99, 120, 255)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(left, yPos);
-                ctx.lineTo(right, yPos);
-                ctx.stroke();
-                ctx.restore();
-            }
-        }]
-    });*/
+    //Inicializamos el gráfico
+    new Chart(ctx, config);
 }
 
 /**

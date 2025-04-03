@@ -1338,9 +1338,9 @@ router.put('/actualizarOrden/:array_ordenado', (req, res) => {
 /**
  * End point para obtener las etapas agrupadas de un puesto
  */
-router.get('/obtenerEtapas_Puesto/:id_puesto/:nombre_etapa', (req, res) => {
+router.get('/obtenerEtapasAgrupadasPuesto/:id_puesto', (req, res) => {
     //Almacenamos el ID del puesto
-    let { id_puesto, nombre_etapa } = req.params;
+    const id_puesto = req.params.id_puesto;
 
     //Creamos la conexión a la base de datos
     getDBConnection((err, connection) => {
@@ -1350,6 +1350,7 @@ router.get('/obtenerEtapas_Puesto/:id_puesto/:nombre_etapa', (req, res) => {
         }
 
         //Almacenamos en una variable la consulta SQL
+    
         const query = `
             SELECT 
                 EN.id_puesto, FS.name, SUM(cantidad_a_mover) AS cantidad_a_mover, COALESCE(distancia_total, 0) AS distancia_total, SUM(PS14) AS PS14, 
