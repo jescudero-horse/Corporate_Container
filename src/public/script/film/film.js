@@ -432,7 +432,24 @@ function renderizarGrafico() {
                             }
                         }
                     }
-                }
+                },
+                plugins: [{
+                    id: 'lineaMedia',
+                    afterDraw: function(chart) {
+                        const { ctx, chartArea: { left, right }, scales: { y } } = chart;
+                        const yPos = y.getPixelForValue(90);
+        
+                        // Dibujar la línea de la media
+                        ctx.save();
+                        ctx.strokeStyle = 'rgb(0, 0, 0)';
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(left, yPos);
+                        ctx.lineTo(right, yPos);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }]
             });
         }
 
