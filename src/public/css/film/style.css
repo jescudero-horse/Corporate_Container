@@ -113,8 +113,8 @@ header:hover .navbar-logo {
 .resaltado {
     animation: fadeInFromLeft 0.5s ease-out;
     animation-fill-mode: forwards;
-    background-color: rgb(114, 148, 201) !important;
-    border: 2px solid rgb(168, 172, 177) !important;
+    background-color: rgb(221, 221, 221) !important;
+    border: 2px solid rgb(213, 213, 213) !important;
     transition: background-color 0.3s, border 0.3s;
 }
 
