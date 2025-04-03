@@ -114,7 +114,6 @@ function gestionarPuesto(data) {
         //Ordenamos los puestos por el número del mismo
         conteosPorPuesto.sort((a, b) => a.numero_puesto - b.numero_puesto);
 
-
         //Aumentamos el contador de peticiones
         peticionesCompletadas++;
 
@@ -256,6 +255,14 @@ function renderizarGrafico() {
     graficosContainer.style.width = '100%';
     graficosContainer.style.transition = 'all 0.3s ease-in-out';
 
+    const titulo = document.createElement('h3');
+    titulo.style.fontSize = '15px';
+    titulo.style.color = '#000000';
+    titulo.style.fontWeight = 'bold';
+    //titulo.style.paddingTop = '5px';
+    //titulo.style.paddingBottom = '10px';
+    titulo.style.textAlign = 'center';
+
     //Contenedor para el gráfico de puesto
     const contenedor_grafico_puesto = document.createElement('div');
     contenedor_grafico_puesto.style.flex = '0';
@@ -270,6 +277,9 @@ function renderizarGrafico() {
     contenedor_grafico_puesto.style.justifyContent = 'center';
     contenedor_grafico_puesto.style.overflow = 'hidden';
     contenedor_grafico_puesto.style.transition = 'all 0.3s ease-in-out';
+    contenedor_grafico_puesto.style.backgroundColor = '#f6f6f6';
+
+    contenedor_grafico_puesto.appendChild(titulo);
 
     //Lienzo para el gráfico de la saturación
     const lienzo_grafico_puesto = document.createElement('canvas');
@@ -285,6 +295,21 @@ function renderizarGrafico() {
 
     //Contenedor para los botones
     const contenedor_botones = document.createElement('div');
+    contenedor_botones.id = "botonesContainer";
+    contenedor_botones.style.display = 'flex';
+    contenedor_botones.style.justifyContent = 'center';
+    contenedor_botones.style.gap = '8px';
+
+    //Obtenemos la instancia de los botones necesarios
+    const { botonEliminarPuesto: boton_eliminar_puesto } = creacionBotones(contenedor_botones);
+
+    //Funcionalidad para eliminar un puesto
+    boton_eliminar_puesto.addEventListener('click', () => {
+        //Llamamos al método para disponer la alerta de confirmación de elemento
+        confirmarEliminar("question", "Vas a eliminar este puesto... ¿Estas seguro de lo que vas hacer?", puestoID, "puestos");
+    });
+
+    //Añadimos el botón al contenedor
     contenedor_grafico_puesto.appendChild(contenedor_botones);
 
     //Contenedor para el gráfico principal
@@ -300,6 +325,7 @@ function renderizarGrafico() {
     contenedor_grafico_principal.style.alignItems = 'center';
     contenedor_grafico_principal.style.justifyContent = 'center';
     contenedor_grafico_principal.style.transition = 'all 0.3s ease-in-out';
+    contenedor_grafico_principal.style.backgroundColor = '#f6f6f6';
 
     //Gráfico principal
     const grafico_principal = document.createElement('canvas');
@@ -333,13 +359,14 @@ function renderizarGrafico() {
             plugins: {
                 legend: {
                     labels: {
-                        color: '#ffffff',
+                        color: 'black',
                         font: {
                             size: 11
                         },
                         textAlign: 'center',
-                        boxWidth: 20 
-                    }
+                        boxWidth: 20
+                    },
+                    display: false
                 },
                 tooltip: {
                     callbacks: {
@@ -351,26 +378,46 @@ function renderizarGrafico() {
                 x: {
                     stacked: true,
                     ticks: {
-                        color: '#ffffff'
+                        color: 'black'
                     }
                 },
                 y: {
                     stacked: true,
                     beginAtZero: true,
-                    max: 100,
+                    max: 160,
                     title: {
                         display: true,
                         text: 'Porcentaje (%)',
-                        color: '#ffffff'
+                        color: 'black'
                     },
                     ticks: {
-                        color: '#ffffff'
+                        color: 'black'
                     }
                 }
             }
         },
         //plugins: [ChartDataLabels]
+        plugins: [{
+            id: 'lineaMedia',
+            afterDraw: function (chart) {
+                const { ctx, chartArea: { left, right }, scales: { y } } = chart;
+                const yPos = y.getPixelForValue(90);
+
+                // Dibujar la línea de la media
+                ctx.save();
+                ctx.strokeStyle = 'rgb(0, 0, 0)';
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(left, yPos);
+                ctx.lineTo(right, yPos);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }]
     });
+
+    //Modificamos los valores para sustituir los 0 por 10 y los colores
+    const conteos_controlados = conteos.map(conteo => (conteo === 0 ? 10 : conteo)), colores_conteos_vacios = conteos.map(conteo => (conteo === 0 ? 'rgba(169, 169, 169, 0.7)' : 'rgba(41, 128, 185, 0.7)'));
 
     //Gráfico principal
     const chartBarras = new Chart(ctxBarras, {
@@ -379,8 +426,8 @@ function renderizarGrafico() {
             labels: nombre_puestos,
             datasets: [{
                 label: 'Puestos',
-                data: conteos,
-                backgroundColor: 'rgba(41, 128, 185, 0.7)',
+                data: conteos_controlados,
+                backgroundColor: colores_conteos_vacios,
                 borderColor: 'rgba(41, 128, 185, 1)',
                 borderWidth: 2,
                 borderRadius: 8,
@@ -396,16 +443,17 @@ function renderizarGrafico() {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: true,
                     labels: {
-                        color: '#ecf0f1',
-                        font: { size: 14 }
+                        color: 'black',
+                        font: {
+                            size: 11
+                        },
+                        textAlign: 'center',
+                        boxWidth: 20
                     }
                 },
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
                     borderRadius: 8,
                     boxPadding: 10
                 }
@@ -414,7 +462,7 @@ function renderizarGrafico() {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        color: '#ecf0f1',
+                        color: 'black',
                         stepSize: 5,
                         font: { size: 12 }
                     },
@@ -425,84 +473,43 @@ function renderizarGrafico() {
                 },
                 x: {
                     ticks: {
-                        color: '#ecf0f1',
+                        color: 'black',
                         font: { size: 12 },
-                        autoSkip: true, 
+                        autoSkip: true,
                         maxRotation: 45,
                         minRotation: 30
                     },
                     grid: { display: false }
                 }
             },
-            /**
-             * Función para desplegar los gráficos detallados del puesto
-             * @param {*} event Evento click
-             * @param {*} elements Barra del gráfico principal
-             */
+
+            //Función para el clic en las barras
             onClick: (event, elements) => {
-                //En  caso de que haya puestos
+                //En caso de que se haga clic en una barra
                 if (elements.length > 0) {
-                    //Almacenamos las variables necesarias
-                    const index = elements[0].index,
-                        id_puesto = id_puestos[index],
-                        nombre_puesto = nombre_puestos[index],
-                        conteoSeleccionado = conteos[index];
-    
-                    //Array con los colores para la leyenda
-                    const colores = [
-                        'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)',
-                        'rgba(255, 206, 86, 0.7)', 'rgba(75, 192, 132, 0.7)',
-                        'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)'
-                    ];
-    
-                    //Variable donde almacenará los datos para la disposición del gráfico de chimenea
-                    const datasets = conteoGraficoChimenea.map((item, index) => ({
-                        label: item.nombre,
-                        data: [item.minutos],
-                        backgroundColor: colores[index % colores.length],
-                        id_puesto: item.id
-                    }));
-    
-                    //Configuramos el contenedor del gráfico del puesto
-                    contenedor_grafico_puesto.style.flex = '0.3';
-                    contenedor_grafico_puesto.style.maxWidth = '30%';
-                    contenedor_grafico_principal.style.flex = '0.7';
-                    contenedor_grafico_principal.style.maxWidth = '70%';
-    
-                    //Creamos una instancia del botón para añadir una etapa
-                    const boton_anyadir_etapa = document.getElementById('anyadirEtapa');
-    
-                    //Aplicamos el estilo de resaltado
-                    boton_anyadir_etapa.classList.add('resaltadoBotones');
-    
-                    //Aplicamos el atributo 'onclick'
-                    boton_anyadir_etapa.setAttribute('onclick', `anyadirEtapa(${id_puesto})`);
-    
-                    //Mostramos el botón
-                    boton_anyadir_etapa.style.display = 'block';
-    
-                    //Creamos una instancia del buscador
-                    const buscador_etapas = document.getElementById('buscadorEtapa');
-    
-                    //Mostramos el buscador
-                    buscador_etapas.style.display = 'block';
-    
-                    //Añadimos el título al encabezado de la sección de las etapas
-                    document.getElementById('tituloPrincipalEtapasDisponibles').textContent = "Etapas disponibles para el puesto: " + nombre_puesto;
-    
-                    //Llamamos a la función para disponer los gráficos del puesto
-                    actualizarGraficoPuesto(chartPuesto, chartChimenea, nombre_puesto, conteoSeleccionado, id_puesto, datasets);
-    
-                    //Llamamos a la función para disponer las etapas del puesto
-                    obtenerEtapas(id_puesto);
-    
-                    //Llamamos a la función para disponer el turno
-                    obtenerTurno(id_puesto);
+                    //Obtenemos el índice del gráfico
+                    const index = elements[0].index;
+
+                    //Reseteamos todas las barras a su color y grosor original
+                    chartBarras.data.datasets[0].backgroundColor = chartBarras.data.datasets[0].data.map((_, i) =>
+                        i === index ? 'rgba(255, 99, 132, 0.9)' : 'rgba(41, 128, 185, 0.7)'
+                    );
+
+                    //Establecemos el grosor de la barra seleccionada del puesto
+                    chartBarras.data.datasets[0].borderWidth = chartBarras.data.datasets[0].data.map((_, i) =>
+                        i === index ? 8 : 2
+                    );
+
+                    //Actualizamos el gráfico
+                    chartBarras.update();
+
+                    //Llamamos a la función para disponer la información detallada del puesto
+                    seleccionarPuesto(index, id_puestos, nombre_puestos, conteos, contenedor_grafico_puesto, contenedor_grafico_principal, chartChimenea, chartPuesto, titulo);
                 }
             }
         }
     });
-    
+
 
     //En caso de que el puesto exista
     if (chartPuesto) {
@@ -523,21 +530,15 @@ function renderizarGrafico() {
         options: {
             plugins: {
                 title: {
-                    display: true,
-                    font: { size: 13 },
-                    color: '#ffffff',
-                    padding: { top: 5, bottom: 10 }
-                },
-                legend: {
-                    labels: { color: '#ffffff' }
+                    display: false
                 },
                 tooltip: {
                     callbacks: {
-                        label: context => ` ${context.raw}%`
+                        label: context => `${context.dataset.data[context.dataIndex]}%`
                     }
                 },
                 centerText: {
-                    text: ''
+                    //text: `${conteo}%`;
                 }
             },
             responsive: false,
@@ -555,7 +556,7 @@ const centerTextPlugin = {
         const { width, height, ctx } = chart;
         const text = chart.options.plugins.centerText.text;
 
-        if (!text) return; 
+        if (!text) return;
 
         ctx.save();
 
@@ -566,7 +567,6 @@ const centerTextPlugin = {
         //Configuramos el texto
         const fontSize = doughnutRadius / 4.5;
         ctx.font = `bold ${fontSize}px Arial`;
-        ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -580,6 +580,89 @@ const centerTextPlugin = {
         ctx.restore();
     }
 };
+
+/**
+ * Función para crear los botones y disponerlos en el puesto
+ * @returns Devuelve los botones formateados
+ */
+function creacionBotones(contenedor_botones) {
+    /** Botón para eliminar un puesto */
+    const botonEliminarPuesto = document.createElement('button');
+    botonEliminarPuesto.innerHTML = '<i class="bi bi-trash3"></i>';
+    botonEliminarPuesto.className = "bg-red-600 text-white py-1 px-2 rounded hover:bg-red-500 transition duration-300";
+    botonEliminarPuesto.setAttribute('data-id', puestoID);
+    contenedor_botones.appendChild(botonEliminarPuesto);
+
+    //Devolvemos los botones
+    return { botonEliminarPuesto };
+}
+
+/**
+ * Función para disponer la información detallada del puesto
+ * @param {int} index Argumento que contiene el indice del puesto del gráfico principal
+ * @param {Array} id_puestos Argumento que contiene los IDs de los puestos
+ * @param {Array} nombre_puestos Argumento que contiene los nombres de los puestos
+ * @param {Array} conteos Argumento que contiene la saturación de los puestos
+ * @param {HTMLElement} contenedor_grafico_puesto Argumento que contiene la instancia del contenedor del puesto
+ * @param {HTMLElement} contenedor_grafico_principal Argumento que contiene la insrancia del contenedor del gráfico principal
+ * @param {Chart} chartChimenea Argumento que contiene la instancia del gráfico de chimenea
+ * @param {Chart} chartPuesto Argumento que contiene la instancia del gráfico de donut
+ */
+function seleccionarPuesto(index, id_puestos, nombre_puestos, conteos, contenedor_grafico_puesto, contenedor_grafico_principal, chartChimenea, chartPuesto, titulo) {
+    //Obtenemos el ID del puesto, el nombre y la saturación del puesto
+    const id_puesto = id_puestos[index], nombre_puesto = nombre_puestos[index], conteoSeleccionado = conteos[index];
+
+    titulo.textContent = `Puesto: ${nombre_puesto}`;
+
+    //Almmacenamos en la variable el ID del puesto
+    puestoID = id_puesto;
+
+    //Variable que contiene los colores disponibles
+    const colores = [
+        'rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 205, 0.6)',
+        'rgba(255, 206, 86, 0.6)', 'rgba(61, 193, 153, 0.6)',
+        'rgba(255, 159, 64, 0.6)', 'rgba(148, 59, 226, 0.6)',
+        'rgba(173, 224, 53, 0.6)', 'rgba(57, 30, 233, 0.6)',
+        'rgba(67, 203, 198, 0.6)', 'rgba(255, 176, 144, 0.6)',
+        'rgba(255, 160, 225, 0.6)', 'rgba(153, 102, 255, 0.6)',
+        'rgba(0, 160, 225, 0.6)', 'rgba(201, 59, 226, 0.6)',
+        'rgba(0, 128, 128, 0.6)', 'rgba(20, 23, 255, 0.6)'
+    ];
+
+    //Variable con los datos necesarios para disponer la información del puesto
+    const datasets = conteoGraficoChimenea.map((item, index) => ({
+        label: item.nombre,
+        data: [item.minutos],
+        backgroundColor: colores[index % colores.length],
+        id_puesto: item.id,
+        borderColor: colores[index % colores.length].replace('0.6', '0.9')
+    }));
+
+    //Configuramos el gráfico y la interfaz del puesto
+    contenedor_grafico_puesto.style.flex = '0.3';
+    contenedor_grafico_puesto.style.maxWidth = '30%';
+    contenedor_grafico_principal.style.flex = '0.7';
+    contenedor_grafico_principal.style.maxWidth = '70%';
+
+    //Mostramos botones y el buscador
+    const boton_anyadir_etapa = document.getElementById('anyadirEtapa');
+    boton_anyadir_etapa.classList.add('resaltadoBotones');
+    boton_anyadir_etapa.setAttribute('onclick', `anyadirEtapa(${id_puesto})`);
+    boton_anyadir_etapa.style.display = 'block';
+
+    const buscador_etapas = document.getElementById('buscadorEtapa');
+    buscador_etapas.style.display = 'block';
+    document.getElementById('tituloPrincipalEtapasDisponibles').textContent = "Etapas disponibles para el puesto: " + nombre_puesto;
+
+    //Llamamos a la función para actualizar los gráficos
+    actualizarGraficoPuesto(chartPuesto, chartChimenea, nombre_puesto, conteoSeleccionado, id_puesto, datasets);
+
+    //Llamamos a la función para obtener las etapas del puesto
+    obtenerEtapas(id_puesto);
+
+    //Llamamos a la función para disponer los turnos del puesto
+    obtenerTurno(id_puesto);
+}
 
 /**
  * Función para disponer los datos en el gráfico del puesto
@@ -607,11 +690,14 @@ function actualizarGraficoPuesto(chartPuesto, chartChimenea, nombre, conteo, id_
     //Almacenamos en variable los datos
     const valores = datos_filtrados.map(data => data.data[0]), etiquetas = datos_filtrados.map(data => data.label), colores = datos_filtrados.map(data => data.backgroundColor);
 
+    //variables para establecer la información de la saturación
+    const conteo_libre = conteo > 100 ? 0 : 100 - conteo;
+
     //Actualizamos el gráfico donut
     chartPuesto.data.labels = ['Tiempo Utilizado', 'Tiempo Libre'];
-    chartPuesto.data.datasets[0].data = [conteo, 100 - conteo];
+    chartPuesto.data.datasets[0].data = [conteo, conteo_libre.toFixed(2)];
     chartPuesto.data.datasets[0].backgroundColor = ['rgba(231, 76, 60, 0.7)', 'rgba(46, 204, 113, 0.7)'];
-    chartPuesto.options.plugins.title.text = `Puesto: ${nombre}`;
+    //chartPuesto.options.plugins.title.text = `Puesto: ${nombre}`;
     chartPuesto.options.plugins.centerText.text = `${conteo}%`;
     chartPuesto.update();
 
@@ -798,13 +884,147 @@ function confirmarEliminar(icono, titulo, id, tabla, id_puesto) {
     });
 }
 
+function obtenerEtapas(puestoID) {
+    //Iniciamos la solicitud GET para obtener las etapas de un puesto
+    fetch(`/film/api/obtenerEtapasAgrupadasPuesto/${puestoID}`, {
+        method: "GET"
+    })
+        //Controlamos la respuesta
+        .then(response => {
+            //En caso de que se produzca un error
+            if (!response.ok) {
+                throw new Error('Error fetching data');
+            }
+
+            //Devolvemos la información formateada
+            return response.json();
+        })
+
+        //Controlamos los datos
+        .then(data => {
+            generarEtapaGlobal(data);
+        });
+}
+
+/**
+ * Función para representar las etapas por puesto
+ * @param {Array} etapas Argumento que contiene la información de las etapas
+ */
+function generarEtapaGlobal(etapas) {
+    let contenedorTablas = document.getElementById('tablaEtapasGlobal');
+    contenedorTablas.innerHTML = '';
+
+    etapas.forEach((etapa, index) => {
+        let color_etapa;
+        const f = etapa.name
+
+        var { nombre_etapa, id_etapa, id_puesto, distancia_total, nuevo_picadas } = inicializarVariablesEtapas(etapa);
+
+        //Creamos un if para controlar la distancia total de la etapa y asi poder modificar el color de la misma... en caso de la distancia sea de 0 a 49
+        if (distancia_total >= 0 && distancia_total <= 49) {
+            //Asignamos el color verde
+            color_etapa = 'bg-green-300';
+
+            //En caso de que la distancia sea entre de 50 a 100
+        } else if (distancia_total >= 50 && distancia_total <= 99) {
+            //Asignamos el color amarillo
+            color_etapa = 'bg-yellow-300';
+
+            //En caso de que la distancia sea más de 100
+        } else if (distancia_total >= 100) {
+            //Asignamos el color rojo
+            color_etapa = 'bg-red-300';
+
+            //En cualquier otro caso
+        } else {
+            //Asignamos el color azul
+            color_etapa = 'bg-blue-300';
+        }
+
+        id_puesto = etapa.id_puesto;
+
+        //Generamos el HTML de la tabla para la etapa
+        const tablaHTML = `
+            <div id="etapa-${id_puesto}-${nombre_etapa}" class="mb-4" data-id-etapa="${id_etapa}">
+                <h3 id="encabezadoEtapa-${nombre_etapa}"
+                    class="text-lg font-semibold mb-2 flex items-center space-x-4 justify-between p-2 rounded-lg animate-fadeIn 
+                        ${f === 'X' ? 'bg-stone-200 text-black' : color_etapa} text-black"
+                    ${f !== 'X' ? `onclick="toggleEtapas(${id_puesto}, '${nombre_etapa}')"` : ''}>
+
+                    <span cla-ss="min-w-[150px]">Etapa: <strong>${nombre_etapa}</strong></span>
+                    <span class="min-w-[150px]">Distancia (metros): <strong>${distancia_total}</strong></span>
+                    <span class="min-w-[150px]">Tiempo (minutos): <strong>${nuevo_picadas}</strong></span>
+
+
+                    <button id="botonAnyadirEtapa" type="button" class="text-blue-500 ml-2" 
+                        onclick="visualizarEtapa('${nombre_etapa}', '${id_puesto}')">
+                        <i class="bi bi-plus-circle-fill" style="font-size: 20px;"></i>
+                    </button>
+
+
+                    <button id="botonEliminarEtapa" type="button" class="text-red-500 ml-2" 
+                        onclick="eliminarRegistro('etapa_global', '${nombre_etapa}', 'EN_IFM_STANDARD', ${id_puesto})">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+
+                    <button id="botonActualizarEtapa" hidden type="button" class="text-red-500 ml-2" 
+                        onclick="actualizarEtapa('${id_etapa}', 'EN_IFM_STANDARD')">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+
+                    ${f !== 'X' ? `
+                        <button id="botonVisualizarEtapa" type="button" class="text-yellow-500 ml-2" 
+                            onclick="visualizarEtapa('${nombre_etapa}', '${id_puesto}')">
+                            <i class="bi bi-map-fill"></i>
+                        </button>`
+                : ''}
+
+
+                    ${f !== 'X' ? `
+                        <button id="botonGestionarEtapa" type="button" class="text-gray-500 ml-2" 
+                            onclick="gestionarEtapa('${id_etapa}')">
+                            <i class="bi bi-arrows-move"></i>
+                        </button>`
+                : ''}
+                </h3>
+            </div>
+        `;
+        contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
+    })
+}
+
+function toggleEtapas(id_puesto, nombre_etapa) {
+    let subEtapasContainer = document.getElementById(`subEtapas-${nombre_etapa}`);
+
+    console.log(nombre_etapa)
+
+    if (!subEtapasContainer) {
+        // Si no existe, creamos el contenedor y lo insertamos después del elemento de la etapa global
+        let etapaGlobal = document.getElementById(`etapa-${id_puesto}-${nombre_etapa}`);
+        subEtapasContainer = document.createElement("div");
+        subEtapasContainer.id = `subEtapas-${nombre_etapa}`;
+        subEtapasContainer.classList.add("ml-4", "hidden");
+        etapaGlobal.insertAdjacentElement("afterend", subEtapasContainer);
+    }
+
+    if (subEtapasContainer.classList.contains('hidden')) {
+        // Si está oculto, lo mostramos y cargamos las etapas por puesto
+        generarTablasPorPuesto(id_puesto, nombre_etapa, subEtapasContainer);
+        subEtapasContainer.classList.remove('hidden');
+    } else {
+        // Si ya está visible, lo ocultamos
+        subEtapasContainer.classList.add('hidden');
+    }
+}
+
 /**
  * Función para obtener las etapas asociadas a un puesto usando el ID del mismo
  * @param {int} puestoID Argumento que contiene el ID del puesto seleccioonado
  */
-function obtenerEtapas(puestoID) {
+function generarTablasPorPuesto(puestoID, nombre_etapa) {
+    console.log("puesto: ", puestoID, nombre_etapa)
     //Iniciamos la solicitud GET para obtener las etapas de un puesto
-    fetch(`/film/api/obtenerEtapas_Puesto/${puestoID}`, {
+    fetch(`/film/api/obtenerEtapas_Puesto/${puestoID}/${nombre_etapa}`, {
         method: "GET"
     })
         //Controlamos la respuesta
@@ -822,7 +1042,7 @@ function obtenerEtapas(puestoID) {
         .then(data => {
             data.sort((a, b) => a.orden - b.orden); // Asegurar orden correcto
             //Llammos al método para mostrar las etapas de un puesto
-            generarTablasPorEtapa(data);
+            generarTablasPorEtapa(data, nombre_etapa);
         });
 }
 
@@ -934,9 +1154,9 @@ function configurarModalInformeDetallado(data) {
  * Función para representar las etapas por puesto
  * @param {Array} etapas Argumento que contiene la información de las etapas
  */
-function generarTablasPorEtapa(etapas) {
+function generarTablasPorEtapa(etapas, nombre_etapa) {
     //Obtenemos el contenedor donde se agregarán las tablas
-    let contenedorTablas = document.getElementById('tablaEtapas');
+    let contenedorTablas = document.getElementById(`subEtapas-${nombre_etapa}`);
     contenedorTablas.innerHTML = '';
 
     //Creamos un mapa para agrupar las etapas por el valor "F"
@@ -1019,22 +1239,22 @@ function generarTablasPorEtapa(etapas) {
                             //Creamos un if para controlar la distancia total de la etapa y asi poder modificar el color de la misma... en caso de la distancia sea de 0 a 49
                             if (distancia_total >= 0 && distancia_total <= 49) {
                                 //Asignamos el color verde
-                                color_etapa = 'bg-green-300';
+                                color_etapa = 'bg-green-200';
 
                                 //En caso de que la distancia sea entre de 50 a 100
                             } else if (distancia_total >= 50 && distancia_total <= 99) {
                                 //Asignamos el color amarillo
-                                color_etapa = 'bg-yellow-300';
+                                color_etapa = 'bg-yellow-200';
 
                                 //En caso de que la distancia sea más de 100
                             } else if (distancia_total >= 100) {
                                 //Asignamos el color rojo
-                                color_etapa = 'bg-red-300';
+                                color_etapa = 'bg-red-200';
 
                                 //En cualquier otro caso
                             } else {
                                 //Asignamos el color azul
-                                color_etapa = 'bg-blue-300';
+                                color_etapa = 'bg-blue-200';
                             }
 
                             //Generamos el HTML de la tabla para la etapa
@@ -1396,14 +1616,6 @@ function ordernarEtapa(array) {
         .catch(error => {
             console.error('Error en la solicitud:', error);
         });
-}
-
-/**
- * Función para configurar el cuerpo del modal con los datos de la etapa
- * @param {Array} data Argumento que contiene los datos de la etapa 
- */
-function gestionarEtapa_Visualizacion(id) {
-    visualizarPlano(puestoID, id);
 }
 
 /**
@@ -2937,7 +3149,7 @@ function anyadirEtapa(id) {
 
                 <!--Numero picadas -->
                 <div class="relative inline-block w-64 mb-4">
-                    <label for="numeroPicadas" class="block text-sm font-medium text-white mb-2">Coger UC/UM y dejar en stock altura media</label>
+                    <label for="numeroPicadas" class="block text-sm font-medium text-white mb-2">Número de UC/UM a mover en simultaneo</label>
                     <select id="numeroPicadas" name="numeroPicadas" class="block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white text-white">
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -2945,6 +3157,33 @@ function anyadirEtapa(id) {
                         <option value="4">4</option>
                         <option value="5">5</option>
                         <option value="6">6</option>
+                    </select>
+                </div>
+
+                <!-- Operacion de la categoria -->
+                <div class="relative inline-block w-64">
+                    <label for="operacion" class="block text-sm font-medium text-gray-700 mb-2">Selecciona una operación</label>
+                    <select id="operacion" name="operacion" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                        <option value="Coger UC/UM y dejar en stock altura media">Coger UC/UM y dejar en stock altura media</option>
+                        <option value="Coger bac y colocar en carro/estanteria">Coger bac y colocar en carro/estanteria</option>
+                        <option value="Carga cassette nacelle J 22 bacs">Carga cassette nacelle J 22 bacs</option>
+                        <option value="Colocacion carros manualmente">Colocacion carros manualmente</option>
+                        <option value="Descarga camión en muelle (UM)">Descarga camión en muelle (UM)</option>
+                        <option value="De estantería a puesto inferior (UM)">De estantería a puesto inferior (UM)</option>
+                        <option value="De imagen camión a stock (UM)">De imagen camión a stock (UM)</option>
+                        <option value="De stock a estantería (UM)">De stock a estantería (UM)</option>
+                        <option value="De imagen camión a estantería (UM)">De imagen camión a estantería (UM)</option>
+                        <option value="Apertura (UM)">Apertura (UM)</option>
+                        <option value="Gestión de residuos (UM)">Gestión de residuos (UM)</option>
+                        <option value="Plegar y apilar (UC)">Plegar y apilar (UC)</option>
+                        <option value="De puesto inferior a carro (UC)">De puesto inferior a carro (UC)</option>
+                        <option value="Nacelle J 22bacs (UC)">Nacelle J 22bacs (UC)</option>
+                        <option value="Documentacion camión (UM)">Documentacion camión (UM)</option>
+                        <option value="Zipado (UM)">Zipado (UM)</option>
+                        <option value="De stock a imagen camion (UM)">De stock a imagen camion (UM)</option>
+                        <option value="De imagen camion a muelle (UM)">De imagen camion a muelle (UM)</option>
+                        <option value="Plegado de vacíos (UM)">Plegado de vacíos (UM)</option>
+                        <option value="De stock a carro (UM)">De stock a carro (UM)</option>
                     </select>
                 </div>
 
@@ -2994,6 +3233,9 @@ function anyadirEtapa(id) {
             //Almacenamos en una variable el número de picadas
             numero_picadas = document.getElementById('numeroPicadas').value;
 
+            //Almacenamos en la variable global la operación seleccionada
+            operacion_seleccionada = document.getElementById('operacion').value;
+
             //Preparamos la petición GET para obtener las referencias válidas
             fetch(`/film/api/comprobarReferencias/${referencia_componente}/${tipo_operacion}/${planta}`, {
                 method: "GET"
@@ -3032,17 +3274,19 @@ function anyadirEtapa(id) {
                         case "Programa_Expedicion_Forklift":
                             //Llamamos a la función para obtener la cantidad a expedir por cada referencia
                             //obtenerCantidadExpedir(referencias_validas, "quantitea_a_expedir", id);
-                            mostrarModalEtapas();
+                            //mostrarModalEtapas();
                             break;
 
                         case "Programa_Recepcion":
                             //Llamamos a la función para obtener la cantidad a expedir por cada referencia
                             //obtenerCantidadExpedir(referencias_validas, "quantite_de_forcage", id);
-                            mostrarModalEtapas();
+                            //mostrarModalEtapas();
+                            subirEtapa();
                             break;
 
                         case "Programa_Fabricacion":
-                            mostrarModalEtapas();
+                            //mostrarModalEtapas();
+                            subirEtapa();
                             break;
 
                         default:
@@ -3159,7 +3403,7 @@ function anyadirEtapaFinal() {
     //Iniciamos la solicitud GET para añadir la etapa al puesto
     fetch(`/film/api/anyadirEtapa/${puestoID}/${referencia_embalaje}/${encodeURIComponent(operacion_seleccionada)}/${mote}/${tipo_operacion}/${numero_picadas}`, {
         method: "POST"
-    })
+    });
 }
 
 /**
@@ -3276,9 +3520,6 @@ function disponerInformacionModal2(referencia, cantidad_a_expedir, valor_carga, 
  * Función para disponer el modal del selector de etapas para las referencias
  */
 function mostrarModalEtapas(opcion) {
-    //Cerramos el modal del informe
-    //$('#modalInformeFinal').modal('hide');
-
     //Configuramos el título del modal del selector de etapas
     $('#modal .modal-title').text('Selecciona una etapa');
 
@@ -3358,51 +3599,48 @@ function mostrarModalEtapas(opcion) {
     subirEtapa(opcion);
 }
 
+/**
+ * Función para añadir una etapa
+ * @param {int} opcion Argumento para saber si es una operacion añadida de forma manual
+ */
 function subirEtapa(opcion) {
-    //Añadimos la funcionalidad al formulario de añadir la etapa
-    $("#formulario_anyadirEtapa").on('submit', function (e) {
-        //Paramos la propagación
-        e.preventDefault();
+    //En caso de que el campo mote este vacio
+    if (typeof mote === "string" && mote.trim() === '') {
+        //Le asignamos NULL
+        mote = null;
+    }
 
-        //En caso de que el campo mote este vacio
-        if (typeof mote === "string" && mote.trim() === '') {
-            //Le asignamos NULL
-            mote = null;
-        }
+    //Almacenamos en una variable el tipo de carga
+    let tipo_carga = "";
 
-        //Almacenamos en una variable el tipo de carga
-        let tipo_carga = "";
+    //Asignamos el valor de carga
+    if (operacion_seleccionada && operacion_seleccionada.includes("UM")) {
+        tipo_carga = "UM";
+    } else if (operacion_seleccionada && operacion_seleccionada.includes("UC")) {
+        tipo_carga = "UC";
+    }
 
-        //Verificamos que referencia_componente no sea nulo o indefinido
-        if (operacion_seleccionada && operacion_seleccionada.includes("UM")) {
-            tipo_carga = "UM";
-        } else if (operacion_seleccionada && operacion_seleccionada.includes("UC")) {
-            tipo_carga = "UC";
-        }
+    //Separamos las referencias finales
+    let referencias_finales = Array.isArray(referencia_componente)
+        ? referencia_componente
+        : referencia_componente.split(',');
 
-        console.log("Tipo de carga: ", tipo_carga, "\tTipo de operacion: ", operacion_seleccionada);
+    console.log("Referencias: ", referencias_finales);
 
-        console.log("REFERENCIA: ", referencia_componente)
+    //Serializamos el diccionario con las referencias y el número de embalajes
+    referencia_embalaje = encodeURIComponent(JSON.stringify(referencias_finales));
 
-        //Separamos las referencias finales
-        let referencias_finales = Array.isArray(referencia_componente)
-            ? referencia_componente
-            : referencia_componente.split(',');
+    //En caso de que opcion sea 1
+    if (opcion == 1) {
+        //Llamamos a la función para subir la referencia manual
+        subirEtapaManual(referencia_embalaje);
+    }
 
-        //Serializamos el diccionario con las referencias y el número de embalajes
-        referencia_embalaje = encodeURIComponent(JSON.stringify(referencias_finales));
+    let referenciasQuery = referencias_finales.join(',');
 
-        //En caso de que opcion sea 1
-        if (opcion == 1) {
-            //Llamamos a la función para subir la referencia manual
-            subirEtapaManual(referencia_embalaje);
-        }
-
-        let referenciasQuery = referencias_finales.join(',');
-
-        /*fetch(`/film/api/cantidadExpedirHoras/${referenciasQuery}/${tipo_operacion}/${planta}/${"quantite_de_forcage"}/${puestoID}`, {
-            method: "GET"
-        })
+    fetch(`/film/api/obtenerDatos/${tipo_carga}/${planta}/${referenciasQuery}/${tipo_operacion}/${puestoID}`, {
+        method: "GET"
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Error fetching data');
@@ -3410,67 +3648,82 @@ function subirEtapa(opcion) {
             return response.json();
         })
         .then(data => {
-            let cantidades = {};
-            data.forEach(item => {
-                cantidades[item.referencia] = item.cantidad_expedir;
-            });
-
-            // Obtener valores de carga en una sola petición
-            return fetch(`/film/api/obtenerValorCarga/${tipo_carga}/${planta}/${referenciasQuery}/${tipo_operacion}`, { method: "GET" });
-        })
-        .then(response => {
-            if (!response.ok) {
-                mostrarAlerta('Error al obtener el valor de la carga', 'La referencia no pertenece al turno del puesto', 'error', 0);
-                return;
-            }
-            return response.json();
-        })
-        .then(data => {
             let referencia_embalaje_datos = {};
 
             data.forEach(item => {
-                let cantidad_a_expedir = cantidades[item.reference] || 0;
-                let valor_carga = item.valor_carga;
-                let numero_embalajes = Math.ceil((cantidad_a_expedir / valor_carga));
+                let cantidad_a_expedir = item.cantidad_expedir || 0;
+                let valor_carga = item.valor_carga || 1;
+                let numero_embalajes = Math.ceil(cantidad_a_expedir / valor_carga);
 
                 referencia_embalaje_datos[item.reference] = numero_embalajes;
             });
 
             referencia_embalaje = referencia_embalaje_datos;
+
             anyadirEtapaFinal();
         })
         .finally(() => {
-            mostrarAlerta("Etapa/s creada/s", null, null, 1);
-        });*/
+            //mostrarAlerta("Etapa/s creada/s", null, null, 1);
+            //Creamos un array con los datos que tenemos que enviar
+            // const rowData = [
 
-        fetch(`/film/api/obtenerDatos/${tipo_carga}/${planta}/${referenciasQuery}/${tipo_operacion}/${puestoID}`, {
-            method: "GET"
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error fetching data');
+            // ];
+
+            // //Comvertimos el array a JSON
+            // const rowDataJson = encodeURIComponent(JSON.stringify(rowData));
+
+            // //Abrimos la página del plano en una nueva pestaña
+            // window.open(`/film/visualizarPlano?data=${rowDataJson}`, '_blank');
+
+            //Alerta para esperar seis segundos
+            Swal.fire({
+                title: 'Espere',
+                text: 'Añadiendo etapas',
+                icon: 'info',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    setTimeout(() => {
+                        Swal.close();
+                        alertaFinalizacionEtapa(puestoID, operacion_seleccionada);
+                    }, 6000);
                 }
-                return response.json();
-            })
-            .then(data => {
-                let referencia_embalaje_datos = {};
-
-                data.forEach(item => {
-                    let cantidad_a_expedir = item.cantidad_expedir || 0;
-                    let valor_carga = item.valor_carga || 1;
-                    let numero_embalajes = Math.ceil(cantidad_a_expedir / valor_carga);
-
-                    referencia_embalaje_datos[item.reference] = numero_embalajes;
-                });
-
-                referencia_embalaje = referencia_embalaje_datos;
-                anyadirEtapaFinal();
-            })
-            .finally(() => {
-                mostrarAlerta("Etapa/s creada/s", null, null, 1);
             });
+        });
+}
 
+/**
+ * Función para disponer la alerta para añadir la información al mapa
+ */
+function alertaFinalizacionEtapa(puestoID, operacion_seleccionada) {
+    Swal.fire({
+        title: 'Etapas añadidas',
+        text: '¿Deseas añadir la información del plano?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí',
+        cancelButtonText: 'No'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            cargarPlano(puestoID, operacion_seleccionada);
+        } else {
+            window.location.reload();
+        }
     });
+}
+
+/**
+ * Función para cargar el mapa
+ * @param {int} puesto_id Argumento que contiene el ID del puesto
+ * @param {String} operacion_seleccionada Argumento que contiene el nombre de la operación seleccionada
+ */
+function cargarPlano(puesto_id, operacion_seleccionada) {
+    //Creamos un array con los datos necesarios
+    const rowData = [
+        puesto_id,
+        operacion_seleccionada
+    ];
+
 }
 
 /**
@@ -3547,36 +3800,11 @@ function mostrarAlerta(titulo, mensaje, icono, opcion) {
  * @param {String} referencia_componente Argumento que contiene la referencia del componenten
  * @param {int} id_etapa Argumento que contiene el ID de la etapa
  */
-function visualizarEtapa(etapa, referencia_componente, id_etapa) {
+function visualizarEtapa(etapa, id_etapa) {
     //Configuramos el título de la etapa
     $('#modalLargeTitle').text('Información de la etapa ', etapa);
 
-    console.log("ID etapa PLANO: ", id_etapa)
-
-    //Preparamos la petición GET para obtener la información de la etapa
-    fetch(`/film/api/obtenerInformacionEtapa/${id_etapa}`, {
-        method: "GET"
-    })
-        //Controlamos la respuesta
-        .then(response => {
-            //En caso de fallo
-            if (!response.ok) {
-                throw new Error('Error fetching data');
-            }
-
-            //Devolvemos los datos obtenidos
-            console.log(response)
-
-            return response.json();
-        })
-
-        //Controlamos los datos obtenidos
-        .then(data => {
-            console.log("Data PLANO: ", data.length)
-
-            //Llamamos a la función para configurar la visualización de la etapa dependiendo de cual sea
-            gestionarEtapa_Visualizacion(data[0].id);
-        });
+    visualizarPlano(etapa, id_etapa);
 }
 
 /**
@@ -3748,18 +3976,15 @@ function controlarRespuesta_Etapa(response) {
 
 /**
  * Función para abrir el plano en una nueva pestaña
- * @param {*} puesto_id Argumento que contiene el ID del puesto
- * @param {*} id_etapa Argumento que contiene el ID de la etapa
+ * @param {int} puesto_id Argumento que contiene el ID del puesto
+ * @param {String} etapa_nombre Argumento que contiene el nombre de la etapa
  */
-function visualizarPlano(puesto_id, id_etapa) {
+function visualizarPlano(puesto_id, etapa_nombre) {
     //Creamos un array con los datos que tenemos que enviar
     const rowData = [
         puesto_id,
-        id_etapa,
-        null
+        etapa_nombre
     ];
-
-    console.log("Row data: ", rowData);
 
     //Convertimos el array a JSON
     const rowDataJson = encodeURIComponent(JSON.stringify(rowData));

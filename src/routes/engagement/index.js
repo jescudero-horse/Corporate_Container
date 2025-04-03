@@ -983,7 +983,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                     (20 * cantidad_mover) / 100 +
                     (2 * cantidad_mover) / 100 +
                     (7 * cantidad_mover) / 100 +
-                    (2 * cantidad_mover) / 100 
+                    (2 * cantidad_mover) / 100
                 ), // Actividad en minutos
                 Math.ceil(
                     (
@@ -1022,7 +1022,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                     (38 * cantidad_mover) / 100 +
                     (6 * cantidad_mover) / 100 +
                     (29 * cantidad_mover) / 100 +
-                    (9 * cantidad_mover) / 100 
+                    (9 * cantidad_mover) / 100
                 ), // Actividad en minutos
                 Math.ceil(
                     (
@@ -1037,7 +1037,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                     ) / numero_picadas
                 ) // Actividad en minutos X picada
             )
-        break;
+            break;
 
         default:
             break;
@@ -1122,6 +1122,7 @@ router.post('/anyadirEtapa/:puesto_id/:referencia_embalaje/:operacion_selecciona
 
         //Enviamos la respuesta al cliente
         return res.status(201).send("End point procesado correctamente");
+
     } catch (err) {
         console.error("> Error en el procesamiento: ", err);
         return res.status(500).send('Error interno del servidor');
@@ -1306,9 +1307,9 @@ router.put('/actualizarOrden/:array_ordenado', (req, res) => {
 /**
  * End point para obtener las etapas de un puesto
  */
-router.get('/obtenerEtapas_Puesto/:id_puesto', (req, res) => {
+router.get('/obtenerEtapas_Puesto/:id_puesto/:nombre_etapa', (req, res) => {
     //Almacenamos el ID del puesto
-    const id_puesto = req.params.id_puesto;
+    let { id_puesto, nombre_etapa } = req.params;
 
     //Creamos la conexión a la base de datos
     getDBConnection((err, connection) => {
@@ -1328,11 +1329,13 @@ router.get('/obtenerEtapas_Puesto/:id_puesto', (req, res) => {
                 FStandard_Name AS FS
             ON 
                 EN.F = FS.FStandard
-            WHERE EN.id_puesto = ?
+            WHERE EN.id_puesto = ? AND EN.F = ?
+            ORDER BY EN.orden;
         `;
+        
 
         //Ejecutamos la consulta
-        connection.query(query, [id_puesto], (error, results) => {
+        connection.query(query, [id_puesto, nombre_etapa], (error, results) => {
             //Liberamos la conexión
             connection.release();
 
@@ -1345,7 +1348,7 @@ router.get('/obtenerEtapas_Puesto/:id_puesto', (req, res) => {
 
                 //En otro caso...
             } else {
-                console.log("> Resultados: ", results);
+                console.log("> Resultados ETAPAS: ", results);
 
                 //Enviamos la información
                 res.json(results);
@@ -1789,6 +1792,66 @@ router.post('/actualizarInformacionMapa/:id_etapa/:totalDistanceMeters/:curveCou
                 return res.status(201).send("Información del mapa actualizada");
             }
         });
+    });
+});
+
+/**
+ * End point para obtener las etapas agrupadas de un puesto
+ */
+router.get('/obtenerEtapasAgrupadasPuesto/:id_puesto', (req, res) => {
+    //Almacenamos el ID del puesto
+    const id_puesto = req.params.id_puesto;
+
+    //Creamos la conexión a la base de datos
+    getDBConnection((err, connection) => {
+        //En caso de que se produzaca un error...
+        if (err) {
+            return res.status(400).send('Error al conectar con la base de datos');
+        }
+
+        //Almacenamos en una variable la consulta SQL
+    
+        const query = `
+            SELECT 
+                EN.id_puesto, FS.name, SUM(cantidad_a_mover) AS cantidad_a_mover, COALESCE(distancia_total, 0) AS distancia_total, SUM(PS14) AS PS14, 
+                SUM(DS10) AS DS10, SUM(CDL) AS CDL, SUM(CDC) AS CDC, SUM(M1) AS M1, SUM(PS15) AS PS15, SUM(DI21) AS DI21, SUM(DC113) AS DC113, numero_picadas, 
+                SUM(DS14) AS DS14, SUM(DS15) AS DS15, SUM(DC) AS DC, SUM(D1) AS D1, SUM(W5) AS W5, SUM(TT) AS TT, SUM(AL) AS AL, SUM(L2) AS L2, SUM(G1) AS G1, 
+                SUM(P5) AS P5, SUM(G1_1) AS G1_1, SUM(P2_1) AS P2_1, SUM(W5_2) AS W5_2, SUM(E2) AS E2, SUM(TT_1) AS TT_1, SUM(M2) AS M2, SUM(PP11) AS PP11, 
+                SUM(G1_2) AS G1_2, SUM(P2_2) AS P2_2, SUM(P2_3) AS P2_3, SUM(nuevo_picadas) AS nuevo_picadas, SUM(tiempo_distancia_total) AS tiempo_distancia_total,
+                SUM(M1_2) AS M1_2, COALESCE(SUM(TT_2), 0) AS TT_2, SUM(DS15_2) AS DS15_2, SUM(CDL_2) AS CDL_2, SUM(CDC_2) AS CDC_2, SUM(CDL_3) AS CDL_3
+            FROM
+                EN_IFM_STANDARD AS EN
+            INNER JOIN
+                FStandard_Name AS FS
+            ON 
+                EN.F = FS.FStandard
+            WHERE 
+                EN.id_puesto = ?
+            GROUP BY 
+                EN.F, EN.id_puesto
+        `;
+        
+
+        //Ejecutamos la consulta
+        connection.query(query, [id_puesto], (error, results) => {
+            //Liberamos la conexión
+            connection.release();
+
+            //En caso de que se produzca un error...
+            if (error) {
+                console.error("> Error: ", error);
+
+                //Enviamos el status
+                return res.status(500).send('Error en la consulta');
+
+                //En otro caso...
+            } else {
+                console.log("> Resultados ETAPAS GRUPO: ", results);
+
+                //Enviamos la información
+                res.json(results);
+            }
+        })
     });
 });
 
@@ -2676,7 +2739,7 @@ router.post('/actualizarInformacionEtapa/:puestoID/:distance_empty_zone/:number_
 /**
  * End point para eliminar un registros en especifico
  */
-router.delete('/eliminarRegistro/:id_elemento/:tabla/:id_etapa', (req, res) => {
+router.delete('/eliminarRegistro/:id_elemento/:tabla/:id_puesto', (req, res) => {
     /** Almacenamos las variables de los parámetros */
     const { id_elemento, tabla, id_puesto } = req.params;
 
@@ -2688,18 +2751,45 @@ router.delete('/eliminarRegistro/:id_elemento/:tabla/:id_etapa', (req, res) => {
         if (err) {
             res.status(500).send()
         }
+        
+        let control = Number(id_elemento), query, array_argumetos;
 
-        //Almacenamos en una variable la consulta SQL
-        const query = `
-            DELETE 
-            FROM
-                ${tabla}
-            WHERE
-                id = ?
-        `;
+        if (tabla === "EN_IFM_STANDARD") {
+            if(!isNaN(control)){
+                query = `
+                    DELETE 
+                    FROM
+                        ${tabla}
+                    WHERE
+                        id = ?
+                `;
+                array_argumetos = [id_elemento];
+            } else if(isNaN(control)){
+                query = `
+                    DELETE 
+                    FROM
+                        ${tabla}
+                    WHERE
+                        F = ?
+                    AND 
+                        id_puesto = ?
+                `;
+                array_argumetos = [id_elemento, id_puesto]
+            }
+        } else if (tabla === "puestos") {
+            query = `
+                DELETE 
+                FROM
+                    ${tabla}
+                WHERE
+                    id = ?
+            `;
+            array_argumetos = [id_elemento];
+        }
 
         //Ejecutamos la consulta
-        connection.query(query, [id_elemento], (error, results) => {
+        connection.query(query, array_argumetos, (error, results) => {
+            console.log("ELIMINAR!!!!!!!!!!!", connection.format(query, array_argumetos))
             //En caso de que falle
             if (error) {
                 console.error("> Error: ", error);
@@ -3286,68 +3376,12 @@ router.get('/comprobarReferencias/:referencias/:tipo_operacion/:planta', (req, r
 
             //Verificamos si el resultado es mayor que 0 (referencia encontrada)
             if (!result || result[0]['COUNT(*)'] <= 0) {
-                console.log("> No se encontró la referencia:", item);
+                //console.log("> No se encontró la referencia:", item);
             }
 
             return res.json({ validReferences: array_referencias_unicas });
         });
     });
-    /*
-    //Creamos un array para almacenar las referencias válidas
-    //let referencias_finales = [];
-
-    let referencias_finales = `'${referencias.split(" ").join("','")}'`;
-
-    console.log("Referencias finales: ", referencias_finales);
-
-    //Número total de referencias a comprobar
-    let totalConsultas = array_referencias_unicas.length;
-
-    //Contador de consultas realizadas
-    let consultasRealizadas = 0;
-
-    //Creamos la conexión a la base de datos
-    getDBConnection((err, connection) => {
-        //En caso de que se produzca algún error...
-        if (err) {
-            console.error("> Error al conectar a la base de datos: ", err);
-            return res.status(500).send('Error al conectar con la base de datos: ', err);
-        }
-
-        //Iteramos por las referencias
-        array_referencias_unicas.forEach(item => {
-            connection.query(query, [tipo_operacion, item, columna_fabrica, planta], (error, result) => {
-
-                console.log(connection.format(query, [tipo_operacion, item, columna_fabrica, planta]));
-
-                //En caso de que se produzca un error en la consulta
-                if (error) {
-                    console.error("> Error: ", error);
-                    return res.status(501).send('Error a la hora de comprobar si la referencia es válida: ', error);
-                }
-
-                //Verificamos si el resultado es mayor que 0 (referencia encontrada)
-                if (result && result[0]['COUNT(*)'] > 0) {
-                    //Si la referencia existe, la agregamos al array de válidas
-                    referencias_finales.push(item);
-                } else {
-                    console.log("> No se encontró la referencia:", item);
-                }
-
-                //Incrementamos el contador de consultas realizadas
-                consultasRealizadas++;
-
-                //Comprobamos si todas las referencias han sido procesadas
-                if (consultasRealizadas === totalConsultas) {
-                    //Liberamos la conexión
-                    connection.release();
-
-                    //Enviamos la respuesta con las referencias válidas
-                    return res.json({ validReferences: referencias_finales });
-                }
-            });
-        });
-    });*/
 });
 
 /**
