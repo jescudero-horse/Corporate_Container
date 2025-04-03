@@ -82,7 +82,6 @@ body {
     color: #000000;
 }
 
-
 /* Estilo para el logo */
 .navbar-logo {
     max-width: 100px;
@@ -276,7 +275,6 @@ header:hover .navbar-logo {
     overflow-x: auto;
     padding: 10px;
     background-color: #2d3748;
-    /* Fondo oscuro */
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -441,4 +439,61 @@ header:hover .navbar-logo {
 
 .dropdown-item:hover {
     background-color: #4a6b8c;
+}
+
+/* Contenedor principal */
+.graficos-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Contenedores de gráficos */
+.contenedor-grafico {
+    padding: 15px;
+    border-radius: 10px;
+    background-color: #34495e;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Gráfico de puesto */
+.contenedor-grafico.puesto {
+    flex: 0 1 30%;
+    max-width: 30%;
+    height: auto;
+}
+
+/* Media queries para pantallas más pequeñas */
+@media (max-width: 768px) {
+    .contenedor-grafico.puesto {
+        flex: 1 1 100%;
+        max-width: 100%;
+        height: auto;
+    }
+
+    .graficos-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contenedor-grafico {
+        padding: 10px;
+    }
+
+    .contenedor-grafico.puesto canvas {
+        width: 100%;
+        height: auto;
+    }
 }

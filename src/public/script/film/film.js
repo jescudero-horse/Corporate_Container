@@ -13,6 +13,9 @@ let cantidad_referencias = 0;
 //Variable que contiene los datos para el gráfico de chimenea
 let conteoGraficoChimenea = [];
 
+//Variable de control para gráfico del puesto
+let chartPuesto = null;
+
 //Creamos un array donde contendrá la información para representar los gráficos
 let peticionesFinalizadas = {
     puestos: false,
@@ -50,8 +53,6 @@ async function fetchData() {
 
         //Almacenamos los puestos obtenidos
         const data = await response.json();
-
-        console.log("DATAAA -> ", data)
 
         //Llamamos al método para disponer los puestos en el panel superior
         gestionarPuesto(data);
@@ -100,6 +101,7 @@ function gestionarPuesto(data) {
     //Iteramos por los datos del puesto
     data.forEach(item => {
         console.log("PUESTOS -> ", item.saturacion, item.id)
+
         //Almacenamos en el array la información necesarias
         conteosPorPuesto.push({
             id: item.id,
@@ -111,7 +113,6 @@ function gestionarPuesto(data) {
 
         //Ordenamos los puestos por el número del mismo
         conteosPorPuesto.sort((a, b) => a.numero_puesto - b.numero_puesto);
-
 
         //Aumentamos el contador de peticiones
         peticionesCompletadas++;
@@ -239,378 +240,446 @@ function gestionarGraficoChimenea(data) {
 }
 
 /**
- * Función para representar los gráficos
+ * Función para renderizar los gráficos
  */
 function renderizarGrafico() {
-    //Almacenamos la instancia del contenedor de gráficos
+    //Contendor de los gráficos
     const graficosContainer = document.getElementById('graficos-container');
     graficosContainer.innerHTML = '';
 
-    //Iteramos sobre los datos del puesto
-    conteosPorPuesto.forEach((puesto, index) => {
-        //Creamos un div para el gráfico del puesto
-        const graficoContainer = document.createElement('li');
+    //Configuramos el contenedor de los gráficos
+    graficosContainer.style.display = 'flex';
+    graficosContainer.style.justifyContent = 'center';
+    graficosContainer.style.alignItems = 'center';
+    graficosContainer.style.gap = '15px';
+    graficosContainer.style.width = '100%';
+    graficosContainer.style.transition = 'all 0.3s ease-in-out';
 
-        //Añadimos la clase de Glide
-        graficoContainer.classList.add('glide__slide');
+    const titulo = document.createElement('h3');
+    titulo.style.fontSize = '15px';
+    titulo.style.color = '#000000';
+    titulo.style.fontWeight = 'bold';
+    //titulo.style.paddingTop = '5px';
+    //titulo.style.paddingBottom = '10px';
+    titulo.style.textAlign = 'center';
 
-        //Aplicamos estilos al contenedor del gráfico del puesto
-        graficoContainer.style.display = 'flex';
-        graficoContainer.style.flexDirection = 'column';
-        graficoContainer.style.alignItems = 'center';
-        graficoContainer.style.margin = '10px';
-        graficoContainer.style.border = '1px solid #dddddd';
-        graficoContainer.style.padding = '15px';
-        graficoContainer.style.borderRadius = '8px';
-        graficoContainer.style.backgroundColor = '#f6f6f6'; //COLOR FONDO TARJETAS
+    //Contenedor para el gráfico de puesto
+    const contenedor_grafico_puesto = document.createElement('div');
+    contenedor_grafico_puesto.style.flex = '0';
+    contenedor_grafico_puesto.style.maxWidth = '0';
+    contenedor_grafico_puesto.style.padding = '15px';
+    contenedor_grafico_puesto.style.borderRadius = '10px';
+    contenedor_grafico_puesto.style.backgroundColor = '#34495e';
+    contenedor_grafico_puesto.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.2)';
+    contenedor_grafico_puesto.style.display = 'flex';
+    contenedor_grafico_puesto.style.flexDirection = 'column';
+    contenedor_grafico_puesto.style.alignItems = 'center';
+    contenedor_grafico_puesto.style.justifyContent = 'center';
+    contenedor_grafico_puesto.style.overflow = 'hidden';
+    contenedor_grafico_puesto.style.transition = 'all 0.3s ease-in-out';
+    contenedor_grafico_puesto.style.backgroundColor = '#f6f6f6';
 
-        //Añadimos el ID del puesto al contenedor
-        graficoContainer.setAttribute('data-id', puesto.id);
+    contenedor_grafico_puesto.appendChild(titulo);
 
-        //Añadimos el turno al contenedor
-        graficoContainer.setAttribute('data-turno', puesto.turno);
+    //Lienzo para el gráfico de la saturación
+    const lienzo_grafico_puesto = document.createElement('canvas');
+    lienzo_grafico_puesto.width = 200;
+    lienzo_grafico_puesto.height = 200;
+    contenedor_grafico_puesto.appendChild(lienzo_grafico_puesto);
 
-        //Añadimos el gráfico al contenedor de gráficos principales
-        graficosContainer.appendChild(graficoContainer);
+    //Lienzo para el gráfico de chimenea
+    const lienzo_grafico_chimenea_canvas = document.createElement('canvas');
+    lienzo_grafico_chimenea_canvas.width = 250;
+    lienzo_grafico_chimenea_canvas.height = 200;
+    contenedor_grafico_puesto.appendChild(lienzo_grafico_chimenea_canvas);
 
-        const titulo = document.createElement('h3');
-        titulo.textContent = `Puesto: ${puesto.nombre}`;
-        titulo.style.fontSize = '15px';
-        titulo.style.color = '#000000';
-        titulo.style.fontWeight = 'bold';
-        titulo.style.paddingTop = '5px';
-        titulo.style.paddingBottom = '10px';
-        titulo.style.textAlign = 'center';
-        graficoContainer.appendChild(titulo);
+    //Contenedor para los botones
+    const contenedor_botones = document.createElement('div');
+    contenedor_botones.id = "botonesContainer";
+    contenedor_botones.style.display = 'flex';
+    contenedor_botones.style.justifyContent = 'center';
+    contenedor_botones.style.gap = '8px';
 
-        //Creamos el lienzo para el gráfico de la saturación
-        const canvasSaturacion = document.createElement('canvas');
-        canvasSaturacion.width = 200;
-        graficoContainer.appendChild(canvasSaturacion);
+    //Obtenemos la instancia de los botones necesarios
+    const { botonEliminarPuesto: boton_eliminar_puesto } = creacionBotones(contenedor_botones);
 
-        /*//Almacenamos en una variable la jornada laboral
-        const jornadaTotal = 442;
+    //Funcionalidad para eliminar un puesto
+    boton_eliminar_puesto.addEventListener('click', () => {
+        //Llamamos al método para disponer la alerta de confirmación de elemento
+        confirmarEliminar("question", "Vas a eliminar este puesto... ¿Estas seguro de lo que vas hacer?", puestoID, "puestos");
+    });
 
-        //Almacenamos la saturación del puesto
-        const saturacion = (puesto.conteo / jornadaTotal) * 100;*/
+    //Añadimos el botón al contenedor
+    contenedor_grafico_puesto.appendChild(contenedor_botones);
 
-        console.log("Puesto conteo: ", puesto.conteo, "\nSaturacion: ", puesto.conteo, "\tNombre del puesto: ", puesto.nombre);
+    //Contenedor para el gráfico principal
+    const contenedor_grafico_principal = document.createElement('div');
+    contenedor_grafico_principal.style.flex = '1';
+    contenedor_grafico_principal.style.maxWidth = '100%';
+    contenedor_grafico_principal.style.height = '545px';
+    contenedor_grafico_principal.style.padding = '15px';
+    contenedor_grafico_principal.style.borderRadius = '10px';
+    contenedor_grafico_principal.style.backgroundColor = '#2c3e50';
+    contenedor_grafico_principal.style.boxShadow = '0px 4px 8px rgba(0, 0, 0, 0.2)';
+    contenedor_grafico_principal.style.display = 'flex';
+    contenedor_grafico_principal.style.alignItems = 'center';
+    contenedor_grafico_principal.style.justifyContent = 'center';
+    contenedor_grafico_principal.style.transition = 'all 0.3s ease-in-out';
+    contenedor_grafico_principal.style.backgroundColor = '#f6f6f6';
 
-        const conteoReal = puesto.conteo;
-        const conteoUtilizado = conteoReal;  // Usa el valor real para el tiempo utilizado
-        const conteoLibre = conteoReal > 100 ? 0 : 100 - conteoReal;  // Si el conteo es mayor a 100, no mostramos tiempo libre
+    //Gráfico principal
+    const grafico_principal = document.createElement('canvas');
+    grafico_principal.style.width = '100%';
+    grafico_principal.style.height = '100%';
+    contenedor_grafico_principal.appendChild(grafico_principal);
 
-        /** Inicializamos la gráfica de la saturación */
-        new Chart(canvasSaturacion, {
-            type: 'doughnut',
-            data: {
-                labels: ['Tiempo Utilizado', 'Tiempo Libre'],
-                datasets: [{
-                    data: [conteoUtilizado, conteoLibre.toFixed(2)],  // Usamos los valores calculados
-                    backgroundColor: ['rgba(217, 41, 41, 0.5)', 'rgba(34, 196, 74, 0.5)'],
-                    borderColor: '#5b5b5b',
-                    borderWidth: 0.5
-                }]
-            },
-            options: {
-                plugins: {
-                    title: {
-                        display: false
-                    },
-                    legend: {
-                        labels: {
-                            color: '#000000',
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            // Mostrar el valor real en el tooltip
-                            label: context => ` ${context.dataset.data[context.dataIndex]}%`  // Muestra el valor del segmento
-                            
-                        }
-                    },
-                    centerText: {
-                        display: true,
-                        text: `${conteoReal}%`,
+    //Agregamos los contenedores al principal
+    graficosContainer.appendChild(contenedor_grafico_puesto);
+    graficosContainer.appendChild(contenedor_grafico_principal);
+
+    //Variables necesarias para enviar al gráfico de puesto
+    const nombre_puestos = conteosPorPuesto.map(puesto => puesto.nombre),
+        conteos = conteosPorPuesto.map(puesto => puesto.conteo),
+        id_puestos = conteosPorPuesto.map(puesto => puesto.id);
+
+    //Instancia de los gráficos
+    const ctxBarras = grafico_principal.getContext('2d'),
+        ctxPuesto = lienzo_grafico_puesto.getContext('2d'),
+        ctxChimenea = lienzo_grafico_chimenea_canvas.getContext('2d');
+
+    //Gráfic chimenea
+    const chartChimenea = new Chart(ctxChimenea, {
+        type: 'bar',
+        data: {
+            labels: ['Label1'],
+            datasets: []
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'black',
                         font: {
-                            size: 15,
-                            weight: 'bold'
-                        }
-                    }
-                },
-                responsive: false,
-                cutout: '70%',
-                rotation: -90
-            },
-            plugins: [{
-                id: 'centerText',
-                beforeDraw: chart => {
-                    const ctx = chart.ctx;
-                    const width = chart.chartArea.left + (chart.chartArea.right - chart.chartArea.left) / 2;
-                    const height = chart.chartArea.top + (chart.chartArea.bottom - chart.chartArea.top) / 2;
-                    const text = chart.config.options.plugins.centerText.text;
-                    const fontSize = chart.config.options.plugins.centerText.font.size;
-                    const fontWeight = chart.config.options.plugins.centerText.font.weight;
-
-                    ctx.save();
-                    ctx.font = `${fontWeight} ${fontSize}px Arial`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(text, width, height);
-                    ctx.restore();
-                }
-            }]
-        });
-
-        //Creamos el lienzo para el gráfico de las actividades
-        const canvasChimenea = document.createElement('canvas');
-        canvasChimenea.height = 300;
-        graficoContainer.appendChild(canvasChimenea);
-
-        //Almacenamos en una variable los datos del puesto
-        const datosChimenea = conteoGraficoChimenea.filter(c => c.id === puesto.id);
-
-        console.log(datosChimenea)
-
-        //En caso de que haya datos
-        if (datosChimenea) {
-            //Almacenamos en variables los datos necesarios 
-            const total = 442;
-            const porcentajes = datosChimenea.map(item => ((item.minutos / total) * 100).toFixed(2));
-            //const porcentaje = total > 0 ? ((datosChimenea.minutos / total) * 100).toFixed(2) : 0;
-
-            // Array de colores para las actividades
-            const colores = [
-                'rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 205, 0.6)', 
-                'rgba(255, 206, 86, 0.6)', 'rgba(61, 193, 153, 0.6)',
-                'rgba(255, 159, 64, 0.6)', 'rgba(148, 59, 226, 0.6)',
-                'rgba(173, 224, 53, 0.6)', 'rgba(57, 30, 233, 0.6)', 
-                'rgba(67, 203, 198, 0.6)', 'rgba(255, 176, 144, 0.6)', 
-                'rgba(255, 160, 225, 0.6)', 'rgba(153, 102, 255, 0.6)', 
-                'rgba(0, 160, 225, 0.6)', 'rgba(201, 59, 226, 0.6)', 
-                'rgba(0, 128, 128, 0.6)', 'rgba(20, 23, 255, 0.6)'
-            ];
-            
-
-            // Crear el dataset del gráfico
-            const datasets = datosChimenea.map((item, index) => ({
-                label: item.nombre,
-                data: [porcentajes[index]],
-                backgroundColor: colores[index % colores.length],
-                borderColor: colores[index % colores.length].replace('0.6', '0.9'),  // Mismo color, pero con opacidad 1
-                borderWidth: 1.3
-            }));
-
-
-            // Inicializamos la gráfica de la actividad
-            new Chart(canvasChimenea, {
-                type: 'bar',
-                data: {
-                    labels: ['Actividades'],
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false, // Ocultar la leyenda
+                            size: 11
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: context => `${context.dataset.label}: ${context.raw}%`
-                            }
-                        },
+                        textAlign: 'center',
+                        boxWidth: 20
                     },
-                    scales: {
-                        x: {
-                            stacked: true,
-                        },
-                        y: {
-                            stacked: true,
-                            beginAtZero: true,
-                            max: 150,
-                            title: {
-                                display: true,
-                                text: 'Porcentaje (%)',
-                            },
-                            ticks: {
-                                stepSize: 10,
-                            }
-                        }
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: context => `${context.dataset.label}: ${context.raw}%`
                     }
                 },
-                plugins: [{
-                    id: 'lineaMedia',
-                    afterDraw: function(chart) {
-                        const { ctx, chartArea: { left, right }, scales: { y } } = chart;
-                        const yPos = y.getPixelForValue(90);
-        
-                        // Dibujar la línea de la media
-                        ctx.save();
-                        ctx.strokeStyle = 'rgb(0, 0, 0)';
-                        ctx.lineWidth = 0.5;
-                        ctx.beginPath();
-                        ctx.moveTo(left, yPos);
-                        ctx.lineTo(right, yPos);
-                        ctx.stroke();
-                        ctx.restore();
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    ticks: {
+                        color: 'black'
                     }
-                }]
-            });
-        }
-
-        /** Creamos el contenedor para los botones */
-        const botonesContainer = document.createElement('div');
-        botonesContainer.id = "botonesContainer";
-        botonesContainer.style.display = 'flex';
-        botonesContainer.style.justifyContent = 'center';
-        botonesContainer.style.gap = '8px';
-        botonesContainer.style.marginTop = '10px';
-
-        /** Botón para visualizar las etapas de un puesto */
-        const { botonInformeDetallado, botonEntrePuestos, button, botonEliminarPuesto } = creacionBotones();
-
-        //En caso de que haya un puesto
-        if (puesto.nombre !== "" || puesto.nombre !== null) {
-            //Añadimos los botones al contenedor
-            graficoContainer.appendChild(botonesContainer);
-        }
-
-        //Funcionalidad para visualizar la información del puesto de forma detallada
-        botonInformeDetallado.addEventListener('click', () => {
-            //Llamamos a la función para disponer el modal
-            modalPuestoDetallado(botonInformeDetallado.getAttribute('data-id'), botonInformeDetallado.getAttribute('data-nombre-puesto'));
-        });
-
-        botonInformeDetallado.setAttribute('hidden', 'true');
-
-        //Funcionalidad para crear el desplazamiento entre puestos
-        botonEntrePuestos.addEventListener('click', () => {
-            const idPuesto = botonEntrePuestos.getAttribute('data-id');
-            const rowData = [idPuesto, null, null];
-            const rowDataJson = encodeURIComponent(JSON.stringify(rowData));
-            window.open(`/film/visualizarPlano?data=${rowDataJson}`, "_blank");
-        });
-
-        //Funcionalidad para visualizar las etapas
-        button.addEventListener('click', () => {
-            //Llamos a la función para inicializar el botón de las etapas
-            inicializarBotonEtapas(button);
-
-            //Quitamos el resaltado de otros elementos
-            document.querySelectorAll('.resaltado').forEach(el => el.classList.remove('resaltado'));
-
-            //Buscar el <li> del contenedor del botón presionado
-            const li_elemento = event.target.closest('li');
-
-            //En caso de que lo encuentre
-            if (li_elemento) {
-                //Agregamos la clase
-                li_elemento.classList.add('resaltado');
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    max: 160,
+                    title: {
+                        display: true,
+                        text: 'Porcentaje (%)',
+                        color: 'black'
+                    },
+                    ticks: {
+                        color: 'black'
+                    }
+                }
             }
-        });
+        },
+        //plugins: [ChartDataLabels]
+        plugins: [{
+            id: 'lineaMedia',
+            afterDraw: function (chart) {
+                const { ctx, chartArea: { left, right }, scales: { y } } = chart;
+                const yPos = y.getPixelForValue(90);
 
-        //Funcionalidad para eliminar un puesto
-        botonEliminarPuesto.addEventListener('click', () => {
-            //Llamamos al método para disponer la alerta de confirmación de elemento
-            const idPuesto = botonEliminarPuesto.getAttribute('data-id');
-            confirmarEliminar("question", "Vas a eliminar este puesto... ¿Estas seguro de lo que vas hacer?", idPuesto, "puestos");
-        });
-
-        //Funcionalidad para ocultar el puesto
-        botonOcultarPuesto.addEventListener('click', () => {
-            //Creamos una instancia del LI
-            const li_elemento = event.target.closest('li');
-
-            //En caso de que se haya encontrado el elemento LI
-            if (li_elemento) {
-                //Agregamos la animación de ocultar el puesto
-                li_elemento.classList.add('ocultarElemento');
-
-                //Añadimos el elemento al array de puestos ocultos
-                puesto_ocultos.push(li_elemento);
-                setTimeout(() => {
-                    li_elemento.style.display = 'none';
-                }, 500);
+                // Dibujar la línea de la media
+                ctx.save();
+                ctx.strokeStyle = 'rgb(0, 0, 0)';
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(left, yPos);
+                ctx.lineTo(right, yPos);
+                ctx.stroke();
+                ctx.restore();
             }
-        });
+        }]
+    });
 
-        /**
-         * Función para crear los botones y disponerlos en el puesto
-         * @returns Devuelve los botones formateados
-         */
-        function creacionBotones() {
-            /** Botón para visualizar las etapas */
-            const button = document.createElement('button');
-            button.innerHTML = '<i class="bi bi-eye"></i>';
-            button.className = "bg-blue-600 text-white py-1 px-2 rounded hover:bg-blue-500 transition duration-300";
-            button.setAttribute('data-id', puesto.id);
-            button.setAttribute('data-nombre-puesto', puesto.nombre);
-            botonesContainer.appendChild(button);
+    //Modificamos los valores para sustituir los 0 por 10 y los colores
+    const conteos_controlados = conteos.map(conteo => (conteo === 0 ? 10 : conteo)), colores_conteos_vacios = conteos.map(conteo => (conteo === 0 ? 'rgba(169, 169, 169, 0.7)' : 'rgba(41, 128, 185, 0.7)'));
 
-            /** Botón para eliminar un puesto */
-            const botonEliminarPuesto = document.createElement('button');
-            botonEliminarPuesto.innerHTML = '<i class="bi bi-trash3"></i>';
-            botonEliminarPuesto.className = "bg-red-600 text-white py-1 px-2 rounded hover:bg-red-500 transition duration-300";
-            botonEliminarPuesto.setAttribute('data-id', puesto.id);
-            botonesContainer.appendChild(botonEliminarPuesto);
+    //Gráfico principal
+    const chartBarras = new Chart(ctxBarras, {
+        type: 'bar',
+        data: {
+            labels: nombre_puestos,
+            datasets: [{
+                label: 'Puestos',
+                data: conteos_controlados,
+                backgroundColor: colores_conteos_vacios,
+                borderColor: 'rgba(41, 128, 185, 1)',
+                borderWidth: 2,
+                borderRadius: 8,
+                barPercentage: 0.8,
+                categoryPercentage: 0.8,
+                hoverBackgroundColor: 'rgba(41, 128, 185, 1)',
+                hoverBorderColor: 'rgba(41, 128, 185, 1)',
+                hoverBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: 'black',
+                        font: {
+                            size: 11
+                        },
+                        textAlign: 'center',
+                        boxWidth: 20
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    borderRadius: 8,
+                    boxPadding: 10
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: 'black',
+                        stepSize: 5,
+                        font: { size: 12 }
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.2)',
+                        borderDash: [5, 5]
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: 'black',
+                        font: { size: 12 },
+                        autoSkip: true,
+                        maxRotation: 45,
+                        minRotation: 30
+                    },
+                    grid: { display: false }
+                }
+            },
 
-            /** Botón para crear un desplazamiento entre puestos */
-            const botonEntrePuestos = document.createElement('button');
-            botonEntrePuestos.innerHTML = '<i class="bi bi-person-walking"></i>';
-            botonEntrePuestos.className = "bg-yellow-500 text-white py-1 px-2 rounded hover:bg-yellow-400 transition duration-300";
-            botonEntrePuestos.setAttribute('data-id', puesto.id);
-            botonesContainer.appendChild(botonEntrePuestos);
+            //Función para el clic en las barras
+            onClick: (event, elements) => {
+                //En caso de que se haga clic en una barra
+                if (elements.length > 0) {
+                    //Obtenemos el índice del gráfico
+                    const index = elements[0].index;
 
-            /**Botón para visualizar la información del puesto de forma detallada */
-            const botonInformeDetallado = document.createElement('button');
-            botonInformeDetallado.innerHTML = '<i class="bi bi-clipboard2-data-fill"></i>';
-            botonInformeDetallado.className = "bg-green-600 text-white py-1 px-2 rounded hover:bg-green-500 transition duration-300";
-            botonInformeDetallado.setAttribute('data-id', puesto.id);
-            botonInformeDetallado.setAttribute('data-nombre-puesto', puesto.nombre);
-            botonesContainer.appendChild(botonInformeDetallado);
+                    //Reseteamos todas las barras a su color y grosor original
+                    chartBarras.data.datasets[0].backgroundColor = chartBarras.data.datasets[0].data.map((_, i) =>
+                        i === index ? 'rgba(255, 99, 132, 0.9)' : 'rgba(41, 128, 185, 0.7)'
+                    );
 
-            /**Botón para ocultar el puesto */
-            botonOcultarPuesto = document.createElement('button');
-            botonOcultarPuesto.innerHTML = '<i class="bi bi-eye-slash-fill"></i>';
-            botonOcultarPuesto.className = "bg-gray-600 text-white py-1 px-2 rounded hover:bg-gray-500 transition duration-300 bg-gray-700";
-            botonOcultarPuesto.setAttribute('data-id', puesto.id);
-            botonesContainer.appendChild(botonOcultarPuesto);
+                    //Establecemos el grosor de la barra seleccionada del puesto
+                    chartBarras.data.datasets[0].borderWidth = chartBarras.data.datasets[0].data.map((_, i) =>
+                        i === index ? 8 : 2
+                    );
 
-            //Devolvemos los botones
-            return { botonInformeDetallado, botonEntrePuestos, button, botonEliminarPuesto, botonOcultarPuesto };
+                    //Actualizamos el gráfico
+                    chartBarras.update();
+
+                    //Llamamos a la función para disponer la información detallada del puesto
+                    seleccionarPuesto(index, id_puestos, nombre_puestos, conteos, contenedor_grafico_puesto, contenedor_grafico_principal, chartChimenea, chartPuesto, titulo);
+                }
+            }
         }
     });
 
-    //Creamos un contenedor vacio para añadirlo al final del slider
-    const dummySlide = document.createElement('li');
-    dummySlide.classList.add('glide__slide');
-    dummySlide.style.visibility = 'hidden';
-    graficosContainer.appendChild(dummySlide);
 
-    //Inicializamos Glide.js
-    const glide = new Glide('.glide', {
-        //Especificamos el tipo
-        type: 'slider',
+    //En caso de que el puesto exista
+    if (chartPuesto) {
+        //Lo destruimos
+        chartPuesto.destroy();
+    }
 
-        //El número de elementos que se mostrarán al mismo tiempo
-        perView: 4,
-
-        //Espacio entre los elementos
-        gap: 20,
-
-        //Centramos la vista en el primer puesto
-        focusAt: 0,
-
-        //Configuramos los puntos de interrupción dependiendo de tipo de pantallas
-        breakpoints: {
-            1024: { perView: 2 },
-            768: { perView: 1 }
-        }
+    //Configuramos el gráfico del puesto
+    chartPuesto = new Chart(ctxPuesto, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [0, 0],
+                backgroundColor: ['rgba(75, 192, 192, 0.7)', 'rgba(211, 211, 211, 0.3)'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: context => `${context.dataset.data[context.dataIndex]}%`
+                    }
+                },
+                centerText: {
+                    //text: `${conteo}%`;
+                }
+            },
+            responsive: false,
+            cutout: '70%',
+            rotation: -90
+        },
+        plugins: [centerTextPlugin]
     });
+}
 
-    //Montamos el carrusel
-    glide.mount();
+/**
+ * Función para crear los botones y disponerlos en el puesto
+ * @returns Devuelve los botones formateados
+ */
+function creacionBotones(contenedor_botones) {
+    /** Botón para eliminar un puesto */
+    const botonEliminarPuesto = document.createElement('button');
+    botonEliminarPuesto.innerHTML = '<i class="bi bi-trash3"></i>';
+    botonEliminarPuesto.className = "bg-red-600 text-white py-1 px-2 rounded hover:bg-red-500 transition duration-300";
+    botonEliminarPuesto.setAttribute('data-id', puestoID);
+    contenedor_botones.appendChild(botonEliminarPuesto);
+
+    //Devolvemos los botones
+    return { botonEliminarPuesto };
+}
+
+/**
+ * Función para disponer la información detallada del puesto
+ * @param {int} index Argumento que contiene el indice del puesto del gráfico principal
+ * @param {Array} id_puestos Argumento que contiene los IDs de los puestos
+ * @param {Array} nombre_puestos Argumento que contiene los nombres de los puestos
+ * @param {Array} conteos Argumento que contiene la saturación de los puestos
+ * @param {HTMLElement} contenedor_grafico_puesto Argumento que contiene la instancia del contenedor del puesto
+ * @param {HTMLElement} contenedor_grafico_principal Argumento que contiene la insrancia del contenedor del gráfico principal
+ * @param {Chart} chartChimenea Argumento que contiene la instancia del gráfico de chimenea
+ * @param {Chart} chartPuesto Argumento que contiene la instancia del gráfico de donut
+ */
+function seleccionarPuesto(index, id_puestos, nombre_puestos, conteos, contenedor_grafico_puesto, contenedor_grafico_principal, chartChimenea, chartPuesto, titulo) {
+    //Obtenemos el ID del puesto, el nombre y la saturación del puesto
+    const id_puesto = id_puestos[index], nombre_puesto = nombre_puestos[index], conteoSeleccionado = conteos[index];
+
+    titulo.textContent = `Puesto: ${nombre_puesto}`;
+
+    //Almmacenamos en la variable el ID del puesto
+    puestoID = id_puesto;
+
+    //Variable que contiene los colores disponibles
+    const colores = [
+        'rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 205, 0.6)',
+        'rgba(255, 206, 86, 0.6)', 'rgba(61, 193, 153, 0.6)',
+        'rgba(255, 159, 64, 0.6)', 'rgba(148, 59, 226, 0.6)',
+        'rgba(173, 224, 53, 0.6)', 'rgba(57, 30, 233, 0.6)',
+        'rgba(67, 203, 198, 0.6)', 'rgba(255, 176, 144, 0.6)',
+        'rgba(255, 160, 225, 0.6)', 'rgba(153, 102, 255, 0.6)',
+        'rgba(0, 160, 225, 0.6)', 'rgba(201, 59, 226, 0.6)',
+        'rgba(0, 128, 128, 0.6)', 'rgba(20, 23, 255, 0.6)'
+    ];
+
+    //Variable con los datos necesarios para disponer la información del puesto
+    const datasets = conteoGraficoChimenea.map((item, index) => ({
+        label: item.nombre,
+        data: [item.minutos],
+        backgroundColor: colores[index % colores.length],
+        id_puesto: item.id,
+        borderColor: colores[index % colores.length].replace('0.6', '0.9')
+    }));
+
+    //Configuramos el gráfico y la interfaz del puesto
+    contenedor_grafico_puesto.style.flex = '0.3';
+    contenedor_grafico_puesto.style.maxWidth = '30%';
+    contenedor_grafico_principal.style.flex = '0.7';
+    contenedor_grafico_principal.style.maxWidth = '70%';
+
+    //Mostramos botones y el buscador
+    const boton_anyadir_etapa = document.getElementById('anyadirEtapa');
+    boton_anyadir_etapa.classList.add('resaltadoBotones');
+    boton_anyadir_etapa.setAttribute('onclick', `anyadirEtapa(${id_puesto})`);
+    boton_anyadir_etapa.style.display = 'block';
+
+    const buscador_etapas = document.getElementById('buscadorEtapa');
+    buscador_etapas.style.display = 'block';
+    document.getElementById('tituloPrincipalEtapasDisponibles').textContent = "Etapas disponibles para el puesto: " + nombre_puesto;
+
+    //Llamamos a la función para actualizar los gráficos
+    actualizarGraficoPuesto(chartPuesto, chartChimenea, nombre_puesto, conteoSeleccionado, id_puesto, datasets);
+
+    //Llamamos a la función para obtener las etapas del puesto
+    obtenerEtapas(id_puesto);
+
+    //Llamamos a la función para disponer los turnos del puesto
+    obtenerTurno(id_puesto);
+}
+
+/**
+ * Función para disponer los datos en el gráfico del puesto
+ * @param {chart} chartPuesto Argumento que contiene la instancia del gráfico del puesto
+ * @param {chart} chartChimenea Argumento que contiene la instancia del gráfico de chimenea
+ * @param {String} nombre Argumento que contiene el nombre del puesto
+ * @param {int} conteo Argumento que contiene la saturación
+ * @param {int} id_puesto Argumento que contiene el ID del puesto
+ * @param {Array} datasets Argumento que contiene los datos de las etapas con sus tiempos
+ * @returns NA
+ */
+function actualizarGraficoPuesto(chartPuesto, chartChimenea, nombre, conteo, id_puesto, datasets) {
+    //Comprobamos si los gráficos del puesto estan bien instanciados
+    if (!chartPuesto || !chartChimenea) return;
+
+    //Almacenamos en una variables los datos depurados
+    const datasets_depurados = datasets.map(dataset => ({
+        ...dataset,
+        data: dataset.data.map(d => (typeof d === 'number' && !isNaN(d)) ? d : 0)
+    }));
+
+    //Almacenamos en una variable los datos del puesto en cuestión
+    const datos_filtrados = datasets_depurados.filter(data => data.id_puesto === id_puesto);
+
+    //Almacenamos en variable los datos
+    const valores = datos_filtrados.map(data => data.data[0]), etiquetas = datos_filtrados.map(data => data.label), colores = datos_filtrados.map(data => data.backgroundColor);
+
+    //variables para establecer la información de la saturación
+    const conteo_libre = conteo > 100 ? 0 : 100 - conteo;
+
+    //Actualizamos el gráfico donut
+    chartPuesto.data.labels = ['Tiempo Utilizado', 'Tiempo Libre'];
+    chartPuesto.data.datasets[0].data = [conteo, conteo_libre.toFixed(2)];
+    chartPuesto.data.datasets[0].backgroundColor = ['rgba(231, 76, 60, 0.7)', 'rgba(46, 204, 113, 0.7)'];
+    //chartPuesto.options.plugins.title.text = `Puesto: ${nombre}`;
+    chartPuesto.options.plugins.centerText.text = `${conteo}%`;
+    chartPuesto.update();
+
+    //Actualizamos el gráfico de chimenea
+    chartChimenea.data.labels = ['Actividades'];
+    chartChimenea.data.datasets = datos_filtrados.map((data, index) => ({
+        label: data.label,
+        data: [valores[index]],
+        backgroundColor: colores[index % colores.length],
+        borderColor: 'rgba(0, 0, 0, 0.3)',
+        borderWidth: 1
+    }));
+
+    chartChimenea.update();
 }
 
 /**
@@ -630,7 +699,7 @@ function inicializarBotonEtapas(button) {
     //Establecemos color al fondo del botón
     button.style.backgroundColor = "#7b8f8f";
 
-    //ALmacenamos el último botón pulsado
+    //Almacenamos el último botón pulsado
     ultimoBotonPulsado = button;
 
     //Almacenamos el ID del puesto de los atributos del botón
@@ -736,6 +805,9 @@ function disponerTurno(turno, jornadaInicio, jornadaFin) {
         //Establecemos el título del modal
         document.getElementById('jornadaLaboralTitle').innerHTML = `Jornada Laboral: ${turno_final} ${icono}`;
 
+        //Configuramos el tamaño de la fuente del título
+        document.getElementById('jornadaLaboralTitle').style.fontSize = '17px';
+
         //Establecemos el inicio de la jornada
         document.getElementById('jornadaInicio').innerText = jornadaInicio.split('T')[1].split('.')[0];
 
@@ -784,8 +856,8 @@ function confirmarEliminar(icono, titulo, id, tabla, id_puesto) {
 }
 
 /**
- * Función para obtener las etapas asociadas a un puesto usando el ID del mismo
- * @param {int} puestoID Argumento que contiene el ID del puesto seleccioonado
+ * Función para obtener las etapas de un puesto en concreto
+ * @param {int} puestoID Argumento que contiene el ID de la etapa
  */
 function obtenerEtapas(puestoID) {
     //Iniciamos la solicitud GET para obtener las etapas de un puesto
@@ -806,6 +878,205 @@ function obtenerEtapas(puestoID) {
         //Controlamos los datos
         .then(data => {
             generarEtapaGlobal(data);
+        });
+}
+
+/**
+ * Función para calcular el número de la semana actual
+ * @param {*} [fecha=new Date()] Argumento que contiene la fecha actual
+ */
+function obtenerNumeroSemana(fecha = new Date()) {
+    //Creamos una copia del argumento
+    const fecha_copia = new Date(fecha.getTime());
+
+    //Establecemos el primero día como lunea
+    const diaSemana = fecha_copia.getUTCDay() || 7;
+    fecha_copia.setUTCDate(fecha_copia.getUTCDate() + 4 - diaSemana);
+
+    //Creamos una variable con el primer día del año
+    const inicioAño = new Date(Date.UTC(fecha_copia.getUTCFullYear(), 0, 1));
+
+    //Calculamos el número de la semana
+    const numeroSemana = Math.ceil(((fecha_copia - inicioAño) / 86400000 + 1) / 7);
+
+    //Devolvemos el día de la semana
+    return numeroSemana;
+}
+
+/**
+ * Función para disponer la información detalla del puesto
+ * @param {*} puesto_id Argumento que contiene el ID del puesto
+ * @param {*} nombre_puesto Argumento que contiene el nombre del puesto
+ */
+function modalPuestoDetallado(puesto_id, nombre_puesto) {
+    //Eliminamos el contenido del cuerpo del modal
+    $('#modalDetalle .modal-body').html(``);
+
+    //Configuramos el título del modal
+    $('#modalDetalle .modal-title').text("Detalles del puesto: ", nombre_puesto);
+
+    //Almacenamos en auna variable la semana actual
+    const semana_actual = obtenerNumeroSemana();
+
+    //Preparamos la petición GET para obtener las referencias asociadas al puesto
+    fetch(`/film/api/obtenerReferencias-puesto/${puesto_id}`, {
+        method: "GET"
+    })
+        //Controlamos la respuesta
+        .then(response => {
+            //En caso de que no sea válida
+            if (!response.ok) {
+                throw new Error('Error fetching data');
+            }
+
+            //Devolvemos los datos
+            return response.json();
+        })
+
+        //Controlamos los datos
+        .then(data => {
+            //Llamamos a la función para obtener las fechas de las referencias
+            obtenerFechas_Referencias(puesto_id, data);
+        });
+}
+
+/**
+ * Función para representar las etapas por puesto
+ * @param {Array} etapas Argumento que contiene la información de las etapas
+ */
+function generarEtapaGlobal(etapas) {
+    let contenedorTablas = document.getElementById('tablaEtapasGlobal');
+    contenedorTablas.innerHTML = '';
+
+    etapas.forEach((etapa, index) => {
+        let color_etapa;
+        const f = etapa.name
+
+        var { nombre_etapa, id_etapa, id_puesto, distancia_total, nuevo_picadas } = inicializarVariablesEtapas(etapa);
+
+        //Creamos un if para controlar la distancia total de la etapa y asi poder modificar el color de la misma... en caso de la distancia sea de 0 a 49
+        if (distancia_total >= 0 && distancia_total <= 49) {
+            //Asignamos el color verde
+            color_etapa = 'bg-green-300';
+
+            //En caso de que la distancia sea entre de 50 a 100
+        } else if (distancia_total >= 50 && distancia_total <= 99) {
+            //Asignamos el color amarillo
+            color_etapa = 'bg-yellow-300';
+
+            //En caso de que la distancia sea más de 100
+        } else if (distancia_total >= 100) {
+            //Asignamos el color rojo
+            color_etapa = 'bg-red-300';
+
+            //En cualquier otro caso
+        } else {
+            //Asignamos el color azul
+            color_etapa = 'bg-blue-300';
+        }
+
+        id_puesto = etapa.id_puesto;
+
+        //Generamos el HTML de la tabla para la etapa
+        const tablaHTML = `
+            <div id="etapa-${id_puesto}-${nombre_etapa}" class="mb-4" data-id-etapa="${id_etapa}">
+                <h3 id="encabezadoEtapa-${nombre_etapa}"
+                    class="text-lg font-semibold mb-2 flex items-center space-x-4 justify-between p-2 rounded-lg animate-fadeIn 
+                        ${f === 'X' ? 'bg-stone-200 text-black' : color_etapa} text-black"
+                    ${f !== 'X' ? `onclick="toggleEtapas(${id_puesto}, '${nombre_etapa}')"` : ''}>
+
+                    <span cla-ss="min-w-[150px]">Etapa: <strong>${nombre_etapa}</strong></span>
+                    <span class="min-w-[150px]">Distancia (metros): <strong>${distancia_total}</strong></span>
+                    <span class="min-w-[150px]">Tiempo (minutos): <strong>${nuevo_picadas}</strong></span>
+
+
+                    <button id="botonAnyadirEtapa" type="button" class="text-blue-500 ml-2" 
+                        onclick="visualizarEtapa('${nombre_etapa}', '${id_puesto}')">
+                        <i class="bi bi-plus-circle-fill" style="font-size: 20px;"></i>
+                    </button>
+
+
+                    <button id="botonEliminarEtapa" type="button" class="text-red-500 ml-2" 
+                        onclick="eliminarRegistro('etapa_global', '${nombre_etapa}', 'EN_IFM_STANDARD', ${id_puesto})">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+
+                    <button id="botonActualizarEtapa" hidden type="button" class="text-red-500 ml-2" 
+                        onclick="actualizarEtapa('${id_etapa}', 'EN_IFM_STANDARD')">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+
+                    ${f !== 'X' ? `
+                        <button id="botonVisualizarEtapa" type="button" class="text-yellow-500 ml-2" 
+                            onclick="visualizarEtapa('${nombre_etapa}', '${id_puesto}')">
+                            <i class="bi bi-map-fill"></i>
+                        </button>`
+                : ''}
+
+
+                    ${f !== 'X' ? `
+                        <button id="botonGestionarEtapa" type="button" class="text-gray-500 ml-2" 
+                            onclick="gestionarEtapa('${id_etapa}')">
+                            <i class="bi bi-arrows-move"></i>
+                        </button>`
+                : ''}
+                </h3>
+            </div>
+        `;
+        contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
+    })
+}
+
+function toggleEtapas(id_puesto, nombre_etapa) {
+    let subEtapasContainer = document.getElementById(`subEtapas-${nombre_etapa}`);
+
+    console.log(nombre_etapa)
+
+    if (!subEtapasContainer) {
+        // Si no existe, creamos el contenedor y lo insertamos después del elemento de la etapa global
+        let etapaGlobal = document.getElementById(`etapa-${id_puesto}-${nombre_etapa}`);
+        subEtapasContainer = document.createElement("div");
+        subEtapasContainer.id = `subEtapas-${nombre_etapa}`;
+        subEtapasContainer.classList.add("ml-4", "hidden");
+        etapaGlobal.insertAdjacentElement("afterend", subEtapasContainer);
+    }
+
+    if (subEtapasContainer.classList.contains('hidden')) {
+        // Si está oculto, lo mostramos y cargamos las etapas por puesto
+        generarTablasPorPuesto(id_puesto, nombre_etapa, subEtapasContainer);
+        subEtapasContainer.classList.remove('hidden');
+    } else {
+        // Si ya está visible, lo ocultamos
+        subEtapasContainer.classList.add('hidden');
+    }
+}
+
+/**
+ * Función para obtener las etapas asociadas a un puesto usando el ID del mismo
+ * @param {int} puestoID Argumento que contiene el ID del puesto seleccioonado
+ */
+function generarTablasPorPuesto(puestoID, nombre_etapa) {
+    console.log("puesto: ", puestoID, nombre_etapa)
+    //Iniciamos la solicitud GET para obtener las etapas de un puesto
+    fetch(`/film/api/obtenerEtapas_Puesto/${puestoID}/${nombre_etapa}`, {
+        method: "GET"
+    })
+        //Controlamos la respuesta
+        .then(response => {
+            //En caso de que se produzca un error
+            if (!response.ok) {
+                throw new Error('Error fetching data');
+            }
+
+            //Devolvemos la información formateada
+            return response.json();
+        })
+
+        //Controlamos los datos
+        .then(data => {
+            data.sort((a, b) => a.orden - b.orden); // Asegurar orden correcto
+            //Llammos al método para mostrar las etapas de un puesto
+            generarTablasPorEtapa(data, nombre_etapa);
         });
 }
 
@@ -917,148 +1188,6 @@ function configurarModalInformeDetallado(data) {
  * Función para representar las etapas por puesto
  * @param {Array} etapas Argumento que contiene la información de las etapas
  */
-function generarEtapaGlobal(etapas) {
-    let contenedorTablas = document.getElementById('tablaEtapasGlobal');
-    contenedorTablas.innerHTML = '';
-
-    etapas.forEach((etapa, index) => {
-        let color_etapa;
-        const f = etapa.name
-
-        var {nombre_etapa, id_etapa, id_puesto, distancia_total, nuevo_picadas} = inicializarVariablesEtapas(etapa);
-
-        //Creamos un if para controlar la distancia total de la etapa y asi poder modificar el color de la misma... en caso de la distancia sea de 0 a 49
-        if (distancia_total >= 0 && distancia_total <= 49) {
-            //Asignamos el color verde
-            color_etapa = 'bg-green-300';
-
-            //En caso de que la distancia sea entre de 50 a 100
-        } else if (distancia_total >= 50 && distancia_total <= 99) {
-            //Asignamos el color amarillo
-            color_etapa = 'bg-yellow-300';
-
-            //En caso de que la distancia sea más de 100
-        } else if (distancia_total >= 100) {
-            //Asignamos el color rojo
-            color_etapa = 'bg-red-300';
-
-            //En cualquier otro caso
-        } else {
-            //Asignamos el color azul
-            color_etapa = 'bg-blue-300';
-        }
-
-        id_puesto = etapa.id_puesto;
-
-        //Generamos el HTML de la tabla para la etapa
-        const tablaHTML = `
-            <div id="etapa-${id_puesto}-${nombre_etapa}" class="mb-4" data-id-etapa="${id_etapa}">
-                <h3 id="encabezadoEtapa-${nombre_etapa}"
-                    class="text-lg font-semibold mb-2 flex items-center space-x-4 justify-between p-2 rounded-lg animate-fadeIn 
-                        ${f === 'X' ? 'bg-stone-200 text-black' : color_etapa} text-black"
-                    ${f !== 'X' ? `onclick="toggleEtapas(${id_puesto}, '${nombre_etapa}')"` : ''}>
-
-                    <span cla-ss="min-w-[150px]">Etapa: <strong>${nombre_etapa}</strong></span>
-                    <span class="min-w-[150px]">Distancia (metros): <strong>${distancia_total}</strong></span>
-                    <span class="min-w-[150px]">Tiempo (minutos): <strong>${nuevo_picadas}</strong></span>
-
-
-                    <button id="botonAnyadirEtapa" type="button" class="text-blue-500 ml-2" 
-                        onclick="visualizarEtapa('${nombre_etapa}', '${id_puesto}')">
-                        <i class="bi bi-plus-circle-fill" style="font-size: 20px;"></i>
-                    </button>
-
-
-                    <button id="botonEliminarEtapa" type="button" class="text-red-500 ml-2" 
-                        onclick="eliminarRegistro('etapa_global', '${nombre_etapa}', 'EN_IFM_STANDARD', ${id_puesto})">
-                        <i class="bi bi-trash-fill"></i>
-                    </button>
-
-                    <button id="botonActualizarEtapa" hidden type="button" class="text-red-500 ml-2" 
-                        onclick="actualizarEtapa('${id_etapa}', 'EN_IFM_STANDARD')">
-                        <i class="bi bi-trash-fill"></i>
-                    </button>
-
-                    ${f !== 'X' ? `
-                        <button id="botonVisualizarEtapa" type="button" class="text-yellow-500 ml-2" 
-                            onclick="visualizarEtapa('${nombre_etapa}', '${id_puesto}')">
-                            <i class="bi bi-map-fill"></i>
-                        </button>`
-                : ''}
-
-
-                    ${f !== 'X' ? `
-                        <button id="botonGestionarEtapa" type="button" class="text-gray-500 ml-2" 
-                            onclick="gestionarEtapa('${id_etapa}')">
-                            <i class="bi bi-arrows-move"></i>
-                        </button>`
-                : ''}
-                </h3>
-            </div>
-        `;
-        contenedorTablas.insertAdjacentHTML('beforeend', tablaHTML);
-    })
-}
-
-function toggleEtapas(id_puesto, nombre_etapa) {
-    let subEtapasContainer = document.getElementById(`subEtapas-${nombre_etapa}`);
-
-    console.log(nombre_etapa)
-
-    if (!subEtapasContainer) {
-        // Si no existe, creamos el contenedor y lo insertamos después del elemento de la etapa global
-        let etapaGlobal = document.getElementById(`etapa-${id_puesto}-${nombre_etapa}`);
-        subEtapasContainer = document.createElement("div");
-        subEtapasContainer.id = `subEtapas-${nombre_etapa}`;
-        subEtapasContainer.classList.add("ml-4", "hidden");
-        etapaGlobal.insertAdjacentElement("afterend", subEtapasContainer);
-    }
-
-    if (subEtapasContainer.classList.contains('hidden')) {
-        // Si está oculto, lo mostramos y cargamos las etapas por puesto
-        generarTablasPorPuesto(id_puesto, nombre_etapa, subEtapasContainer);
-        subEtapasContainer.classList.remove('hidden');
-    } else {
-        // Si ya está visible, lo ocultamos
-        subEtapasContainer.classList.add('hidden');
-    }
-}
-
-
-/**
- * Función para obtener las etapas asociadas a un puesto usando el ID del mismo
- * @param {int} puestoID Argumento que contiene el ID del puesto seleccioonado
- */
-function generarTablasPorPuesto(puestoID, nombre_etapa){
-    console.log("puesto: ", puestoID, nombre_etapa)
-    //Iniciamos la solicitud GET para obtener las etapas de un puesto
-    fetch(`/film/api/obtenerEtapas_Puesto/${puestoID}/${nombre_etapa}`, {
-        method: "GET"
-    })
-        //Controlamos la respuesta
-        .then(response => {
-            //En caso de que se produzca un error
-            if (!response.ok) {
-                throw new Error('Error fetching data');
-            }
-    
-            //Devolvemos la información formateada
-            return response.json();
-        })
-    
-        //Controlamos los datos
-        .then(data => {
-            data.sort((a, b) => a.orden - b.orden); // Asegurar orden correcto
-            //Llammos al método para mostrar las etapas de un puesto
-            generarTablasPorEtapa(data, nombre_etapa);
-        });
-}
-
-
-/**
- * Función para representar las etapas por puesto
- * @param {Array} etapas Argumento que contiene la información de las etapas
- */
 function generarTablasPorEtapa(etapas, nombre_etapa) {
     //Obtenemos el contenedor donde se agregarán las tablas
     let contenedorTablas = document.getElementById(`subEtapas-${nombre_etapa}`);
@@ -1075,7 +1204,7 @@ function generarTablasPorEtapa(etapas, nombre_etapa) {
 
     // Ordenar cada grupo al final
     Object.keys(agrupadoPorF).forEach(key => {
-        agrupadoPorF[key].sort((a, b) => a.orden - b.orden);
+        agrupadoPorF[key].sort((a, b) => a.id - b.id);
     });
 
     //Iteramos sobre cada grupo de "F" para crear una tabla por cada uno
@@ -1524,15 +1653,6 @@ function ordernarEtapa(array) {
 }
 
 /**
- * Función para configurar el cuerpo del modal con los datos de la etapa
- * @param {Array} data Argumento que contiene los datos de la etapa 
- */
-function gestionarEtapa_Visualizacion(id) {
-    //visualizarPlano(puestoID, id);
-}
-
-
-/**
  * Función que actualiza el campo de la velocidad (speed)
  * @param {String} value Argumento que contiene el valor de la velocidad 
  */
@@ -1709,15 +1829,15 @@ function visualizarInformeStaturacionUAT() { /** PONER BIEN LAS FECHAS */
     //Mostramos el modal antes de añadir el gráfico
     $('#modalInforme').fadeIn(() => {
         //Creamos una instancia del contenedor del gráfico
-        const graficoContainer = document.getElementById('modal-grafico-container');
-        graficoContainer.innerHTML = '';
+        const grafico_principal = document.getElementById('modal-grafico-container');
+        grafico_principal.innerHTML = '';
 
         //Creamos el lienzo para el gráfico
         const canvas = document.createElement('canvas');
-        graficoContainer.appendChild(canvas);
+        grafico_principal.appendChild(canvas);
 
         //Llamamos a la función para establecer las fechas dentro del gráfico
-        obtenerTomaDatos(graficoContainer);
+        obtenerTomaDatos(grafico_principal);
 
         //Calculamos la saturación total
         const saturacionTotal = calcularSaturacionTotal(conteosPorPuesto);
@@ -2011,7 +2131,7 @@ function anyadirEtapa(id) {
 
                 <!--Numero picadas -->
                 <div class="relative inline-block w-64 mb-4">
-                    <label for="numeroPicadas" class="block text-sm font-medium text-white mb-2">Coger UC/UM y dejar en stock altura media</label>
+                    <label for="numeroPicadas" class="block text-sm font-medium text-white mb-2">Número de UC/UM a mover en simultaneo</label>
                     <select id="numeroPicadas" name="numeroPicadas" class="block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md bg-white text-white">
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -2019,6 +2139,33 @@ function anyadirEtapa(id) {
                         <option value="4">4</option>
                         <option value="5">5</option>
                         <option value="6">6</option>
+                    </select>
+                </div>
+
+                <!-- Operacion de la categoria -->
+                <div class="relative inline-block w-64">
+                    <label for="operacion" class="block text-sm font-medium text-gray-700 mb-2">Selecciona una operación</label>
+                    <select id="operacion" name="operacion" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                        <option value="Coger UC/UM y dejar en stock altura media">Coger UC/UM y dejar en stock altura media</option>
+                        <option value="Coger bac y colocar en carro/estanteria">Coger bac y colocar en carro/estanteria</option>
+                        <option value="Carga cassette nacelle J 22 bacs">Carga cassette nacelle J 22 bacs</option>
+                        <option value="Colocacion carros manualmente">Colocacion carros manualmente</option>
+                        <option value="Descarga camión en muelle (UM)">Descarga camión en muelle (UM)</option>
+                        <option value="De estantería a puesto inferior (UM)">De estantería a puesto inferior (UM)</option>
+                        <option value="De imagen camión a stock (UM)">De imagen camión a stock (UM)</option>
+                        <option value="De stock a estantería (UM)">De stock a estantería (UM)</option>
+                        <option value="De imagen camión a estantería (UM)">De imagen camión a estantería (UM)</option>
+                        <option value="Apertura (UM)">Apertura (UM)</option>
+                        <option value="Gestión de residuos (UM)">Gestión de residuos (UM)</option>
+                        <option value="Plegar y apilar (UC)">Plegar y apilar (UC)</option>
+                        <option value="De puesto inferior a carro (UC)">De puesto inferior a carro (UC)</option>
+                        <option value="Nacelle J 22bacs (UC)">Nacelle J 22bacs (UC)</option>
+                        <option value="Documentacion camión (UM)">Documentacion camión (UM)</option>
+                        <option value="Zipado (UM)">Zipado (UM)</option>
+                        <option value="De stock a imagen camion (UM)">De stock a imagen camion (UM)</option>
+                        <option value="De imagen camion a muelle (UM)">De imagen camion a muelle (UM)</option>
+                        <option value="Plegado de vacíos (UM)">Plegado de vacíos (UM)</option>
+                        <option value="De stock a carro (UM)">De stock a carro (UM)</option>
                     </select>
                 </div>
 
@@ -2068,6 +2215,9 @@ function anyadirEtapa(id) {
             //Almacenamos en una variable el número de picadas
             numero_picadas = document.getElementById('numeroPicadas').value;
 
+            //Almacenamos en la variable global la operación seleccionada
+            operacion_seleccionada = document.getElementById('operacion').value;
+
             //Preparamos la petición GET para obtener las referencias válidas
             fetch(`/film/api/comprobarReferencias/${referencia_componente}/${tipo_operacion}/${planta}`, {
                 method: "GET"
@@ -2100,24 +2250,25 @@ function anyadirEtapa(id) {
                         //Paramos la propagación
                         return;
                     }
-                    console.log("NUM: ", data.validReferences.length, "REF: ", referencia_componente.length)
 
                     //Creamos un switch para controlar el tipo de operación
                     switch (tipo_operacion) {
                         case "Programa_Expedicion_Forklift":
                             //Llamamos a la función para obtener la cantidad a expedir por cada referencia
                             //obtenerCantidadExpedir(referencias_validas, "quantitea_a_expedir", id);
-                            mostrarModalEtapas();
+                            //mostrarModalEtapas();
                             break;
 
                         case "Programa_Recepcion":
                             //Llamamos a la función para obtener la cantidad a expedir por cada referencia
                             //obtenerCantidadExpedir(referencias_validas, "quantite_de_forcage", id);
-                            mostrarModalEtapas();
+                            //mostrarModalEtapas();
+                            subirEtapa();
                             break;
 
                         case "Programa_Fabricacion":
-                            mostrarModalEtapas();
+                            //mostrarModalEtapas();
+                            subirEtapa();
                             break;
 
                         default:
@@ -2234,7 +2385,7 @@ function anyadirEtapaFinal() {
     //Iniciamos la solicitud GET para añadir la etapa al puesto
     fetch(`/film/api/anyadirEtapa/${puestoID}/${referencia_embalaje}/${encodeURIComponent(operacion_seleccionada)}/${mote}/${tipo_operacion}/${numero_picadas}`, {
         method: "POST"
-    })
+    });
 }
 
 /**
@@ -2351,9 +2502,6 @@ function disponerInformacionModal2(referencia, cantidad_a_expedir, valor_carga, 
  * Función para disponer el modal del selector de etapas para las referencias
  */
 function mostrarModalEtapas(opcion) {
-    //Cerramos el modal del informe
-    //$('#modalInformeFinal').modal('hide');
-
     //Configuramos el título del modal del selector de etapas
     $('#modal .modal-title').text('Selecciona una etapa');
 
@@ -2434,96 +2582,47 @@ function mostrarModalEtapas(opcion) {
 }
 
 /**
- * Función para añadir una etapa al puesto
+ * Función para añadir una etapa
+ * @param {int} opcion Argumento para saber si es una operacion añadida de forma manual
  */
 function subirEtapa(opcion) {
-    //Añadimos la funcionalidad al formulario de añadir la etapa
-    $("#formulario_anyadirEtapa").on('submit', function (e) {
-        //Paramos la propagación
-        e.preventDefault();
+    //En caso de que el campo mote este vacio
+    if (typeof mote === "string" && mote.trim() === '') {
+        //Le asignamos NULL
+        mote = null;
+    }
 
-        //En caso de que el campo mote este vacio
-        if (typeof mote === "string" && mote.trim() === '') {
-            //Le asignamos NULL
-            mote = null;
-        }
+    //Almacenamos en una variable el tipo de carga
+    let tipo_carga = "";
 
-        //Almacenamos en una variable el tipo de carga
-        let tipo_carga = "";
+    //Asignamos el valor de carga
+    if (operacion_seleccionada && operacion_seleccionada.includes("UM")) {
+        tipo_carga = "UM";
+    } else if (operacion_seleccionada && operacion_seleccionada.includes("UC")) {
+        tipo_carga = "UC";
+    }
 
-        //Verificamos que referencia_componente no sea nulo o indefinido
-        if (operacion_seleccionada && operacion_seleccionada.includes("UM")) {
-            tipo_carga = "UM";
-        } else if (operacion_seleccionada && operacion_seleccionada.includes("UC")) {
-            tipo_carga = "UC";
-        }
+    //Separamos las referencias finales
+    let referencias_finales = Array.isArray(referencia_componente)
+        ? referencia_componente
+        : referencia_componente.split(',');
 
-        console.log("Tipo de carga: ", tipo_carga, "\tTipo de operacion: ", operacion_seleccionada);
+    console.log("Referencias: ", referencias_finales);
 
-        console.log("REFERENCIA: ", referencia_componente)
+    //Serializamos el diccionario con las referencias y el número de embalajes
+    referencia_embalaje = encodeURIComponent(JSON.stringify(referencias_finales));
 
-        //Separamos las referencias finales
-        let referencias_finales = Array.isArray(referencia_componente)
-            ? referencia_componente
-            : referencia_componente.split(',');
+    //En caso de que opcion sea 1
+    if (opcion == 1) {
+        //Llamamos a la función para subir la referencia manual
+        subirEtapaManual(referencia_embalaje);
+    }
 
-        //Serializamos el diccionario con las referencias y el número de embalajes
-        referencia_embalaje = encodeURIComponent(JSON.stringify(referencias_finales));
+    let referenciasQuery = referencias_finales.join(',');
 
-        //En caso de que opcion sea 1
-        if (opcion == 1) {
-            //Llamamos a la función para subir la referencia manual
-            subirEtapaManual(referencia_embalaje);
-        }
-
-        let referenciasQuery = referencias_finales.join(',');
-
-        /*fetch(`/film/api/cantidadExpedirHoras/${referenciasQuery}/${tipo_operacion}/${planta}/${"quantite_de_forcage"}/${puestoID}`, {
-            method: "GET"
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error fetching data');
-            }
-            return response.json();
-        })
-        .then(data => {
-            let cantidades = {};
-            data.forEach(item => {
-                cantidades[item.referencia] = item.cantidad_expedir;
-            });
-
-            // Obtener valores de carga en una sola petición
-            return fetch(`/film/api/obtenerValorCarga/${tipo_carga}/${planta}/${referenciasQuery}/${tipo_operacion}`, { method: "GET" });
-        })
-        .then(response => {
-            if (!response.ok) {
-                mostrarAlerta('Error al obtener el valor de la carga', 'La referencia no pertenece al turno del puesto', 'error', 0);
-                return;
-            }
-            return response.json();
-        })
-        .then(data => {
-            let referencia_embalaje_datos = {};
-
-            data.forEach(item => {
-                let cantidad_a_expedir = cantidades[item.reference] || 0;
-                let valor_carga = item.valor_carga;
-                let numero_embalajes = Math.ceil((cantidad_a_expedir / valor_carga));
-
-                referencia_embalaje_datos[item.reference] = numero_embalajes;
-            });
-
-            referencia_embalaje = referencia_embalaje_datos;
-            anyadirEtapaFinal();
-        })
-        .finally(() => {
-            mostrarAlerta("Etapa/s creada/s", null, null, 1);
-        });*/
-
-        fetch(`/film/api/obtenerDatos/${tipo_carga}/${planta}/${referenciasQuery}/${tipo_operacion}/${puestoID}`, {
-            method: "GET"
-        })
+    fetch(`/film/api/obtenerDatos/${tipo_carga}/${planta}/${referenciasQuery}/${tipo_operacion}/${puestoID}`, {
+        method: "GET"
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Error fetching data');
@@ -2542,13 +2641,71 @@ function subirEtapa(opcion) {
             });
 
             referencia_embalaje = referencia_embalaje_datos;
+
             anyadirEtapaFinal();
         })
         .finally(() => {
-            mostrarAlerta("Etapa/s creada/s", null, null, 1);
+            //mostrarAlerta("Etapa/s creada/s", null, null, 1);
+            //Creamos un array con los datos que tenemos que enviar
+            // const rowData = [
+
+            // ];
+
+            // //Comvertimos el array a JSON
+            // const rowDataJson = encodeURIComponent(JSON.stringify(rowData));
+
+            // //Abrimos la página del plano en una nueva pestaña
+            // window.open(`/film/visualizarPlano?data=${rowDataJson}`, '_blank');
+
+            //Alerta para esperar seis segundos
+            Swal.fire({
+                title: 'Espere',
+                text: 'Añadiendo etapas',
+                icon: 'info',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    setTimeout(() => {
+                        Swal.close();
+                        alertaFinalizacionEtapa(puestoID, operacion_seleccionada);
+                    }, 6000);
+                }
+            });
         });
-    
+}
+
+/**
+ * Función para disponer la alerta para añadir la información al mapa
+ */
+function alertaFinalizacionEtapa(puestoID, operacion_seleccionada) {
+    Swal.fire({
+        title: 'Etapas añadidas',
+        text: '¿Deseas añadir la información del plano?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí',
+        cancelButtonText: 'No'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            cargarPlano(puestoID, operacion_seleccionada);
+        } else {
+            window.location.reload();
+        }
     });
+}
+
+/**
+ * Función para cargar el mapa
+ * @param {int} puesto_id Argumento que contiene el ID del puesto
+ * @param {String} operacion_seleccionada Argumento que contiene el nombre de la operación seleccionada
+ */
+function cargarPlano(puesto_id, operacion_seleccionada) {
+    //Creamos un array con los datos necesarios
+    const rowData = [
+        puesto_id,
+        operacion_seleccionada
+    ];
+
 }
 
 /**
@@ -2622,42 +2779,13 @@ function mostrarAlerta(titulo, mensaje, icono, opcion) {
 /**
  * Función para visualizar la información de una etapa
  * @param {String} etapa Argumento que contiene el nombre de la etapa
- * @param {String} referencia_componente Argumento que contiene la referencia del componenten
  * @param {int} id_etapa Argumento que contiene el ID de la etapa
  */
 function visualizarEtapa(etapa, id_etapa) {
     //Configuramos el título de la etapa
     $('#modalLargeTitle').text('Información de la etapa ', etapa);
 
-    console.log("ID etapa PLANO: ", id_etapa)
-
-    visualizarPlano(id_etapa, etapa)
-    //id_etapa es id_puesto ----- etapa es nombre_etapa
-
-    //Preparamos la petición GET para obtener la información de la etapa
-    /*fetch(`/film/api/obtenerInformacionEtapa/${id_etapa}`, {
-        method: "GET"
-    })
-        //Controlamos la respuesta
-        .then(response => {
-            //En caso de fallo
-            if (!response.ok) {
-                throw new Error('Error fetching data');
-            }
-
-            //Devolvemos los datos obtenidos
-            console.log(response)
-
-            return response.json();
-        })
-
-        //Controlamos los datos obtenidos
-        .then(data => {
-            console.log("Data PLANO: ", data.length)
-
-            //Llamamos a la función para configurar la visualización de la etapa dependiendo de cual sea
-            gestionarEtapa_Visualizacion(data[0].id);
-        });*/
+    visualizarPlano(etapa, id_etapa);
 }
 
 /**
@@ -2829,8 +2957,8 @@ function controlarRespuesta_Etapa(response) {
 
 /**
  * Función para abrir el plano en una nueva pestaña
- * @param {*} puesto_id Argumento que contiene el ID del puesto
- * @param {*} id_etapa Argumento que contiene el ID de la etapa
+ * @param {int} puesto_id Argumento que contiene el ID del puesto
+ * @param {String} etapa_nombre Argumento que contiene el nombre de la etapa
  */
 function visualizarPlano(puesto_id, etapa_nombre) {
     //Creamos un array con los datos que tenemos que enviar
@@ -2838,8 +2966,6 @@ function visualizarPlano(puesto_id, etapa_nombre) {
         puesto_id,
         etapa_nombre
     ];
-
-    console.log("Row data: ", rowData);
 
     //Convertimos el array a JSON
     const rowDataJson = encodeURIComponent(JSON.stringify(rowData));
@@ -2981,7 +3107,7 @@ function gestionarEtapa(id_etapa) {
                     </div>
                 </form>
             `);
-            
+
             //Aplicamos la funcionalidad al formulario
             $('#gestionarEtapa').on('submit', async function (e) {
                 //Paramos la propagación
@@ -2989,7 +3115,7 @@ function gestionarEtapa(id_etapa) {
 
                 /** Almacenamos en variables las opciones elegidas */
                 const id_puesto = document.getElementById('puesto').value, gestion = document.getElementById('gestion').value;
-              
+
                 //Preparamos la solicitud POST para llamar al end point para gestionar la etapa
                 fetch(`/film/api/gestionarEtapa/${id_etapa}/${id_puesto}/${gestion}`, {
                     method: "POST"
@@ -3151,9 +3277,9 @@ function configurarLinea() {
 
 /**
  * Función para disponer la fecha de inicio y la fecha de fin de los datos disponibles
- * @param {HTMLElement} graficoContainer Argumento que contiene el contenedor del gráfico 
+ * @param {HTMLElement} grafico_principal Argumento que contiene el contenedor del gráfico 
  */
-function obtenerTomaDatos(graficoContainer) {
+function obtenerTomaDatos(grafico_principal) {
     //Preparamos la peticion GET para obtener las fechas 
     fetch('/film/api/fechaTomaDatos', {
         method: "GET"
@@ -3180,8 +3306,8 @@ function obtenerTomaDatos(graficoContainer) {
             fecha_final.textContent = `Fecha de toma de datos:\n ${data.fecha_fin.split('T')[0]}`;
 
             /**Añadimos ambas fechas al contenedor */
-            graficoContainer.append(fecha_actual);
-            graficoContainer.append(fecha_final);
+            grafico_principal.append(fecha_actual);
+            grafico_principal.append(fecha_final);
         });
 }
 

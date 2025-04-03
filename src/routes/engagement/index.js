@@ -1014,7 +1014,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                     (20 * cantidad_mover) / 100 +
                     (2 * cantidad_mover) / 100 +
                     (7 * cantidad_mover) / 100 +
-                    (2 * cantidad_mover) / 100 
+                    (2 * cantidad_mover) / 100
                 ), // Actividad en minutos
                 Math.ceil(
                     (
@@ -1053,7 +1053,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                     (38 * cantidad_mover) / 100 +
                     (6 * cantidad_mover) / 100 +
                     (29 * cantidad_mover) / 100 +
-                    (9 * cantidad_mover) / 100 
+                    (9 * cantidad_mover) / 100
                 ), // Actividad en minutos
                 Math.ceil(
                     (
@@ -1068,7 +1068,7 @@ function anyadirEtapa_Operacion(connection, query, data, operacion_seleccionada)
                     ) / numero_picadas
                 ) // Actividad en minutos X picada
             )
-        break;
+            break;
 
         default:
             break;
@@ -1153,6 +1153,7 @@ router.post('/anyadirEtapa/:puesto_id/:referencia_embalaje/:operacion_selecciona
 
         //Enviamos la respuesta al cliente
         return res.status(201).send("End point procesado correctamente");
+
     } catch (err) {
         console.error("> Error en el procesamiento: ", err);
         return res.status(500).send('Error interno del servidor');
@@ -1337,9 +1338,9 @@ router.put('/actualizarOrden/:array_ordenado', (req, res) => {
 /**
  * End point para obtener las etapas agrupadas de un puesto
  */
-router.get('/obtenerEtapasAgrupadasPuesto/:id_puesto', (req, res) => {
+router.get('/obtenerEtapas_Puesto/:id_puesto/:nombre_etapa', (req, res) => {
     //Almacenamos el ID del puesto
-    const id_puesto = req.params.id_puesto;
+    let { id_puesto, nombre_etapa } = req.params;
 
     //Creamos la conexión a la base de datos
     getDBConnection((err, connection) => {
@@ -1349,7 +1350,6 @@ router.get('/obtenerEtapasAgrupadasPuesto/:id_puesto', (req, res) => {
         }
 
         //Almacenamos en una variable la consulta SQL
-    
         const query = `
             SELECT 
                 EN.id_puesto, FS.name, SUM(cantidad_a_mover) AS cantidad_a_mover, COALESCE(distancia_total, 0) AS distancia_total, SUM(PS14) AS PS14, 
@@ -1887,6 +1887,66 @@ router.post('/actualizarInformacionMapa/:id_puesto/:totalDistanceMeters/:curveCo
 });
 
 /**
+ * End point para obtener las etapas agrupadas de un puesto
+ */
+router.get('/obtenerEtapasAgrupadasPuesto/:id_puesto', (req, res) => {
+    //Almacenamos el ID del puesto
+    const id_puesto = req.params.id_puesto;
+
+    //Creamos la conexión a la base de datos
+    getDBConnection((err, connection) => {
+        //En caso de que se produzaca un error...
+        if (err) {
+            return res.status(400).send('Error al conectar con la base de datos');
+        }
+
+        //Almacenamos en una variable la consulta SQL
+    
+        const query = `
+            SELECT 
+                EN.id_puesto, FS.name, SUM(cantidad_a_mover) AS cantidad_a_mover, COALESCE(distancia_total, 0) AS distancia_total, SUM(PS14) AS PS14, 
+                SUM(DS10) AS DS10, SUM(CDL) AS CDL, SUM(CDC) AS CDC, SUM(M1) AS M1, SUM(PS15) AS PS15, SUM(DI21) AS DI21, SUM(DC113) AS DC113, numero_picadas, 
+                SUM(DS14) AS DS14, SUM(DS15) AS DS15, SUM(DC) AS DC, SUM(D1) AS D1, SUM(W5) AS W5, SUM(TT) AS TT, SUM(AL) AS AL, SUM(L2) AS L2, SUM(G1) AS G1, 
+                SUM(P5) AS P5, SUM(G1_1) AS G1_1, SUM(P2_1) AS P2_1, SUM(W5_2) AS W5_2, SUM(E2) AS E2, SUM(TT_1) AS TT_1, SUM(M2) AS M2, SUM(PP11) AS PP11, 
+                SUM(G1_2) AS G1_2, SUM(P2_2) AS P2_2, SUM(P2_3) AS P2_3, SUM(nuevo_picadas) AS nuevo_picadas, SUM(tiempo_distancia_total) AS tiempo_distancia_total,
+                SUM(M1_2) AS M1_2, COALESCE(SUM(TT_2), 0) AS TT_2, SUM(DS15_2) AS DS15_2, SUM(CDL_2) AS CDL_2, SUM(CDC_2) AS CDC_2, SUM(CDL_3) AS CDL_3
+            FROM
+                EN_IFM_STANDARD AS EN
+            INNER JOIN
+                FStandard_Name AS FS
+            ON 
+                EN.F = FS.FStandard
+            WHERE 
+                EN.id_puesto = ?
+            GROUP BY 
+                EN.F, EN.id_puesto
+        `;
+        
+
+        //Ejecutamos la consulta
+        connection.query(query, [id_puesto], (error, results) => {
+            //Liberamos la conexión
+            connection.release();
+
+            //En caso de que se produzca un error...
+            if (error) {
+                console.error("> Error: ", error);
+
+                //Enviamos el status
+                return res.status(500).send('Error en la consulta');
+
+                //En otro caso...
+            } else {
+                console.log("> Resultados ETAPAS GRUPO: ", results);
+
+                //Enviamos la información
+                res.json(results);
+            }
+        })
+    });
+});
+
+/**
  * End point para obtener todos los puestos
  */
 router.get('/obtenerPuestos', (req, res) => {
@@ -1999,20 +2059,7 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
         }
 
         //Almacenamos en una variable la consulta SQL
-        /*const query = `
-            SELECT 
-                c.id_puesto,
-                SUM(c.dinamico_VA) AS dinamico_VA,
-                SUM(c.dinamico_NoVA) AS dinamico_NoVA,
-                SUM(c.estatico_VA) AS estatico_VA,
-                SUM(c.estatico_NoVA) AS estatico_NoVA,
-                (SELECT (SUM(tiempo_distancia_total))/numero_picadas FROM EN_IFM_STANDARD WHERE id_puesto = c.id_puesto) AS tiempo_distancia_total
-            FROM chimenea c
-            WHERE c.id_puesto = ?
-            GROUP BY c.id_puesto;
-        `;*/
-
-        const query = `
+          const query = `
             SELECT 
                 EN.id_puesto AS id, 
                 FS.name AS nombre, 
@@ -2025,7 +2072,7 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
                 EN.F = FS.FStandard 
             WHERE 
                 EN.id_puesto = ?
-            GROUP BY EN.F, EN.id_puesto;
+            GROUP BY EN.F, EN.id_puesto
         `;
 
         //Ejecutamos la consulta
@@ -2048,7 +2095,6 @@ router.get('/graficoChimenea/:id_puesto', (req, res) => {
         });
     });
 });
-
 /**
  * End point para obtener la cantidad de UM a mover usando la referencia del componente
  */
@@ -3421,68 +3467,12 @@ router.get('/comprobarReferencias/:referencias/:tipo_operacion/:planta', (req, r
 
             //Verificamos si el resultado es mayor que 0 (referencia encontrada)
             if (!result || result[0]['COUNT(*)'] <= 0) {
-                console.log("> No se encontró la referencia:", item);
+                //console.log("> No se encontró la referencia:", item);
             }
 
             return res.json({ validReferences: array_referencias_unicas });
         });
     });
-    /*
-    //Creamos un array para almacenar las referencias válidas
-    //let referencias_finales = [];
-
-    let referencias_finales = `'${referencias.split(" ").join("','")}'`;
-
-    console.log("Referencias finales: ", referencias_finales);
-
-    //Número total de referencias a comprobar
-    let totalConsultas = array_referencias_unicas.length;
-
-    //Contador de consultas realizadas
-    let consultasRealizadas = 0;
-
-    //Creamos la conexión a la base de datos
-    getDBConnection((err, connection) => {
-        //En caso de que se produzca algún error...
-        if (err) {
-            console.error("> Error al conectar a la base de datos: ", err);
-            return res.status(500).send('Error al conectar con la base de datos: ', err);
-        }
-
-        //Iteramos por las referencias
-        array_referencias_unicas.forEach(item => {
-            connection.query(query, [tipo_operacion, item, columna_fabrica, planta], (error, result) => {
-
-                console.log(connection.format(query, [tipo_operacion, item, columna_fabrica, planta]));
-
-                //En caso de que se produzca un error en la consulta
-                if (error) {
-                    console.error("> Error: ", error);
-                    return res.status(501).send('Error a la hora de comprobar si la referencia es válida: ', error);
-                }
-
-                //Verificamos si el resultado es mayor que 0 (referencia encontrada)
-                if (result && result[0]['COUNT(*)'] > 0) {
-                    //Si la referencia existe, la agregamos al array de válidas
-                    referencias_finales.push(item);
-                } else {
-                    console.log("> No se encontró la referencia:", item);
-                }
-
-                //Incrementamos el contador de consultas realizadas
-                consultasRealizadas++;
-
-                //Comprobamos si todas las referencias han sido procesadas
-                if (consultasRealizadas === totalConsultas) {
-                    //Liberamos la conexión
-                    connection.release();
-
-                    //Enviamos la respuesta con las referencias válidas
-                    return res.json({ validReferences: referencias_finales });
-                }
-            });
-        });
-    });*/
 });
 
 /**
@@ -4228,14 +4218,20 @@ router.put('/actualizarOrden/:array_ordenado', (req, res) => {
     });
 });
 
+/**
+ * End ponint para obtener los datos para subir la etapa a un puesto
+ */
 router.get('/obtenerDatos/:tipo_carga/:planta/:referencia/:tipo_operacion/:puesto_id', (req, res) => {
+    //Almacenamos los datos de los parámetros
     const { tipo_carga, planta, referencia, tipo_operacion, puesto_id } = req.params;
+
+    //Almacenamos las referencias separadas por ","
     const referenciasArray = referencia.split(',');
 
-    let jornada_inicio, jornada_final;
-    let columna_hora, columna_fabrica, columna_fabrica2, columna_2, columna_valor_carga;
+    //Variables para almacenar los datos necesarios
+    let jornada_inicio, jornada_final, columna_hora, columna_fabrica, columna_fabrica2, columna_2, columna_valor_carga;
 
-    // Obtener el inicio y fin de la jornada
+    //Consulta SQL para obtener el inicio y fin de la jornada
     const query_jornada = `
         SELECT t.jornada_inicio, t.jornada_fin 
         FROM puestos p 
@@ -4243,13 +4239,12 @@ router.get('/obtenerDatos/:tipo_carga/:planta/:referencia/:tipo_operacion/:puest
         WHERE p.id = ?;
     `;
 
-    // Determinar nombres de columnas según tipo de operación
+    //Añadimos un control por tipo dè operación para obtener el nombre de las columnas
     if (tipo_operacion === 'Programa_Recepcion') {
         columna_hora = 'heure_de_la_periode';
         columna_fabrica = 'compte_client';
         columna_fabrica2 = columna_fabrica;
         columna_2 = 'quantite_calculee_par_GPI';
-        //columna_2 = 'quantite_de_forcage';
     } else if (tipo_operacion === 'Programa_Expedicion_Forklift') {
         columna_hora = 'heure_expedition';
         columna_fabrica = 'compte_fournisseur';
@@ -4262,17 +4257,17 @@ router.get('/obtenerDatos/:tipo_carga/:planta/:referencia/:tipo_operacion/:puest
         columna_2 = "besoin";
     }
 
-    // Determinar la columna de valor de carga
+    //Operación ternaría para saber la columna de valor de carga
     columna_valor_carga = tipo_carga === 'UM' ? 'nb_pieces_par_um' : 'nb_pieces_par_uc';
 
-    // Conexión a la BD
+    //Conexión a la BD
     getDBConnection((err, connection) => {
         if (err) {
             console.error("> Error de conexión: ", err);
             return res.status(500).send('Error al conectar con la base de datos');
         }
 
-        // Obtener jornada de trabajo
+        //Obtenemos la jornada de trabajo
         connection.query(query_jornada, [puesto_id], (errorJornada, resultJornada) => {
             if (errorJornada || resultJornada.length === 0) {
                 console.error("> Error obteniendo jornada: ", errorJornada);
@@ -4280,10 +4275,11 @@ router.get('/obtenerDatos/:tipo_carga/:planta/:referencia/:tipo_operacion/:puest
                 return res.status(500).send('Error al obtener la jornada');
             }
 
+            //Almacenamos las jornadas correspondientes
             jornada_inicio = resultJornada[0].jornada_inicio;
             jornada_final = resultJornada[0].jornada_fin;
 
-            // Consulta SQL optimizada
+            //Consulta SQL optimizada
             const query = `
                 SELECT 
                     t.reference, 
@@ -4303,7 +4299,7 @@ router.get('/obtenerDatos/:tipo_carga/:planta/:referencia/:tipo_operacion/:puest
                 GROUP BY t.reference;
             `;
 
-            // Ejecutar consulta combinada
+            //Ejecutamos consulta combinada
             connection.query(query, [columna_2, columna_valor_carga, tipo_operacion, columna_fabrica, planta, referenciasArray, columna_hora, jornada_inicio, columna_hora, jornada_final], (error, result) => {
                 console.log(">>>>> QUERY FINAL:\n", connection.format(query, [columna_2, columna_valor_carga, tipo_operacion, columna_fabrica, planta, referenciasArray, columna_hora, jornada_inicio, columna_hora, jornada_final]));
 
@@ -4316,12 +4312,12 @@ router.get('/obtenerDatos/:tipo_carga/:planta/:referencia/:tipo_operacion/:puest
 
                 console.log("Datos obtenidos:", result);
 
+                //Devolvemos los datos
                 res.json(result);
             });
         });
     });
 });
-
 
 //Exportamos el enrutador
 export default router;
