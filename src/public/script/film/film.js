@@ -457,7 +457,7 @@ function renderizarGrafico() {
                             const originalLabels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
                             originalLabels.push({
                                 text: `Media: ${media.toFixed(2)}%`,
-                                fillStyle: 'rgba(204, 34, 199, 0)',
+                                fillStyle: 'rgb(77, 52, 177)',
                                 strokeStyle: 'rgb(77, 52, 177)',
                                 lineWidth: 1,
                                 hidden: false
