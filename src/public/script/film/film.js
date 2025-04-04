@@ -997,7 +997,7 @@ function generarEtapaGlobal(etapas) {
 
 
                     <button id="botonAnyadirEtapa" type="button" class="text-blue-500 ml-2" 
-                        onclick="visualizarEtapa('${nombre_etapa}', '${id_puesto}')">
+                        onclick="anyadirEtapa(${id_puesto}, '${nombre_etapa}')">
                         <i class="bi bi-plus-circle-fill" style="font-size: 20px;"></i>
                     </button>
 
@@ -1308,12 +1308,6 @@ function generarTablasPorEtapa(etapas, nombre_etapa) {
                                         ${f !== 'X' ? `<span class="min-w-[150px]">Línea: <strong>${linea}</strong></span>` : ''}
                                         <span class="min-w-[150px]"><i class="bi bi-stopwatch-fill"></i> <strong>${nuevo_picadas}</strong></span>
 
-                                        ${f !== 'X' ? `
-                                            <button id="botonVisualizarEtapa" type="button" class="text-blue-500 ml-2" 
-                                                onclick="visualizarEtapa('${FKey}', '${referenciaComponente}', '${id_etapa}')">
-                                                <i class="bi bi-compass-fill"></i>
-                                            </button>`
-                                    : ''}
 
                                         <button id="botonEliminarEtapa" type="button" class="text-red-500 ml-2" 
                                             onclick="eliminarRegistro(${id_etapa}, 'EN_IFM_STANDARD', ${id_puesto})">
@@ -3123,11 +3117,12 @@ function disponerReferenciasBuscador(data, puesto_id) {
 
 /**
  * Función para añadir una etapa a un puesto
- * @param {int} id Argumento que contiene el ID del puesto
+ * @param {int} id_puesto Argumento que contiene el ID del puesto
  */
-function anyadirEtapa(id) {
+function anyadirEtapa(id_puesto, operacion) {
+    let opcion;
     //Controlamos el valor del argumento "id"... en caso de que el argumento sea NULL
-    if (id === '' || id === null) {
+    if (id_puesto === '' || id_puesto === null) {
         //Llamamos al método para mostrar una alerta de aviso
         mostrarAlerta('Error al mostrar el moda de añadir etapa', 'Debes de seleccionar un puesto antes de añadir una etapa', 'error', 0);
 
@@ -3156,7 +3151,7 @@ function anyadirEtapa(id) {
                         <input type="text" id="referencia_componente" name="referencia_componente" 
                             class="w-full p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black rounded-l-lg" 
                             placeholder="Ingresa la referencia del componente" required>
-                        <button type="button" class="p-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600" onclick="buscadorReferencias(${id})">
+                        <button type="button" class="p-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600" onclick="buscadorReferencias(${id_puesto})">
                             <i class="bi bi-search"></i>
                         </button>
                     </div>
@@ -3249,6 +3244,17 @@ function anyadirEtapa(id) {
             document.getElementById('referencia_componente').value = referencia_componente;
         }
 
+        // Si se pasa la operación como argumento
+        if (operacion) {
+            // Preseleccionamos la operación en el dropdown
+            const operacionSelect = document.getElementById('operacion');
+            operacionSelect.value = operacion; // Establecemos el valor de la operación seleccionada
+
+            // Deshabilitamos el dropdown para evitar que el usuario lo cambie
+            operacionSelect.disabled = true;
+            opcion = 2;
+        }
+
         //Añadimos la funcionalidad para el formulario de consultar la información usando la referencia del componente y la linea
         $('#consultarValores').on('submit', async function (e) {
             //Paramos la propagación
@@ -3317,12 +3323,12 @@ function anyadirEtapa(id) {
                             //Llamamos a la función para obtener la cantidad a expedir por cada referencia
                             //obtenerCantidadExpedir(referencias_validas, "quantite_de_forcage", id);
                             //mostrarModalEtapas();
-                            subirEtapa();
+                            subirEtapa(id_puesto, operacion, opcion);
                             break;
 
                         case "Programa_Fabricacion":
                             //mostrarModalEtapas();
-                            subirEtapa();
+                            subirEtapa(id_puesto, operacion, opcion);
                             break;
 
                         default:
@@ -3432,9 +3438,18 @@ function obtenerValorCarga(item, cantidad_a_expedir, tipo_operacion, tipo_carga)
 /**
  * Función para añadir la etapa
  */
-function anyadirEtapaFinal() {
+function anyadirEtapaFinal(id_puesto, operacion_seleccionada) {
+    console.log('id_puesto:', id_puesto);
+    console.log('operacion_seleccionada:', operacion_seleccionada);
     //Serializamos el diccionario con las referencias y el número de embalahjes
     referencia_embalaje = encodeURIComponent(JSON.stringify(referencia_embalaje));
+
+    if(id_puesto){
+        puestoID = id_puesto;
+    }
+    
+
+    console.log('id_puesto:', puestoID);
 
     //Iniciamos la solicitud GET para añadir la etapa al puesto
     fetch(`/film/api/anyadirEtapa/${puestoID}/${referencia_embalaje}/${encodeURIComponent(operacion_seleccionada)}/${mote}/${tipo_operacion}/${numero_picadas}`, {
@@ -3639,7 +3654,7 @@ function mostrarModalEtapas(opcion) {
  * Función para añadir una etapa
  * @param {int} opcion Argumento para saber si es una operacion añadida de forma manual
  */
-function subirEtapa(opcion) {
+function subirEtapa(id_puesto, operacion, opcion) {
     //En caso de que el campo mote este vacio
     if (typeof mote === "string" && mote.trim() === '') {
         //Le asignamos NULL
@@ -3672,7 +3687,13 @@ function subirEtapa(opcion) {
         subirEtapaManual(referencia_embalaje);
     }
 
+    if(operacion){
+        operacion_seleccionada = operacion;
+    }
+
     let referenciasQuery = referencias_finales.join(',');
+
+    console.log("SUBIR ETAPA -> ", operacion)
 
     fetch(`/film/api/obtenerDatos/${tipo_carga}/${planta}/${referenciasQuery}/${tipo_operacion}/${puestoID}`, {
         method: "GET"
@@ -3696,7 +3717,7 @@ function subirEtapa(opcion) {
 
             referencia_embalaje = referencia_embalaje_datos;
 
-            anyadirEtapaFinal();
+            anyadirEtapaFinal(id_puesto, operacion_seleccionada);
         })
         .finally(() => {
             //mostrarAlerta("Etapa/s creada/s", null, null, 1);
@@ -3711,20 +3732,51 @@ function subirEtapa(opcion) {
             // //Abrimos la página del plano en una nueva pestaña
             // window.open(`/film/visualizarPlano?data=${rowDataJson}`, '_blank');
 
-            //Alerta para esperar seis segundos
-            Swal.fire({
-                title: 'Espere',
-                text: 'Añadiendo etapas',
-                icon: 'info',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                    setTimeout(() => {
-                        Swal.close();
-                        alertaFinalizacionEtapa(puestoID, operacion_seleccionada);
-                    }, 6000);
-                }
-            });
+            if(opcion === 2){
+                mostrarAlerta("Etapa/s creada/s", null, null, 1);
+            } else {
+                //Alerta
+                Swal.fire({
+                    title: 'Espere',
+                    text: 'Añadiendo etapas',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        setTimeout(2000);
+                        Swal.fire({
+                            title: 'Etapas añadidas',
+                            text: '¿Deseas añadir la información del plano?',
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Sí',
+                            cancelButtonText: 'No'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Si confirma, abrir el plano en una nueva pestaña
+                                visualizarPlano(puestoID, operacion_seleccionada);
+
+                                // Cerrar el modal actual
+                                Swal.close();
+
+                                // Recargar la página después de un pequeño retraso
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1000); // Puedes ajustar este tiempo según sea necesario
+                            } else {
+                                window.location.reload();
+                            }
+                        });
+                        /*setTimeout(() => {
+                            Swal.close();
+                            alertaFinalizacionEtapa(puestoID, operacion_seleccionada);
+                        }, 6000);*/
+                        //Swal.close();
+                        //alertaFinalizacionEtapa(puestoID, operacion_seleccionada);
+                    }
+                });
+            }
+            
         });
 }
 
@@ -3741,7 +3793,7 @@ function alertaFinalizacionEtapa(puestoID, operacion_seleccionada) {
         cancelButtonText: 'No'
     }).then((result) => {
         if (result.isConfirmed) {
-            cargarPlano(puestoID, operacion_seleccionada);
+            visualizarPlano(puestoID, operacion_seleccionada);
         } else {
             window.location.reload();
         }
@@ -3832,15 +3884,15 @@ function mostrarAlerta(titulo, mensaje, icono, opcion) {
 
 /**
  * Función para visualizar la información de una etapa
- * @param {String} etapa Argumento que contiene el nombre de la etapa
+ * @param {String} etapa_nombre Argumento que contiene el nombre de la etapa
  * @param {String} referencia_componente Argumento que contiene la referencia del componenten
- * @param {int} id_etapa Argumento que contiene el ID de la etapa
+ * @param {int} puesto_id Argumento que contiene el ID del puesto
  */
-function visualizarEtapa(etapa, id_etapa) {
+function visualizarEtapa(etapa_nombre, puesto_id) {
     //Configuramos el título de la etapa
-    $('#modalLargeTitle').text('Información de la etapa ', etapa);
+    $('#modalLargeTitle').text('Información de la etapa ', etapa_nombre);
 
-    visualizarPlano(etapa, id_etapa);
+    visualizarPlano(puesto_id, etapa_nombre);
 }
 
 /**
@@ -4021,6 +4073,8 @@ function visualizarPlano(puesto_id, etapa_nombre) {
         puesto_id,
         etapa_nombre
     ];
+
+    console.log(rowData)
 
     //Convertimos el array a JSON
     const rowDataJson = encodeURIComponent(JSON.stringify(rowData));
