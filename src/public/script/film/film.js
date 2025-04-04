@@ -458,7 +458,7 @@ function renderizarGrafico() {
                             originalLabels.push({
                                 text: `Media: ${media.toFixed(2)}%`,
                                 fillStyle: 'rgba(204, 34, 199, 0)',
-                                strokeStyle: 'rgb(43, 7, 187)',
+                                strokeStyle: 'rgb(77, 52, 177)',
                                 lineWidth: 1,
                                 hidden: false
                             });
