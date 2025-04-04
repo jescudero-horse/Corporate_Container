@@ -617,25 +617,13 @@ function seleccionarPuesto(index, id_puestos, nombre_puestos, conteos, contenedo
     //Almmacenamos en la variable el ID del puesto
     puestoID = id_puesto;
 
-    //Variable que contiene los colores disponibles
-    const colores = [
-        'rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 205, 0.6)',
-        'rgba(255, 206, 86, 0.6)', 'rgba(61, 193, 153, 0.6)',
-        'rgba(255, 159, 64, 0.6)', 'rgba(148, 59, 226, 0.6)',
-        'rgba(173, 224, 53, 0.6)', 'rgba(57, 30, 233, 0.6)',
-        'rgba(67, 203, 198, 0.6)', 'rgba(255, 176, 144, 0.6)',
-        'rgba(255, 160, 225, 0.6)', 'rgba(153, 102, 255, 0.6)',
-        'rgba(0, 160, 225, 0.6)', 'rgba(201, 59, 226, 0.6)',
-        'rgba(0, 128, 128, 0.6)', 'rgba(20, 23, 255, 0.6)'
-    ];
+    
 
     //Variable con los datos necesarios para disponer la información del puesto
     const datasets = conteoGraficoChimenea.map((item, index) => ({
         label: item.nombre,
         data: [item.minutos],
-        backgroundColor: colores[index % colores.length],
-        id_puesto: item.id,
-        borderColor: colores[index % colores.length].replace('0.6', '0.9')
+        id_puesto: item.id
     }));
 
     //Configuramos el gráfico y la interfaz del puesto
@@ -688,7 +676,21 @@ function actualizarGraficoPuesto(chartPuesto, chartChimenea, nombre, conteo, id_
     const datos_filtrados = datasets_depurados.filter(data => data.id_puesto === id_puesto);
 
     //Almacenamos en variable los datos
-    const valores = datos_filtrados.map(data => data.data[0]), etiquetas = datos_filtrados.map(data => data.label), colores = datos_filtrados.map(data => data.backgroundColor);
+    const valores = datos_filtrados.map(data => data.data[0]), etiquetas = datos_filtrados.map(data => data.label);
+
+    console.log("VALORES -> ", valores)
+
+    //Variable que contiene los colores disponibles
+    const colores = [
+        'rgba(54, 162, 235, 0.6)', 'rgba(255, 99, 205, 0.6)',
+        'rgba(255, 206, 86, 0.6)', 'rgba(61, 193, 153, 0.6)',
+        'rgba(255, 159, 64, 0.6)', 'rgba(148, 59, 226, 0.6)',
+        'rgba(173, 224, 53, 0.6)', 'rgba(57, 30, 233, 0.6)',
+        'rgba(67, 203, 198, 0.6)', 'rgba(255, 176, 144, 0.6)',
+        'rgba(255, 160, 225, 0.6)', 'rgba(153, 102, 255, 0.6)',
+        'rgba(0, 160, 225, 0.6)', 'rgba(201, 59, 226, 0.6)',
+        'rgba(0, 128, 128, 0.6)', 'rgba(20, 23, 255, 0.6)'
+    ];
 
     //variables para establecer la información de la saturación
     const conteo_libre = conteo > 100 ? 0 : 100 - conteo;
@@ -701,13 +703,18 @@ function actualizarGraficoPuesto(chartPuesto, chartChimenea, nombre, conteo, id_
     chartPuesto.options.plugins.centerText.text = `${conteo}%`;
     chartPuesto.update();
 
+    //Almacenamos en variables los datos necesarios
+    const total = 442;
+    const porcentajes = valores.map(item => ((item / total) * 100).toFixed(2));
+
+
     //Actualizamos el gráfico de chimenea
     chartChimenea.data.labels = ['Actividades'];
     chartChimenea.data.datasets = datos_filtrados.map((data, index) => ({
         label: data.label,
-        data: [valores[index]],
+        data: [porcentajes[index]],
         backgroundColor: colores[index % colores.length],
-        borderColor: 'rgba(0, 0, 0, 0.3)',
+        borderColor: colores[index % colores.length].replace('0.6', '0.9'),
         borderWidth: 1
     }));
 
@@ -963,7 +970,7 @@ function generarEtapaGlobal(etapas) {
 
 
                     <button id="botonEliminarEtapa" type="button" class="text-red-500 ml-2" 
-                        onclick="eliminarRegistro('etapa_global', '${nombre_etapa}', 'EN_IFM_STANDARD', ${id_puesto})">
+                        onclick="eliminarRegistro('${nombre_etapa}', 'EN_IFM_STANDARD', ${id_puesto})">
                         <i class="bi bi-trash-fill"></i>
                     </button>
 
@@ -1276,7 +1283,7 @@ function generarTablasPorEtapa(etapas, nombre_etapa) {
                                     : ''}
 
                                         <button id="botonEliminarEtapa" type="button" class="text-red-500 ml-2" 
-                                            onclick="eliminarRegistro('etapa_referencia', ${id_etapa}, 'EN_IFM_STANDARD', ${id_puesto})">
+                                            onclick="eliminarRegistro(${id_etapa}, 'EN_IFM_STANDARD', ${id_puesto})">
                                             <i class="bi bi-trash-fill"></i>
                                         </button>
 
