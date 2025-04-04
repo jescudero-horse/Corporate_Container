@@ -417,7 +417,10 @@ function renderizarGrafico() {
     });
 
     //Modificamos los valores para sustituir los 0 por 10 y los colores
-    const conteos_controlados = conteos.map(conteo => (conteo === 0 ? 10 : conteo)), colores_conteos_vacios = conteos.map(conteo => (conteo === 0 ? 'rgba(169, 169, 169, 0.7)' : 'rgba(41, 128, 185, 0.7)'));
+    const conteos_controlados = conteos.map(conteo => (conteo === 0 ? 10 : conteo)), colores_conteos_vacios = conteos.map(conteo => (conteo === 0 ? 'rgba(169, 169, 169, 0.7)' : 'rgba(68, 125, 216, 0.6)'));
+
+    conteos_controlados
+    const media = (conteos_controlados.reduce((a, b) => a + b, 0))/conteos_controlados.length
 
     //Gráfico principal
     const chartBarras = new Chart(ctxBarras, {
@@ -428,13 +431,13 @@ function renderizarGrafico() {
                 label: 'Puestos',
                 data: conteos_controlados,
                 backgroundColor: colores_conteos_vacios,
-                borderColor: 'rgba(41, 128, 185, 1)',
+                borderColor: 'rgba(68, 125, 216, 0.9)',
                 borderWidth: 2,
                 borderRadius: 8,
                 barPercentage: 0.8,
                 categoryPercentage: 0.8,
-                hoverBackgroundColor: 'rgba(41, 128, 185, 1)',
-                hoverBorderColor: 'rgba(41, 128, 185, 1)',
+                hoverBackgroundColor: 'rgba(68, 125, 216, 1)',
+                hoverBorderColor: 'rgba(68, 125, 216, 1)',
                 hoverBorderWidth: 2
             }]
         },
@@ -449,7 +452,18 @@ function renderizarGrafico() {
                             size: 11
                         },
                         textAlign: 'center',
-                        boxWidth: 20
+                        boxWidth: 20,
+                        generateLabels: (chart) => {
+                            const originalLabels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                            originalLabels.push({
+                                text: `Media: ${media.toFixed(2)}%`,
+                                fillStyle: 'rgba(204, 34, 199, 0)',
+                                strokeStyle: 'rgb(43, 7, 187)',
+                                lineWidth: 1,
+                                hidden: false
+                            });
+                            return originalLabels;
+                        }
                     }
                 },
                 tooltip: {
@@ -492,12 +506,12 @@ function renderizarGrafico() {
 
                     //Reseteamos todas las barras a su color y grosor original
                     chartBarras.data.datasets[0].backgroundColor = chartBarras.data.datasets[0].data.map((_, i) =>
-                        i === index ? 'rgba(255, 99, 132, 0.9)' : 'rgba(41, 128, 185, 0.7)'
+                        i === index ? 'rgba(36, 84, 162, 0.8)' : 'rgba(68, 125, 216, 0.7)'
                     );
 
                     //Establecemos el grosor de la barra seleccionada del puesto
                     chartBarras.data.datasets[0].borderWidth = chartBarras.data.datasets[0].data.map((_, i) =>
-                        i === index ? 8 : 2
+                        i === index ? 0 : 2
                     );
 
                     //Actualizamos el gráfico
@@ -507,7 +521,25 @@ function renderizarGrafico() {
                     seleccionarPuesto(index, id_puestos, nombre_puestos, conteos, contenedor_grafico_puesto, contenedor_grafico_principal, chartChimenea, chartPuesto, titulo);
                 }
             }
-        }
+        },
+        plugins: [{
+            id: 'lineaMedia',
+            afterDraw: function(chart) {
+                const { ctx, chartArea: { left, right }, scales: { y } } = chart;
+                const yPos = y.getPixelForValue(media);
+
+                // Dibujar la línea de la media
+                ctx.save();
+                //ctx.setLineDash([6, 6]); //rgb(196, 83, 253)
+                ctx.strokeStyle = 'rgb(77, 52, 177)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(left, yPos);
+                ctx.lineTo(right, yPos);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }]
     });
 
 
@@ -699,6 +731,7 @@ function actualizarGraficoPuesto(chartPuesto, chartChimenea, nombre, conteo, id_
     chartPuesto.data.labels = ['Tiempo Utilizado', 'Tiempo Libre'];
     chartPuesto.data.datasets[0].data = [conteo, conteo_libre.toFixed(2)];
     chartPuesto.data.datasets[0].backgroundColor = ['rgba(231, 76, 60, 0.7)', 'rgba(46, 204, 113, 0.7)'];
+    chartPuesto.data.datasets[0].borderColor = '#5b5b5b',
     //chartPuesto.options.plugins.title.text = `Puesto: ${nombre}`;
     chartPuesto.options.plugins.centerText.text = `${conteo}%`;
     chartPuesto.update();
